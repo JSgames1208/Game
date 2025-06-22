@@ -1,4 +1,9 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Networker = require(ReplicatedStorage.Packages.Networker)
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
-type Networker = Networker.Client
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local packets = require(ReplicatedStorage.Shared.network)
+
+local BlockPlacer = require(script.BlockPlacer)
+
+BlockPlacer.Start()
