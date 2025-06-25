@@ -1,4 +1,3 @@
-local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local Mouse = player:GetMouse()
@@ -18,32 +17,33 @@ local normalMap = {
 }
 
 function BlockPlacer.Start()
-	Mouse.Button1Down:Connect(function()
-		local target = Mouse.Target
-		if not target then
-			return
-		end
+	Mouse.Button1Down:Connect(function() end)
+end
 
-		local surface = Mouse.TargetSurface
-		local normal = normalMap[surface]
+function BlockPlacer.Place()
+	local target = Mouse.Target
+	if not target then
+		return
+	end
 
-		local blockId = "grass"
+	local surface = Mouse.TargetSurface
+	local normal = normalMap[surface]
 
-		if normal then
-			local blockSize = 4 -- Or whatever your block size is
-			local placePos = Vector3.new(
-				math.floor(target.Position.X / 4 + 0.5) + normal.X,
-				math.floor(target.Position.Y / 4 + 0.5) + normal.Y,
-				math.floor(target.Position.Z / 4 + 0.5) + normal.Z
-			)
-			packets.PlaceBlock.send({
-				x = placePos.X,
-				y = placePos.Y,
-				z = placePos.Z,
-				blockId = blockId,
-			})
-		end
-	end)
+	local blockId = "grass"
+
+	if normal then
+		local placePos = Vector3.new(
+			math.floor(target.Position.X / 4 + 0.5) + normal.X,
+			math.floor(target.Position.Y / 4 + 0.5) + normal.Y,
+			math.floor(target.Position.Z / 4 + 0.5) + normal.Z
+		)
+		packets.PlaceBlock.send({
+			x = placePos.X,
+			y = placePos.Y,
+			z = placePos.Z,
+			blockId = blockId,
+		})
+	end
 end
 
 return BlockPlacer

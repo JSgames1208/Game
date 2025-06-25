@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packets = require(ReplicatedStorage.Shared.network)
 local IslandRenderer = require(script.Parent.IslandRenderer)
-local IslandDataStore = require(script.Parent.IslandDataStore)
+local DataStore = require(script.Parent.DataStore)
 
 local IslandManager = {}
 
@@ -46,6 +46,17 @@ end
 
 function IslandManager.PlayerJoined(player: Player)
 	IslandManager.LoadIsland(player)
+	IslandManager.TeleportToIsland(player)
+end
+
+function IslandManager.TeleportToIsland(player: Player)
+	if PlayerIslands[player.UserId] then
+		if PlayerIslands[player.UserId].PlotPosition then
+			local character = player.Character or player.CharacterAdded:Wait()
+			local rootPart = character:WaitForChild("HumanoidRootPart")
+			rootPart.Position = PlayerIslands[player.UserId].PlotPosition + Vector3.new(0, 10, 0)
+		end
+	end
 end
 
 function IslandManager.PlaceBlock(player: Player, pos, blockId)
@@ -54,17 +65,23 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 		return
 	end
 
-	local gridPos = Vector3.new(math.floor(pos.X + 0.5), math.floor(pos.Y + 0.5), math.floor(pos.Z + 0.5))
+	local gridPos = Vector3.new(
+		math.floor(pos.X - island.PlotPosition.X / 4 + 0.5),
+		math.floor(pos.Y - island.PlotPosition.Y / 4 + 0.5),
+		math.floor(pos.Z - island.PlotPosition.Z / 4 + 0.5)
+	)
+
+	print(gridPos)
 
 	local key = getBlockKey(gridPos)
 	island.IslandData.Blocks[key] = blockId
 
-	IslandRenderer.SetBlock(island.IslandModel, gridPos, blockId)
+	IslandRenderer.SetBlock(island.IslandModel, gridPos + island.PlotPosition / 4, blockId)
 end
 
 function IslandManager.LoadIsland(player: Player)
 	local plotIndex, plotPos = IslandManager.AssignPlotToPlayer(player)
-	local islandData = IslandDataStore.LoadPlayerData(player.UserId) or {}
+	local islandData = DataStore.LoadPlayerData(player.UserId) or {}
 
 	local islandModel = IslandRenderer.RenderIsland(islandData, plotPos)
 	islandModel.Name = player.Name .. "_Island"
@@ -81,8 +98,7 @@ function IslandManager.LoadIsland(player: Player)
 end
 
 function IslandManager.PlayerLeaving(player: Player)
-	--IslandDataStore.SavePlayerData(player.UserId)
-	IslandDataStore.ReleasePlayerData(player.UserId)
+	DataStore.ReleasePlayerData(player.UserId)
 	PlayerIslands[player.UserId].IslandModel:Destroy()
 	IslandManager.ReleasePlot(player)
 end

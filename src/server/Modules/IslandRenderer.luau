@@ -14,6 +14,8 @@ end
 function IslandRenderer.RenderIsland(islandData, origin)
 	local model = Instance.new("Model")
 
+	print(origin)
+
 	for posStr, blockId in pairs(islandData.Blocks) do
 		if blockId ~= "air" then
 			local relativePos = ParsePos(posStr)

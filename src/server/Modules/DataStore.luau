@@ -15,13 +15,14 @@ end
 local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
 	Blocks = defaultBlocks,
 	Progress = {},
+	Inventory = table.create(9, nil),
 })
 
-local IslandDataStore = {}
+local DataStore = {}
 
-IslandDataStore.profiles = {} -- [userId] = profile
+DataStore.profiles = {} -- [userId] = profile
 
-function IslandDataStore.LoadPlayerData(userId)
+function DataStore.LoadPlayerData(userId)
 	local success, profile = pcall(function()
 		return profileStore:LoadProfileAsync("Player_" .. userId)
 	end)
@@ -35,11 +36,11 @@ function IslandDataStore.LoadPlayerData(userId)
 		-- Always reconcile after load to fill missing fields
 		profile:Reconcile()
 
-		IslandDataStore.profiles[userId] = profile
+		DataStore.profiles[userId] = profile
 
 		-- Listen to release to cleanup cache
 		profile:ListenToRelease(function()
-			IslandDataStore.profiles[userId] = nil
+			DataStore.profiles[userId] = nil
 		end)
 
 		print(profile.Data)
@@ -51,11 +52,11 @@ function IslandDataStore.LoadPlayerData(userId)
 		}
 		profile:Reconcile()
 
-		IslandDataStore.profiles[userId] = profile
+		DataStore.profiles[userId] = profile
 
 		-- Listen to release to cleanup cache
 		profile:ListenToRelease(function()
-			IslandDataStore.profiles[userId] = nil
+			DataStore.profiles[userId] = nil
 		end)
 
 		print(profile.Data)
@@ -64,8 +65,8 @@ function IslandDataStore.LoadPlayerData(userId)
 	return profile.Data
 end
 
-function IslandDataStore.SavePlayerData(userId)
-	local profile = IslandDataStore.profiles[userId]
+function DataStore.SavePlayerData(userId)
+	local profile = DataStore.profiles[userId]
 	if profile then
 		local success, err = pcall(function()
 			profile:Save()
@@ -76,12 +77,12 @@ function IslandDataStore.SavePlayerData(userId)
 	end
 end
 
-function IslandDataStore.ReleasePlayerData(userId)
-	local profile = IslandDataStore.profiles[userId]
+function DataStore.ReleasePlayerData(userId)
+	local profile = DataStore.profiles[userId]
 	if profile then
 		profile:Release()
 		-- profile:ListenToRelease will clear profiles[userId] automatically
 	end
 end
 
-return IslandDataStore
+return DataStore
