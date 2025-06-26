@@ -1,12 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BlockLibrary = {}
 
-local BLOCK_SIZE = 4
-
 local blockDefinitions = {
 	grass = {},
 	dirt = {},
 	stone = {},
+	sand = {},
+	log = {},
 }
 
 function BlockLibrary.CreateBlockPart(blockId: string)

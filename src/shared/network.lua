@@ -15,12 +15,19 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 				y = ByteNet.int32,
 				z = ByteNet.int32,
 				blockId = ByteNet.string,
+				slot = ByteNet.int32,
 			}),
 			reliabilityType = "reliable", -- ensure the block place request always reaches the server
 		}),
 		InventorySync = ByteNet.definePacket({
 			value = ByteNet.array(SlotStruct),
 
+			reliabilityType = "reliable",
+		}),
+		SlotPressed = ByteNet.definePacket({
+			value = ByteNet.struct({
+				slotIndex = ByteNet.int32,
+			}),
 			reliabilityType = "reliable",
 		}),
 	}

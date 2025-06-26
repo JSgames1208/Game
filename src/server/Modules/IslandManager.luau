@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local packets = require(ReplicatedStorage.Shared.network)
 local IslandRenderer = require(script.Parent.IslandRenderer)
 local DataStore = require(script.Parent.DataStore)
+local InventoryManager = require(script.Parent.InventoryManager)
 
 local IslandManager = {}
 
@@ -106,7 +107,10 @@ end
 packets.PlaceBlock.listen(function(data, player)
 	local pos = Vector3.new(data.x, data.y, data.z)
 	local blockId = data.blockId
-	IslandManager.PlaceBlock(player, pos, blockId)
+	if InventoryManager.IsAvailable(player, 1) then
+		InventoryManager.RemoveItem(player, 1)
+		IslandManager.PlaceBlock(player, pos, blockId)
+	end
 end)
 
 return IslandManager
