@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local packets = require(ReplicatedStorage.Shared.network)
 local IslandRenderer = require(script.Parent.IslandRenderer)
 local DataStore = require(script.Parent.DataStore)
@@ -80,9 +81,33 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 	IslandRenderer.SetBlock(island.IslandModel, gridPos + island.PlotPosition / 4, blockId)
 end
 
+function IslandManager.RemoveBlock(player: Player, pos: string)
+	local island = PlayerIslands[player.UserId]
+	print(island.IslandData.Blocks)
+	local block = island.IslandData.Blocks[pos]
+	if block then
+		local toolId = InventoryManager.GetSelected(player)
+		if ItemLibrary.itemDefinitions[toolId].type == "tool" then
+			island.IslandModel:FindFirstChild(pos):SetAttribute(
+				"hp",
+				island.IslandModel:FindFirstChild(pos):GetAttribute("hp") - ItemLibrary.itemDefinitions[toolId].strength
+			)
+			if island.IslandModel:FindFirstChild(pos):GetAttribute("hp") <= 0 then
+				IslandRenderer.RemoveBlock(island.IslandModel, pos)
+				island.IslandData.Blocks[pos] = nil
+			end
+		end
+	end
+end
+
+packets.MineBlock.listen(function(data, player: Player)
+	IslandManager.RemoveBlock(player, data.blockPosStr)
+end)
+
 function IslandManager.LoadIsland(player: Player)
 	local plotIndex, plotPos = IslandManager.AssignPlotToPlayer(player)
 	local islandData = DataStore.LoadPlayerData(player.UserId) or {}
+	print(islandData)
 
 	local islandModel = IslandRenderer.RenderIsland(islandData, plotPos)
 	islandModel.Name = player.Name .. "_Island"

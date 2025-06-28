@@ -2,8 +2,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local TweenService = game:GetService("TweenService")
-local BlockPlacer = require(script.Parent.BlockPlacer)
-local RenderBlockToViewport = require(StarterPlayer.StarterPlayerScripts.Client.Utility.RenderBlockIcon)
+local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
+local ItemManager = require(script.Parent.ItemManager)
+local RenderBlockToViewport = require(StarterPlayer.StarterPlayerScripts.Client.Utility.RenderItemIcon)
 local packets = require(ReplicatedStorage.Shared.network)
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
@@ -48,7 +49,11 @@ function InventoryClient.UpdateSlots(data)
 			local amount = slot:FindFirstChild("Amount")
 			if viewport and newItem then
 				RenderBlockToViewport(viewport, newItem.id)
-				amount.Text = newItem.count > 0 and tostring(newItem.count) or ""
+				if ItemLibrary.itemDefinitions[newItem.id].type == "block" then
+					amount.Text = newItem.count > 0 and tostring(newItem.count) or ""
+				elseif ItemLibrary.itemDefinitions[newItem.id].type == "tool" then
+					amount.Text = ""
+				end
 			elseif viewport then
 				viewport:ClearAllChildren()
 			end
@@ -58,14 +63,21 @@ end
 
 local selectedSlot = nil
 
-function InventoryClient.SlotPressed(slot: Frame)
-	local slotIndex = slot:GetAttribute("SlotIndex")
+function InventoryClient.SlotPressed(slotIndex: number)
+	local slot = nil
+	for _, s in HotBar:GetChildren() do
+		if s:GetAttribute("SlotIndex") == slotIndex then
+			slot = s
+		end
+	end
 	if slotIndex <= 9 then
 		local UIStroke = slot:FindFirstChild("UIStroke")
 		if not selectedSlot then
 			selectedSlot = slot
 			UIStroke.Enabled = true
-			BlockPlacer.SelectBlock(inventory[slotIndex].id, slotIndex)
+
+			ItemManager.SelectItem(inventory[slotIndex].id, slotIndex)
+
 			packets.SlotPressed.send({ slotIndex = slotIndex })
 			return
 		end
@@ -73,13 +85,23 @@ function InventoryClient.SlotPressed(slot: Frame)
 		if selectedSlot ~= slot then
 			UIStroke.Enabled = true
 			selectedSlot = slot
-			BlockPlacer.SelectBlock(inventory[slotIndex].id, slotIndex)
+
+			ItemManager.SelectItem(inventory[slotIndex].id, slotIndex)
+
 			packets.SlotPressed.send({ slotIndex = slotIndex })
 		else
 			selectedSlot = nil
-			BlockPlacer.SelectBlock("nothing", slotIndex)
+			ItemManager.SelectItem("nothing", 0)
 			packets.SlotPressed.send({ slotIndex = 0 })
 		end
+	end
+end
+
+function InventoryClient.GetItem()
+	if selectedSlot then
+		return selectedSlot:GetAttribute("SlotIndex"), inventory[selectedSlot:GetAttribute("SlotIndex")]
+	else
+		return 0, "nothing"
 	end
 end
 

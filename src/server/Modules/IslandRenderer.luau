@@ -1,27 +1,23 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
+local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
+local BlockCoord = require(ReplicatedStorage.Shared.Utility.BlockCoord)
 
 local BLOCK_SIZE = 4
 
 local IslandRenderer = {}
 
--- Helper function
-local function ParsePos(posStr)
-	local x, y, z = posStr:match("(-?%d+),(-?%d+),(-?%d+)")
-	return Vector3.new(tonumber(x), tonumber(y), tonumber(z))
-end
-
 function IslandRenderer.RenderIsland(islandData, origin)
 	local model = Instance.new("Model")
 
-	print(origin)
-
 	for posStr, blockId in pairs(islandData.Blocks) do
 		if blockId ~= "air" then
-			local relativePos = ParsePos(posStr)
-			local blockPart = BlockLibrary.CreateBlockPart(blockId)
+			local relativePos = BlockCoord.ParsePos(posStr)
+			local blockPart: Part = BlockLibrary.CreateBlockPart(blockId) :: Part
 			blockPart.Position = origin + relativePos * BLOCK_SIZE
+			blockPart.Name = posStr
 			blockPart.Parent = model
+			blockPart:SetAttribute("hp", ItemLibrary.itemDefinitions[blockId].hp)
 		end
 	end
 
@@ -29,21 +25,19 @@ function IslandRenderer.RenderIsland(islandData, origin)
 end
 
 function IslandRenderer.SetBlock(islandModel, relativePos, blockId)
-	local blockPart = BlockLibrary.CreateBlockPart(blockId)
+	local blockPart: Part = BlockLibrary.CreateBlockPart(blockId) :: Part
 	blockPart.Position = (relativePos * BLOCK_SIZE)
 	blockPart.Parent = islandModel
+	blockPart.Name = BlockCoord.GetName(relativePos)
+	blockPart:SetAttribute("hp", ItemLibrary.itemDefinitions[blockId].hp)
 	return blockPart
 end
 
-function IslandRenderer.RemoveBlock(islandModel, relativePos)
-	for _, part in pairs(islandModel:GetChildren()) do
-		local blockPos = (part.Position - islandModel.PrimaryPart.Position) / BLOCK_SIZE
-		if blockPos:FuzzyEq(relativePos, 0.1) then
-			part:Destroy()
-			return true
-		end
+function IslandRenderer.RemoveBlock(islandModel, posStr: string)
+	local block = islandModel[posStr]
+	if block then
+		block:Destroy()
 	end
-	return false
 end
 
 return IslandRenderer

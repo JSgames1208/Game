@@ -30,6 +30,11 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		MineBlock = ByteNet.definePacket({
+			value = ByteNet.struct({
+				blockPosStr = ByteNet.string,
+			}),
+		}),
 	}
 end)
 

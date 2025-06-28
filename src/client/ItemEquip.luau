@@ -16,16 +16,18 @@ function ItemEquip.Start()
 	return
 end
 
-local block = nil
+local item = nil
 local equippedItem = nil
 
 function ItemEquip.Equip(itemName: string)
 	if itemName == equippedItem then
 		return
 	end
-	if block then
-		block:Destroy()
-		block = nil
+	equippedItem = itemName
+	if item then
+		print("Destroying")
+		item:Destroy()
+		item = nil
 	end
 
 	local itemDef = ItemLibrary.itemDefinitions[itemName]
@@ -35,17 +37,28 @@ function ItemEquip.Equip(itemName: string)
 		for _, c in itemTool:GetChildren() do
 			c:Destroy()
 		end
-		block = BlockLibrary.CreateBlockPart(itemName)
-		block.Name = "Handle"
-		block.Parent = itemTool
-		block.Size = block.Size / 4
-		block.Anchored = false
-		block.CanCollide = false
-		for _, texture in block:GetChildren() do
+		item = BlockLibrary.CreateBlockPart(itemName)
+		item.Name = "Handle"
+		item.Parent = itemTool
+		item.Size = item.Size / 4
+		item.Anchored = false
+		item.CanCollide = false
+		for _, texture in item:GetChildren() do
 			if texture:IsA("Texture") then
 				texture.StudsPerTileU = texture.StudsPerTileU / 4
 				texture.StudsPerTileV = texture.StudsPerTileV / 4
 			end
+		end
+		humanoid:EquipTool(itemTool)
+	elseif itemType == "tool" then
+		-- treat it as a full tool model
+		for _, c in itemTool:GetChildren() do
+			c:Destroy()
+		end
+
+		item = ItemLibrary.CreateToolPart(itemName) -- should return a Tool with a Handle
+		for _, c in item:GetChildren() do
+			c.Parent = itemTool
 		end
 		humanoid:EquipTool(itemTool)
 	end
@@ -53,9 +66,9 @@ end
 
 function ItemEquip.UnEquip()
 	humanoid:UnequipTools()
-	if block then
-		block:Destroy()
-		block = nil
+	if item then
+		item:Destroy()
+		item = nil
 	end
 	equippedItem = nil
 end

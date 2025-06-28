@@ -79,6 +79,11 @@ function BlockPlacer.SelectBlock(blockId: string, slot: number)
 	end
 end
 
+function BlockPlacer.Unselect()
+	currentBlock = nil
+	BlockPlacer.SelectBlock("nothing", 0)
+end
+
 function BlockPlacer.Place()
 	if not currentBlock then
 		return

@@ -9,6 +9,10 @@ function InventoryManager.Get(player: Player)
 	return Inventories[player.UserId] or table.create(9, nil)
 end
 
+function InventoryManager.GetSelected(player: Player)
+	return InventoryManager.Get(player)[SelectedSlots[player.UserId]].id
+end
+
 function InventoryManager.SendToClient(player: Player)
 	local inventory = InventoryManager.Get(player)
 
@@ -23,7 +27,7 @@ function InventoryManager.PlayerJoined(player: Player)
 		[4] = { id = "sand", count = 32 },
 		[5] = { id = "log", count = 64 },
 		[6] = { id = "dirt", count = 64 },
-		[7] = { id = "stone", count = 4 },
+		[7] = { id = "wooden pickaxe", count = 1 },
 		[8] = { id = "nothing", count = 0 },
 		[9] = { id = "grass", count = 32 },
 	}
