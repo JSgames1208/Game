@@ -1,4 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local DataStore = require(script.Parent.DataStore)
+local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local packets = require(ReplicatedStorage.Shared.network)
 local InventoryManager = {}
 
@@ -20,17 +22,10 @@ function InventoryManager.SendToClient(player: Player)
 end
 
 function InventoryManager.PlayerJoined(player: Player)
-	Inventories[player.UserId] = {
-		[1] = { id = "stone", count = 2 },
-		[2] = { id = "grass", count = 16 },
-		[3] = { id = "stone", count = 24 },
-		[4] = { id = "sand", count = 32 },
-		[5] = { id = "log", count = 64 },
-		[6] = { id = "dirt", count = 64 },
-		[7] = { id = "wooden pickaxe", count = 1 },
-		[8] = { id = "nothing", count = 0 },
-		[9] = { id = "grass", count = 32 },
-	}
+	local inventory = DataStore.profiles[player.UserId].Data.Inventory
+	Inventories[player.UserId] = inventory
+
+	print(inventory)
 
 	InventoryManager.SendToClient(player)
 end
@@ -57,7 +52,41 @@ function InventoryManager.RemoveItem(player: Player, amount: number)
 	if inventory[SelectedSlots[player.UserId]].count <= 0 then
 		inventory[SelectedSlots[player.UserId]].id = "nothing"
 		inventory[SelectedSlots[player.UserId]].count = 0
+		DataStore.profiles[player.UserId].Data.Inventory = inventory
 	end
+	InventoryManager.SendToClient(player)
+end
+
+function InventoryManager.GiveItem(player: Player, itemId: string, amount: number)
+	local inventory = InventoryManager.Get(player)
+	local maxStack = ItemLibrary.itemDefinitions[itemId].maxStack
+	for _, item in ipairs(inventory) do
+		if item.id == itemId and item.count < maxStack then
+			local spaceLeft = maxStack - item.count
+			local toAdd = math.min(amount, spaceLeft)
+			item.count += toAdd
+			amount -= toAdd
+			if amount <= 0 then
+				break
+			end
+		end
+	end
+	if amount > 0 then
+		for _, item in ipairs(inventory) do
+			if item.id == "nothing" then
+				local toAdd = math.min(amount, maxStack)
+				item.id = itemId
+				item.count = toAdd
+				amount -= toAdd
+				if amount <= 0 then
+					break
+				end
+			end
+		end
+	end
+
+	DataStore.profiles[player.UserId].Data.Inventory = inventory
+
 	InventoryManager.SendToClient(player)
 end
 

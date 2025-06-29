@@ -118,7 +118,7 @@ packets.InventorySync.listen(function(data)
 	if not currentSlot then
 		return
 	end
-	if data[currentSlot].count <= 0 then
+	if data and data[currentSlot] and data[currentSlot].count <= 0 then
 		BlockPlacer.SelectBlock("nothing", currentSlot)
 	end
 end)

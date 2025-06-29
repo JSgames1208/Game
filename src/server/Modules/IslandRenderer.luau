@@ -17,6 +17,7 @@ function IslandRenderer.RenderIsland(islandData, origin)
 			blockPart.Position = origin + relativePos * BLOCK_SIZE
 			blockPart.Name = posStr
 			blockPart.Parent = model
+			blockPart:SetAttribute("maxhp", ItemLibrary.itemDefinitions[blockId].hp)
 			blockPart:SetAttribute("hp", ItemLibrary.itemDefinitions[blockId].hp)
 		end
 	end
@@ -29,6 +30,7 @@ function IslandRenderer.SetBlock(islandModel, relativePos, blockId)
 	blockPart.Position = (relativePos * BLOCK_SIZE)
 	blockPart.Parent = islandModel
 	blockPart.Name = BlockCoord.GetName(relativePos)
+	blockPart:SetAttribute("maxhp", ItemLibrary.itemDefinitions[blockId].hp)
 	blockPart:SetAttribute("hp", ItemLibrary.itemDefinitions[blockId].hp)
 	return blockPart
 end

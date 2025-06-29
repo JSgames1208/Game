@@ -12,10 +12,19 @@ for x = -5, 5 do
 	end
 end
 
+local function GetBaseInventory()
+	local inventory = {}
+	inventory[1] = { id = "wooden pickaxe", count = 1 }
+	for i = 2, 9 do
+		inventory[i] = { id = "nothing", count = 0 }
+	end
+	return inventory
+end
+
 local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
-	Blocks = defaultBlocks,
+	Blocks = {},
 	Progress = {},
-	Inventory = table.create(9, nil),
+	Inventory = GetBaseInventory(),
 })
 
 local DataStore = {}
@@ -36,19 +45,22 @@ function DataStore.LoadPlayerData(userId)
 		-- Always reconcile after load to fill missing fields
 		profile:Reconcile()
 
+		if not profile.Data.Blocks or next(profile.Data.Blocks) == nil then
+			profile.Data.Blocks = table.clone(defaultBlocks)
+		end
+
 		DataStore.profiles[userId] = profile
 
 		-- Listen to release to cleanup cache
 		profile:ListenToRelease(function()
 			DataStore.profiles[userId] = nil
 		end)
-
-		print(profile.Data)
-	else
+		--[[else
 		-- Always reconcile after load to fill missing fields
 		profile.Data = {
 			Blocks = defaultBlocks,
 			Progress = {},
+			Inventory = GetBaseInventory(),
 		}
 		profile:Reconcile()
 
@@ -57,9 +69,7 @@ function DataStore.LoadPlayerData(userId)
 		-- Listen to release to cleanup cache
 		profile:ListenToRelease(function()
 			DataStore.profiles[userId] = nil
-		end)
-
-		print(profile.Data)
+		end)]]
 	end
 
 	return profile.Data
@@ -81,6 +91,7 @@ function DataStore.ReleasePlayerData(userId)
 	local profile = DataStore.profiles[userId]
 	if profile then
 		profile:Release()
+		--profileStore:WipeProfileAsync("Player_" .. userId, false)
 		-- profile:ListenToRelease will clear profiles[userId] automatically
 	end
 end

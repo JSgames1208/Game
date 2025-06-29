@@ -2,7 +2,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
-local packets = require(ReplicatedStorage.Shared.network)
 local BlockPlacer = require(script.Parent.BlockPlacer)
 local InventoryClient = require(script.Parent.InventoryClient)
 local ToolManager = require(script.Parent.ToolManager)
@@ -29,6 +28,10 @@ function InputManager.Start()
 	end
 end
 
+function InputManager.IsOnSlot()
+	return hoveredSlot and true or false
+end
+
 UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: boolean)
 	if gameProcessed then
 		return
@@ -36,13 +39,14 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if hoveredSlot then
 			InventoryClient.SlotPressed(hoveredSlot:GetAttribute("SlotIndex"))
+			ToolManager.MouseDown = false
 		else
-			local currentSlot, currentItem = InventoryClient.GetItem()
+			local _, currentItem = InventoryClient.GetItem()
 			if currentItem then
 				if ItemLibrary.itemDefinitions[currentItem.id].type == "block" then
 					BlockPlacer.Place()
-					--elseif ItemLibrary.itemDefinitions[currentItem.id].type == "tool" then
-					--ToolManager.Use()
+				elseif ItemLibrary.itemDefinitions[currentItem.id].type == "tool" then
+					ToolManager.MouseDown = true
 				end
 			end
 		end
@@ -67,6 +71,12 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 		elseif input.KeyCode == Enum.KeyCode.Nine then
 			InventoryClient.SlotPressed(9)
 		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		ToolManager.MouseDown = false
 	end
 end)
 

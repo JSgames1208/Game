@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local ItemEquip = require(script.Parent.ItemEquip)
 local packets = require(ReplicatedStorage.Shared.network)
 
@@ -13,6 +12,8 @@ local humanoid: Humanoid = character:WaitForChild("Humanoid")
 local animator: Animator = humanoid:WaitForChild("Animator") :: Animator
 
 local ToolManager = {}
+
+ToolManager.MouseDown = false
 
 local currentTool = nil
 local currentSlot = nil
@@ -33,10 +34,13 @@ local currentAnimation = nil
 local miningAnimation = animator:LoadAnimation(miningAnimationTrack)
 miningAnimation.Looped = true
 
+local isMining = false
+
 local function StartAnimation(animationName: string)
 	if animationName ~= currentAnimation then
-		currentAnimation = "miningAnimation"
+		currentAnimation = animationName
 		if animationName == "miningAnimation" then
+			isMining = true
 			miningAnimation:Play(0, 1, 1)
 		end
 	end
@@ -44,10 +48,17 @@ end
 
 local function StopAnimation(animationName: string)
 	if animationName == "miningAnimation" then
-		miningAnimation:Stop()
+		isMining = false
 	end
 	currentAnimation = nil
 end
+
+-- only connect DidLoop once
+miningAnimation.DidLoop:Connect(function()
+	if not isMining then
+		miningAnimation:Stop()
+	end
+end)
 
 local currentMiningCooldown = 0
 
@@ -65,13 +76,11 @@ function ToolManager.Start()
 						highlight.Adornee = target
 					end
 
-					if
-						UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-						and currentMiningCooldown <= 0
-					then
+					if ToolManager.MouseDown and currentMiningCooldown <= 0 then
 						StartAnimation("miningAnimation")
 						currentMiningCooldown = miningAnimation.Length / miningAnimation.Speed
 						coroutine.wrap(function()
+							task.wait(0.4)
 							packets.MineBlock.send({ blockPosStr = target.Name })
 						end)()
 					end
@@ -81,8 +90,10 @@ function ToolManager.Start()
 			else
 				highlight.Adornee = highlightpart
 			end
+		else
+			highlight.Adornee = highlightpart
 		end
-		if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+		if not ToolManager.MouseDown then
 			if miningAnimation.IsPlaying then
 				StopAnimation("miningAnimation")
 			end
@@ -111,7 +122,6 @@ packets.InventorySync.listen(function(data)
 		return
 	end
 	if data[currentSlot] then
-		print(data[currentSlot])
 		if data[currentSlot].count <= 0 then
 			ToolManager.SelectTool("nothing", currentSlot)
 		end

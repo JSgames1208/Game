@@ -51,7 +51,10 @@ function InventoryClient.UpdateSlots(data)
 				RenderBlockToViewport(viewport, newItem.id)
 				if ItemLibrary.itemDefinitions[newItem.id].type == "block" then
 					amount.Text = newItem.count > 0 and tostring(newItem.count) or ""
-				elseif ItemLibrary.itemDefinitions[newItem.id].type == "tool" then
+				elseif
+					ItemLibrary.itemDefinitions[newItem.id].type == "tool"
+					or ItemLibrary.itemDefinitions[newItem.id].type == "nothing"
+				then
 					amount.Text = ""
 				end
 			elseif viewport then
@@ -101,7 +104,7 @@ function InventoryClient.GetItem()
 	if selectedSlot then
 		return selectedSlot:GetAttribute("SlotIndex"), inventory[selectedSlot:GetAttribute("SlotIndex")]
 	else
-		return 0, "nothing"
+		return 0, { id = "nothing", count = 0 }
 	end
 end
 
