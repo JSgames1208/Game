@@ -72,8 +72,12 @@ function ToolManager.Start()
 			local target = Mouse.Target
 			if target then
 				if target:HasTag("Block") then
-					if target ~= highlight.Adornee then
-						highlight.Adornee = target
+					if target ~= highlight.Adornee and target.Parent ~= highlight.Adornee then
+						if target.Transparency == 1 and target.Parent:HasTag("Block") then
+							highlight.Adornee = target.Parent
+						else
+							highlight.Adornee = target
+						end
 					end
 
 					if ToolManager.MouseDown and currentMiningCooldown <= 0 then
@@ -81,7 +85,11 @@ function ToolManager.Start()
 						currentMiningCooldown = miningAnimation.Length / miningAnimation.Speed
 						coroutine.wrap(function()
 							task.wait(0.4)
-							packets.MineBlock.send({ blockPosStr = target.Name })
+							if target.Transparency == 1 and target.Parent:HasTag("Block") then
+								packets.MineBlock.send({ blockPosStr = target.Parent.Name })
+							else
+								packets.MineBlock.send({ blockPosStr = target.Name })
+							end
 						end)()
 					end
 				else

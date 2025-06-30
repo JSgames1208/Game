@@ -14,7 +14,7 @@ function IslandRenderer.RenderIsland(islandData, origin)
 		if blockId ~= "air" then
 			local relativePos = BlockCoord.ParsePos(posStr)
 			local blockPart: Part = BlockLibrary.CreateBlockPart(blockId) :: Part
-			blockPart.Position = origin + relativePos * BLOCK_SIZE
+			blockPart:PivotTo(CFrame.new(origin + relativePos * BLOCK_SIZE))
 			blockPart.Name = posStr
 			blockPart.Parent = model
 			blockPart:SetAttribute("maxhp", ItemLibrary.itemDefinitions[blockId].hp)
@@ -26,8 +26,8 @@ function IslandRenderer.RenderIsland(islandData, origin)
 end
 
 function IslandRenderer.SetBlock(islandModel, relativePos, blockId)
-	local blockPart: Part = BlockLibrary.CreateBlockPart(blockId) :: Part
-	blockPart.Position = (relativePos * BLOCK_SIZE)
+	local blockPart = BlockLibrary.CreateBlockPart(blockId)
+	blockPart:PivotTo(CFrame.new(relativePos * BLOCK_SIZE))
 	blockPart.Parent = islandModel
 	blockPart.Name = BlockCoord.GetName(relativePos)
 	blockPart:SetAttribute("maxhp", ItemLibrary.itemDefinitions[blockId].hp)

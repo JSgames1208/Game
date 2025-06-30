@@ -5,8 +5,10 @@ local blockDefinitions = {
 	grass = {},
 	dirt = {},
 	stone = {},
+	bedrock = {},
 	sand = {},
 	log = {},
+	["pine tree sapling"] = {},
 }
 
 function BlockLibrary.CreateBlockPart(blockId: string)

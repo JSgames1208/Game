@@ -38,15 +38,30 @@ function ItemEquip.Equip(itemName: string)
 			c:Destroy()
 		end
 		item = BlockLibrary.CreateBlockPart(itemName)
-		item.Name = "Handle"
 		item.Parent = itemTool
-		item.Size = item.Size / 4
-		item.Anchored = false
-		item.CanCollide = false
-		for _, texture in item:GetChildren() do
-			if texture:IsA("Texture") then
-				texture.StudsPerTileU = texture.StudsPerTileU / 4
-				texture.StudsPerTileV = texture.StudsPerTileV / 4
+		if item:IsA("Part") then
+			item.Name = "Handle"
+			item.Size = item.Size / 4
+			item.Anchored = false
+			item.CanCollide = false
+			for _, texture in item:GetChildren() do
+				if texture:IsA("Texture") then
+					texture.StudsPerTileU = texture.StudsPerTileU / 4
+					texture.StudsPerTileV = texture.StudsPerTileV / 4
+				end
+			end
+		elseif item:IsA("Model") then
+			item.PrimaryPart.Name = "Handle"
+			for _, c in item:GetChildren() do
+				if c:IsA("Part") or c:IsA("MeshPart") then
+					c.Parent = item.Parent
+				end
+			end
+			for _, c in item.Parent:GetDescendants() do
+				if c:IsA("Part") or c:IsA("MeshPart") then
+					c.CanCollide = false
+					c.Anchored = false
+				end
 			end
 		end
 		humanoid:EquipTool(itemTool)

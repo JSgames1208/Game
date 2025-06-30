@@ -26,7 +26,7 @@ local function RenderItemToViewport(viewport: ViewportFrame, itemId: string)
 
 		blockModel:PivotTo(CFrame.new(Vector3.new(0, 1000, 0)))
 
-		local camPos = Vector3.new(-60, 1045, -60)
+		local camPos = Vector3.new(-50, 1040, -50)
 		camera.CFrame = CFrame.new(camPos, Vector3.new(0, 1000, 0))
 	elseif ItemLibrary.itemDefinitions[itemId].type == "tool" then
 		local camera = viewport:FindFirstChildWhichIsA("Camera")
@@ -58,7 +58,7 @@ local function RenderItemToViewport(viewport: ViewportFrame, itemId: string)
 
 		toolModel:PivotTo(CFrame.new(centerPos + offset) * rotation)
 
-		local camPos = centerPos + Vector3.new(-50, 0, 0)
+		local camPos = centerPos + Vector3.new(-45, 0, 0)
 		camera.CFrame = CFrame.new(camPos, centerPos)
 	end
 end

@@ -2,20 +2,22 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local ProfileService = require(ServerScriptService.ServerPackages.ProfileService)
 
 local defaultBlocks = {}
-for x = -5, 5 do
-	for z = -5, 5 do
-		if (x + z) % 2 == 0 then
-			defaultBlocks[tostring(x) .. ",0," .. tostring(z)] = "grass"
-		else
-			defaultBlocks[tostring(x) .. ",0," .. tostring(z)] = "dirt"
-		end
+for x = -2, 2 do
+	for z = -2, 2 do
+		defaultBlocks[tostring(x) .. ",0," .. tostring(z)] = "dirt"
+		defaultBlocks[tostring(x) .. ",1," .. tostring(z)] = "grass"
 	end
 end
+defaultBlocks["0,0,0"] = "bedrock"
 
 local function GetBaseInventory()
 	local inventory = {}
 	inventory[1] = { id = "wooden pickaxe", count = 1 }
-	for i = 2, 9 do
+	inventory[2] = { id = "golden pickaxe", count = 1 }
+	inventory[3] = { id = "diamond pickaxe", count = 1 }
+	inventory[4] = { id = "obsidian pickaxe", count = 1 }
+	inventory[5] = { id = "pine tree sapling", count = 1 }
+	for i = 6, 9 do
 		inventory[i] = { id = "nothing", count = 0 }
 	end
 	return inventory
@@ -92,7 +94,6 @@ function DataStore.ReleasePlayerData(userId)
 	if profile then
 		profile:Release()
 		--profileStore:WipeProfileAsync("Player_" .. userId, false)
-		-- profile:ListenToRelease will clear profiles[userId] automatically
 	end
 end
 

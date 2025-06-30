@@ -20,6 +20,9 @@ function BlockHealthBar.Start()
 		if pos then
 			local block = island:FindFirstChild(pos)
 			if block then
+				if block:GetAttribute("maxhp") == math.huge then
+					return
+				end
 				local HealthBar = block:FindFirstChildOfClass("BillboardGui")
 				if not HealthBar then
 					HealthBar = HealthBarTemplate:Clone()
