@@ -18,7 +18,7 @@ function ItemManager.SelectItem(itemId, slotIndex)
 	BlockPlacer.Unselect()
 	ToolManager.Unselect()
 
-	if itemType == "block" then
+	if itemType == "block" or itemType == "sapling" then
 		BlockPlacer.SelectBlock(itemId, slotIndex)
 	elseif itemType == "tool" then
 		ToolManager.SelectTool(itemId, slotIndex)

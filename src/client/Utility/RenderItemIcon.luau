@@ -7,7 +7,7 @@ local function RenderItemToViewport(viewport: ViewportFrame, itemId: string)
 		viewport:ClearAllChildren()
 		return
 	end
-	if ItemLibrary.itemDefinitions[itemId].type == "block" then
+	if ItemLibrary.itemDefinitions[itemId].type == "block" or ItemLibrary.itemDefinitions[itemId].type == "sapling" then
 		local camera = viewport:FindFirstChildWhichIsA("Camera")
 		if not camera then
 			camera = Instance.new("Camera")
@@ -54,7 +54,6 @@ local function RenderItemToViewport(viewport: ViewportFrame, itemId: string)
 			return
 		end
 		local offset = handle.Position - toolModel:GetBoundingBox().Position
-		print(offset)
 
 		toolModel:PivotTo(CFrame.new(centerPos + offset) * rotation)
 

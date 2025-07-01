@@ -33,7 +33,7 @@ function ItemEquip.Equip(itemName: string)
 	local itemDef = ItemLibrary.itemDefinitions[itemName]
 
 	local itemType = itemDef.type
-	if itemType == "block" then
+	if itemType == "block" or itemType == "sapling" then
 		for _, c in itemTool:GetChildren() do
 			c:Destroy()
 		end

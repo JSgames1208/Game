@@ -47,13 +47,23 @@ function InventoryClient.UpdateSlots(data)
 		if slot then
 			local viewport = slot:FindFirstChild("IconViewport")
 			local amount = slot:FindFirstChild("Amount")
+
+			if newItem.count <= 0 then
+				viewport:ClearAllChildren()
+				amount.Text = ""
+				continue
+			end
+
 			if viewport and newItem then
-				RenderBlockToViewport(viewport, newItem.id)
-				if ItemLibrary.itemDefinitions[newItem.id].type == "block" then
+				RenderBlockToViewport(viewport, newItem.itemInfo.id)
+				if
+					ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "block"
+					or ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "sapling"
+				then
 					amount.Text = newItem.count > 0 and tostring(newItem.count) or ""
 				elseif
-					ItemLibrary.itemDefinitions[newItem.id].type == "tool"
-					or ItemLibrary.itemDefinitions[newItem.id].type == "nothing"
+					ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "tool"
+					or ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "nothing"
 				then
 					amount.Text = ""
 				end
@@ -79,7 +89,7 @@ function InventoryClient.SlotPressed(slotIndex: number)
 			selectedSlot = slot
 			UIStroke.Enabled = true
 
-			ItemManager.SelectItem(inventory[slotIndex].id, slotIndex)
+			ItemManager.SelectItem(inventory[slotIndex].itemInfo.id, slotIndex)
 
 			packets.SlotPressed.send({ slotIndex = slotIndex })
 			return
@@ -89,7 +99,7 @@ function InventoryClient.SlotPressed(slotIndex: number)
 			UIStroke.Enabled = true
 			selectedSlot = slot
 
-			ItemManager.SelectItem(inventory[slotIndex].id, slotIndex)
+			ItemManager.SelectItem(inventory[slotIndex].itemInfo.id, slotIndex)
 
 			packets.SlotPressed.send({ slotIndex = slotIndex })
 		else

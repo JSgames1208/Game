@@ -4,7 +4,9 @@ local ByteNet = require(ReplicatedStorage.Packages.Bytenet)
 local packets = ByteNet.defineNamespace("IslandNet", function()
 	local SlotStruct = ByteNet.struct({
 		count = ByteNet.int32,
-		id = ByteNet.string,
+		itemInfo = ByteNet.struct({
+			id = ByteNet.string,
+		}),
 	})
 
 	return {
