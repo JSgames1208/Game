@@ -7,6 +7,7 @@ local function RenderItemToViewport(viewport: ViewportFrame, itemId: string)
 		viewport:ClearAllChildren()
 		return
 	end
+
 	if ItemLibrary.itemDefinitions[itemId].type == "block" or ItemLibrary.itemDefinitions[itemId].type == "sapling" then
 		local camera = viewport:FindFirstChildWhichIsA("Camera")
 		if not camera then

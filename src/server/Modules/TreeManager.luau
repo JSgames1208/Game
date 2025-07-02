@@ -41,9 +41,10 @@ function TreeManager.PlayerJoined(player: Player)
 	local data = DataStore.profiles[player.UserId]
 
 	for posStr, block in data.Data.Blocks do
-		if not block.id then
+		if not block.itemInfo or not block.itemInfo.id then
 			return
-		if ItemLibrary.itemDefinitions[block.id].type == "sapling" then
+		end
+		if ItemLibrary.itemDefinitions[block.itemInfo.id].type == "sapling" then
 			saplings[player.UserId][posStr] = block
 		end
 	end
@@ -51,7 +52,7 @@ end
 
 function TreeManager.AddSapling(player: Player, posStr: string, block)
 	if ItemLibrary.itemDefinitions[block.id].type == "sapling" then
-		saplings[player.UserId][posStr] = block
+		saplings[player.UserId][posStr] = { id = block.id, growTime = ItemLibrary.itemDefinitions[block.id].growTime }
 	end
 end
 

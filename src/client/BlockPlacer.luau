@@ -30,15 +30,26 @@ function BlockPlacer.Start()
 			ItemEquip.Equip(currentBlock)
 			if not blockPreview then
 				blockPreview = BlockLibrary.CreateBlockPart(currentBlock)
-				blockPreview.Transparency = 1
-				for _, texture in blockPreview:GetChildren() do
-					if texture:IsA("Texture") then
-						texture.Transparency = 0.6
+				for _, child in blockPreview:GetDescendants() do
+					if child:IsA("Texture") then
+						child.Transparency = 0.6
+					elseif child:IsA("MeshPart") then
+						child.Transparency = 0.6
+						child.CanCollide = false
+						child.CanQuery = false
+					elseif child:IsA("Part") then
+						child.CanCollide = false
+						child.CanQuery = false
 					end
 				end
+
+				if blockPreview:IsA("Part") then
+					blockPreview.Transparency = 1
+					blockPreview.CanCollide = false
+					blockPreview.CanQuery = false
+				end
+
 				blockPreview.Parent = workspace
-				blockPreview.CanCollide = false
-				blockPreview.CanQuery = false
 			end
 
 			local target = Mouse.Target
@@ -55,7 +66,7 @@ function BlockPlacer.Start()
 					math.floor(target.Position.Y / 4 + 0.5) + normal.Y,
 					math.floor(target.Position.Z / 4 + 0.5) + normal.Z
 				)
-				blockPreview.Position = placePos * 4
+				blockPreview:PivotTo(CFrame.new(placePos * 4))
 			end
 		end
 	end)
@@ -89,7 +100,7 @@ function BlockPlacer.Place()
 		return
 	end
 	local target = Mouse.Target
-	if not target then
+	if not target or not target:HasTag("Block") then
 		return
 	end
 

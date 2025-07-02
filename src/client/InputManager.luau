@@ -43,10 +43,14 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 		else
 			local _, currentItem = InventoryClient.GetItem()
 			if currentItem then
-				if ItemLibrary.itemDefinitions[currentItem.id].type == "block" then
-					BlockPlacer.Place()
-				elseif ItemLibrary.itemDefinitions[currentItem.id].type == "tool" then
-					ToolManager.MouseDown = true
+				local id = currentItem.itemInfo.id
+				if id then
+					local type = ItemLibrary.itemDefinitions[id].type
+					if type == "block" or type == "sapling" then
+						BlockPlacer.Place()
+					elseif type == "tool" then
+						ToolManager.MouseDown = true
+					end
 				end
 			end
 		end

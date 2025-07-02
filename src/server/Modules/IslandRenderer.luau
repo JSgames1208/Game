@@ -1,7 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
-local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local BlockCoord = require(ReplicatedStorage.Shared.Utility.BlockCoord)
 
 local BLOCK_SIZE = 4
@@ -16,12 +15,13 @@ function IslandRenderer.RenderIsland(islandData, origin)
 			continue
 		end
 		local id = blockInfo.id
-		if id ~= "air" then
+		if id ~= "nothing" then
 			local relativePos = BlockCoord.ParsePos(posStr)
 			local blockPart: Part = BlockLibrary.CreateBlockPart(id) :: Part
 			blockPart:PivotTo(CFrame.new(origin + relativePos * BLOCK_SIZE))
 			blockPart.Name = posStr
 			blockPart.Parent = model
+			print(id)
 			blockPart:SetAttribute("maxhp", ItemLibrary.itemDefinitions[id].hp)
 			blockPart:SetAttribute("hp", ItemLibrary.itemDefinitions[id].hp)
 		end

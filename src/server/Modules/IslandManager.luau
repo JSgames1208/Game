@@ -223,9 +223,12 @@ packets.PlaceBlock.listen(function(data, player)
 	end
 end)
 
-TreeManager.SetOnSaplingGrownCallback(function(player: Player, posStr: string, sapling)
+TreeManager.SetOnSaplingGrownCallback(function(player: Player, posStr: string, _)
 	local coord: Vector3 = BlockCoord.ParsePos(posStr)
 	local island = PlayerIslands[player.UserId]
+	if not island.IslandModel:FindFirstChild(posStr) then
+		return
+	end
 	if island then
 		IslandRenderer.RemoveBlock(island.IslandModel, posStr)
 		IslandManager.PlaceModel(player, coord, "pine tree")

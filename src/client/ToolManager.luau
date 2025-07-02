@@ -72,17 +72,12 @@ function ToolManager.Start()
 			local target = Mouse.Target
 			if target then
 				if target:HasTag("Block") then
-<<<<<<< Updated upstream
-					if target ~= highlight.Adornee then
-						highlight.Adornee = target
-=======
 					if target ~= highlight.Adornee and target.Parent ~= highlight.Adornee then
 						if target.Parent:HasTag("Block") then
 							highlight.Adornee = target.Parent
 						else
 							highlight.Adornee = target
 						end
->>>>>>> Stashed changes
 					end
 
 					if ToolManager.MouseDown and currentMiningCooldown <= 0 then
@@ -90,15 +85,11 @@ function ToolManager.Start()
 						currentMiningCooldown = miningAnimation.Length / miningAnimation.Speed
 						coroutine.wrap(function()
 							task.wait(0.4)
-<<<<<<< Updated upstream
-							packets.MineBlock.send({ blockPosStr = target.Name })
-=======
 							if target.Parent:HasTag("Block") then
 								packets.MineBlock.send({ blockPosStr = target.Parent.Name })
 							else
 								packets.MineBlock.send({ blockPosStr = target.Name })
 							end
->>>>>>> Stashed changes
 						end)()
 					end
 				else
