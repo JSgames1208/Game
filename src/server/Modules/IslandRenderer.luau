@@ -21,7 +21,6 @@ function IslandRenderer.RenderIsland(islandData, origin)
 			blockPart:PivotTo(CFrame.new(origin + relativePos * BLOCK_SIZE))
 			blockPart.Name = posStr
 			blockPart.Parent = model
-			print(id)
 			blockPart:SetAttribute("maxhp", ItemLibrary.itemDefinitions[id].hp)
 			blockPart:SetAttribute("hp", ItemLibrary.itemDefinitions[id].hp)
 		end

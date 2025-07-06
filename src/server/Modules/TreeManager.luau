@@ -38,16 +38,27 @@ end)
 function TreeManager.PlayerJoined(player: Player)
 	saplings[player.UserId] = {}
 
-	local data = DataStore.profiles[player.UserId]
-
-	for posStr, block in data.Data.Blocks do
-		if not block.itemInfo or not block.itemInfo.id then
-			return
+	local profile = DataStore.profiles[player.UserId]
+	for posStr, block in profile.Data.Blocks do
+		if not block or not block.id then
+			continue
 		end
-		if ItemLibrary.itemDefinitions[block.itemInfo.id].type == "sapling" then
+		if ItemLibrary.itemDefinitions[block.id].type == "sapling" then
 			saplings[player.UserId][posStr] = block
 		end
 	end
+end
+
+function TreeManager.PlayerLeaving(player: Player)
+	local profile = DataStore.profiles[player.UserId]
+	local blocks = profile.Data.Blocks
+	for posStr, sapling in saplings[player.UserId] do
+		if blocks[posStr] then
+			blocks[posStr] = sapling
+		end
+	end
+
+	saplings[player.UserId] = nil
 end
 
 function TreeManager.AddSapling(player: Player, posStr: string, block)

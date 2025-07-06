@@ -17,7 +17,7 @@ end
 
 function InventoryManager.SendToClient(player: Player)
 	local inventory = InventoryManager.Get(player)
-
+	print(inventory)
 	packets.InventorySync.sendTo(inventory, player)
 end
 
@@ -56,7 +56,7 @@ function InventoryManager.RemoveItem(player: Player, amount: number)
 	local inventory = InventoryManager.Get(player)
 	inventory[SelectedSlots[player.UserId]].count -= amount
 	if inventory[SelectedSlots[player.UserId]].count <= 0 then
-		inventory[SelectedSlots[player.UserId]].id = "nothing"
+		inventory[SelectedSlots[player.UserId]].itemInfo.id = "nothing"
 		inventory[SelectedSlots[player.UserId]].count = 0
 		DataStore.profiles[player.UserId].Data.Inventory = inventory
 	end
@@ -64,10 +64,11 @@ function InventoryManager.RemoveItem(player: Player, amount: number)
 end
 
 function InventoryManager.GiveItem(player: Player, itemId: string, amount: number)
+	print(itemId, amount)
 	local inventory = InventoryManager.Get(player)
-	local maxStack = ItemLibrary.itemDefinitions[ItemLibrary.itemDefinitions[itemId].drop].maxStack
+	local maxStack = ItemLibrary.itemDefinitions[itemId].maxStack
 	for _, item in ipairs(inventory) do
-		if item.itemInfo.id == ItemLibrary.itemDefinitions[itemId].drop and item.count < maxStack then
+		if item.itemInfo.id == itemId and item.count < maxStack then
 			local spaceLeft = maxStack - item.count
 			local toAdd = math.min(amount, spaceLeft)
 			item.count += toAdd
@@ -81,7 +82,7 @@ function InventoryManager.GiveItem(player: Player, itemId: string, amount: numbe
 		for _, item in ipairs(inventory) do
 			if item.itemInfo.id == "nothing" then
 				local toAdd = math.min(amount, maxStack)
-				item.itemInfo.id = ItemLibrary.itemDefinitions[itemId].drop
+				item.itemInfo.id = itemId
 				item.count = toAdd
 				amount -= toAdd
 				if amount <= 0 then

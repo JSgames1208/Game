@@ -5,13 +5,7 @@ local ToolManager = require(script.Parent.ToolManager)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local ItemManager = {}
 
-local currentType = nil
-local currentId = nil
-local currentSlot = nil
-
 function ItemManager.SelectItem(itemId, slotIndex)
-	currentId = itemId
-	currentSlot = slotIndex
 	local itemType = ItemLibrary.itemDefinitions[itemId].type
 
 	-- UnEquip existing

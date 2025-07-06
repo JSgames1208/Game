@@ -53,6 +53,8 @@ end
 function IslandManager.PlayerJoined(player: Player)
 	IslandManager.LoadIsland(player)
 	IslandManager.TeleportToIsland(player)
+
+	TreeManager.PlayerJoined(player)
 end
 
 function IslandManager.TeleportToIsland(player: Player)
@@ -68,12 +70,29 @@ end
 local function CheckGrass(player: Player, pos: Vector3)
 	local island = PlayerIslands[player.UserId]
 
+	local blocks = island.IslandData.Blocks
+
 	local checkPos = Vector3.new(pos.X, pos.Y - 1, pos.Z)
 	local checkPosStr = BlockCoord.GetName(checkPos)
-	if island.IslandData.Blocks[checkPosStr] and island.IslandData.Blocks[checkPosStr].id == "grass" then
-		island.IslandData.Blocks[checkPosStr].id = "dirt"
+	if blocks[checkPosStr] and blocks[checkPosStr].id == "grass" then
+		blocks[checkPosStr].id = "dirt"
 		IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
 		IslandRenderer.SetBlock(island.IslandModel, checkPos, "dirt")
+	end
+
+	local posStr = BlockCoord.GetName(pos)
+	if blocks[posStr] and blocks[posStr].id == "grass" then
+		checkPos = Vector3.new(pos.X, pos.Y + 1, pos.Z)
+		checkPosStr = BlockCoord.GetName(checkPos)
+		if
+			blocks[checkPosStr]
+			and ItemLibrary.itemDefinitions[blocks[checkPosStr].id].type == "block"
+			and not BlockLibrary.blockDefinitions[blocks[checkPosStr].id].transparent
+		then
+			blocks[posStr].id = "dirt"
+			IslandRenderer.RemoveBlock(island.IslandModel, BlockCoord.GetName(pos))
+			IslandRenderer.SetBlock(island.IslandModel, pos, "dirt")
+		end
 	end
 end
 
@@ -82,6 +101,8 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 	if not island then
 		return
 	end
+
+	local blocks = island.IslandData.Blocks
 
 	local gridPos = Vector3.new(
 		math.floor(pos.X - island.PlotPosition.X / 4 + 0.5),
@@ -98,13 +119,32 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 
 	local key = getBlockKey(gridPos)
 	if ItemLibrary.itemDefinitions[blockId].type == "block" then
-		island.IslandData.Blocks[key] = { id = blockId }
+		blocks[key] = { id = blockId }
 	elseif ItemLibrary.itemDefinitions[blockId].type == "sapling" then
-		island.IslandData.Blocks[key] = { id = blockId, growTime = ItemLibrary.itemDefinitions[blockId].growTime }
-		TreeManager.AddSapling(player, key, { id = blockId, growTime = ItemLibrary.itemDefinitions[blockId].growTime })
+		local checkPos: Vector3 = Vector3.new(pos.X, pos.Y - 1, pos.Z)
+		local checkPosStr: string = BlockCoord.GetName(checkPos)
+		if not blocks[checkPosStr] then
+			return false
+		end
+		if blocks[checkPosStr].id == "grass" then
+			blocks[key] = { id = blockId, growTime = ItemLibrary.itemDefinitions[blockId].growTime }
+			TreeManager.AddSapling(
+				player,
+				key,
+				{ id = blockId, growTime = ItemLibrary.itemDefinitions[blockId].growTime }
+			)
+		else
+			return false
+		end
 	end
 
 	IslandRenderer.SetBlock(island.IslandModel, gridPos + island.PlotPosition / 4, blockId)
+
+	if ItemLibrary.itemDefinitions[blockId].id == "grass" then
+		CheckGrass(player, pos)
+	end
+
+	return true
 end
 
 function IslandManager.PlaceModel(player: Player, pos: Vector3, modelId: string)
@@ -112,7 +152,7 @@ function IslandManager.PlaceModel(player: Player, pos: Vector3, modelId: string)
 
 	local island = PlayerIslands[player.UserId]
 	if not island then
-		return
+		return false
 	end
 
 	local gridPos = Vector3.new(
@@ -130,37 +170,51 @@ function IslandManager.PlaceModel(player: Player, pos: Vector3, modelId: string)
 	end
 
 	IslandRenderer.SetBlock(island.IslandModel, gridPos + island.PlotPosition / 4, modelId)
+	return true
 end
-
---[[local function CheckGrass(player: Player, pos: Vector3)
-	local island = PlayerIslands[player.UserId]
-
-	local checkPos = Vector3.new(pos.X, pos.Y - 1, pos.Z)
-	local checkPosStr = BlockCoord.GetName(checkPos)
-	if island.IslandData.Blocks[checkPosStr] and island.IslandData.Blocks[checkPosStr].id == "grass" then
-		island.IslandData.Blocks[checkPosStr].id = "dirt"
-		IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
-		IslandRenderer.SetBlock(island.IslandModel, checkPos, "dirt")
-	end
-end]]
 
 local function CheckDirt(player: Player, pos: string)
 	local island = PlayerIslands[player.UserId]
 	local removedPos: Vector3 = BlockCoord.ParsePos(pos)
+	local blocks = island.IslandData.Blocks
 
 	local checkPos: Vector3 = Vector3.new(removedPos.X, removedPos.Y - 1, removedPos.Z)
 	local checkPosStr: string = BlockCoord.GetName(checkPos)
-	if island.IslandData.Blocks[checkPosStr] and island.IslandData.Blocks[checkPosStr].id == "dirt" then
-		island.IslandData.Blocks[checkPosStr].id = "grass"
+	if blocks[checkPosStr] and blocks[checkPosStr].id == "dirt" then
+		blocks[checkPosStr].id = "grass"
 		IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
 		IslandRenderer.SetBlock(island.IslandModel, checkPos, "grass")
+	end
+end
+
+local function CheckBlockAbove(player: Player, pos: string)
+	local island = PlayerIslands[player.UserId]
+	local removedPos: Vector3 = BlockCoord.ParsePos(pos)
+	local blocks = island.IslandData.Blocks
+
+	local checkPos: Vector3 = Vector3.new(removedPos.X, removedPos.Y + 1, removedPos.Z)
+	local checkPosStr: string = BlockCoord.GetName(checkPos)
+	if blocks[checkPosStr] then
+		print(blocks[checkPosStr])
+		local type = ItemLibrary.itemDefinitions[blocks[checkPosStr].id].type
+		print(type)
+		if type == "tree" or type == "sapling" then
+			InventoryManager.GiveItem(
+				player,
+				blocks[checkPosStr].id,
+				ItemLibrary.itemDefinitions[blocks[checkPosStr].id].dropAmount
+			)
+			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
+			blocks[checkPosStr] = nil
+		end
 	end
 end
 
 function IslandManager.MineBlock(player: Player, pos: string)
 	local island = PlayerIslands[player.UserId]
 	print(island.IslandData.Blocks)
-	local block = island.IslandData.Blocks[pos]
+	local blocks = island.IslandData.Blocks
+	local block = blocks[pos]
 	if block then
 		local toolId = InventoryManager.GetSelected(player)
 		if ItemLibrary.itemDefinitions[toolId].type == "tool" then
@@ -171,16 +225,23 @@ function IslandManager.MineBlock(player: Player, pos: string)
 			packets.MineBlock.sendTo({ blockPosStr = pos }, player)
 			if island.IslandModel:FindFirstChild(pos):GetAttribute("hp") <= 0 then
 				IslandRenderer.RemoveBlock(island.IslandModel, pos)
-				if island.IslandData.Blocks[pos].blocked then
+				if blocks[pos].blocked then
 					for _, blockedPos in island.IslandData.Blocks[pos].blocked do
-						if island.IslandData.Blocks[blockedPos].parent == pos then
-							island.IslandData.Blocks[blockedPos] = nil
+						if blocks[blockedPos].parent == pos then
+							blocks[blockedPos] = nil
 						end
 					end
 				end
-				island.IslandData.Blocks[pos] = nil
+				blocks[pos] = nil
+
+				for itemId, amount in ItemLibrary.itemDefinitions[block.id].drops do
+					InventoryManager.GiveItem(player, itemId, amount)
+				end
+				--InventoryManager.GiveItem(player, block.id, ItemLibrary.itemDefinitions[block.id].dropAmount)
+
+				CheckBlockAbove(player, pos)
+
 				CheckDirt(player, pos)
-				InventoryManager.GiveItem(player, block.id, ItemLibrary.itemDefinitions[block.id].dropAmount)
 			end
 		end
 	end
@@ -209,6 +270,8 @@ function IslandManager.LoadIsland(player: Player)
 end
 
 function IslandManager.PlayerLeaving(player: Player)
+	TreeManager.PlayerLeaving(player)
+
 	DataStore.ReleasePlayerData(player.UserId)
 	PlayerIslands[player.UserId].IslandModel:Destroy()
 	IslandManager.ReleasePlot(player)
@@ -218,8 +281,10 @@ packets.PlaceBlock.listen(function(data, player)
 	local pos = Vector3.new(data.x, data.y, data.z)
 	local blockId = data.blockId
 	if InventoryManager.IsAvailable(player, 1) then
-		InventoryManager.RemoveItem(player, 1)
-		IslandManager.PlaceBlock(player, pos, blockId)
+		local placed = IslandManager.PlaceBlock(player, pos, blockId)
+		if placed then
+			InventoryManager.RemoveItem(player, 1)
+		end
 	end
 end)
 

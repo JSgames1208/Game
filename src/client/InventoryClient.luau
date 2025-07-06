@@ -114,7 +114,7 @@ function InventoryClient.GetItem()
 	if selectedSlot then
 		return selectedSlot:GetAttribute("SlotIndex"), inventory[selectedSlot:GetAttribute("SlotIndex")]
 	else
-		return 0, { id = "nothing", count = 0 }
+		return 0, { itemInfo = { id = "nothing" }, count = 0 }
 	end
 end
 

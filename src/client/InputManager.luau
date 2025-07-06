@@ -43,6 +43,7 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 		else
 			local _, currentItem = InventoryClient.GetItem()
 			if currentItem then
+				print(currentItem)
 				local id = currentItem.itemInfo.id
 				if id then
 					local type = ItemLibrary.itemDefinitions[id].type
