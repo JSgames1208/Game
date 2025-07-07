@@ -31,7 +31,7 @@ function BlockHealthBar.Start()
 
 				HealthBar:FindFirstChild("Health").Size = UDim2.new(hp / maxhp, 0, 1, 0)
 
-				HealthBars[HealthBar] = 7
+				HealthBars[HealthBar] = 3
 			end
 		end
 	end)

@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
+local BlockCoord = require(ReplicatedStorage.Shared.Utility.BlockCoord)
 local DataStore = require(ServerScriptService.Server.Modules.DataStore)
 local TreeManager = {}
 
@@ -25,6 +26,13 @@ RunService.Heartbeat:Connect(function(dt: number)
 			for posStr, sapling in playerSaplings do
 				sapling.growTime -= 0.1
 				if sapling.growTime <= 0 then
+					local blocks =
+						workspace.IslandsFolder:FindFirstChild(Players:GetPlayerByUserId(userId).Name .. "_Island")
+					if
+						blocks:FindFirstChild(BlockCoord.GetName(BlockCoord.ParsePos(posStr) + Vector3.new(0, 1, 0)))
+					then
+						continue
+					end
 					playerSaplings[posStr] = nil
 					if growCallback then
 						growCallback(Players:GetPlayerByUserId(userId), posStr, sapling)

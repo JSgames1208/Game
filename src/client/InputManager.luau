@@ -9,14 +9,14 @@ local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
 
 local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
-local HotBar = InventoryGui:WaitForChild("HotBar")
+local Hotbar = InventoryGui:WaitForChild("Hotbar")
 
 local InputManager = {}
 
 local hoveredSlot = nil
 
 function InputManager.Start()
-	for _, slot in HotBar:GetChildren() do
+	for _, slot in Hotbar:GetChildren() do
 		if slot:IsA("Frame") then
 			slot.MouseEnter:Connect(function()
 				hoveredSlot = slot
@@ -36,6 +36,14 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 	if gameProcessed then
 		return
 	end
+	if InventoryClient.IsInventoryOpen() then
+		if input.UserInputType == Enum.UserInputType.Keyboard then
+			if input.KeyCode == Enum.KeyCode.E then
+				InventoryClient.ToggleVisibility()
+			end
+		end
+		return
+	end
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if hoveredSlot then
 			InventoryClient.SlotPressed(hoveredSlot:GetAttribute("SlotIndex"))
@@ -43,7 +51,6 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 		else
 			local _, currentItem = InventoryClient.GetItem()
 			if currentItem then
-				print(currentItem)
 				local id = currentItem.itemInfo.id
 				if id then
 					local type = ItemLibrary.itemDefinitions[id].type
@@ -75,6 +82,8 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 			InventoryClient.SlotPressed(8)
 		elseif input.KeyCode == Enum.KeyCode.Nine then
 			InventoryClient.SlotPressed(9)
+		elseif input.KeyCode == Enum.KeyCode.E then
+			InventoryClient.ToggleVisibility()
 		end
 	end
 end)

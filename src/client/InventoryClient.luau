@@ -9,10 +9,16 @@ local packets = require(ReplicatedStorage.Shared.network)
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
 
+local visible = false
+
 local slotTweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
 local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
-local HotBar = InventoryGui:WaitForChild("HotBar")
+local Hotbar: Frame = InventoryGui:WaitForChild("Hotbar") :: Frame
+
+local InventoryFrame: Frame = InventoryGui:WaitForChild("Inventory") :: Frame
+local OpenHotbar: Frame = InventoryFrame:WaitForChild("Hotbar") :: Frame
+local MainInventory: Frame = InventoryFrame:WaitForChild("MainInventory") :: Frame
 
 local inventory = table.create(9, nil)
 
@@ -22,7 +28,7 @@ function InventoryClient.Start()
 	return
 end
 
-for _, slot in HotBar:GetChildren() do
+for _, slot in Hotbar:GetChildren() do
 	if slot:IsA("Frame") then
 		slot.MouseEnter:Connect(function()
 			TweenService:Create(slot, slotTweenInfo, { Size = UDim2.new(1.1, 0, 1.1, 0) }):Play()
@@ -33,13 +39,13 @@ for _, slot in HotBar:GetChildren() do
 	end
 end
 
-function InventoryClient.UpdateSlots(data)
+function InventoryClient.PopulateHotbar(data)
 	for i = 1, 9 do
 		local newItem = data[i]
 		inventory[i] = newItem
 
 		local slot = nil
-		for _, s in HotBar:GetChildren() do
+		for _, s in Hotbar:GetChildren() do
 			if s:GetAttribute("SlotIndex") == i then
 				slot = s
 			end
@@ -74,11 +80,15 @@ function InventoryClient.UpdateSlots(data)
 	end
 end
 
+function InventoryClient.UpdateSlots(data)
+	InventoryClient.PopulateHotbar(data)
+end
+
 local selectedSlot = nil
 
 function InventoryClient.SlotPressed(slotIndex: number)
 	local slot = nil
-	for _, s in HotBar:GetChildren() do
+	for _, s in Hotbar:GetChildren() do
 		if s:GetAttribute("SlotIndex") == slotIndex then
 			slot = s
 		end
@@ -116,6 +126,40 @@ function InventoryClient.GetItem()
 	else
 		return 0, { itemInfo = { id = "nothing" }, count = 0 }
 	end
+end
+
+function InventoryClient.CloseInventory()
+	if InventoryFrame.Visible then
+		InventoryFrame.Visible = false
+		Hotbar.Visible = true
+	end
+end
+
+function InventoryClient.OpenInventory()
+	if Hotbar.Visible then
+		Hotbar.Visible = false
+		InventoryFrame.Visible = true
+	end
+end
+
+function InventoryClient.ToggleVisibility()
+	if visible then
+		InventoryClient.CloseInventory()
+		visible = false
+	else
+		InventoryClient.OpenInventory()
+		visible = true
+		if selectedSlot then
+			local slotIndex = selectedSlot:GetAttribute("SlotIndex")
+			InventoryClient.SlotPressed(slotIndex)
+		end
+	end
+end
+
+--{{GETTERS}}--
+
+function InventoryClient.IsInventoryOpen()
+	return visible
 end
 
 packets.InventorySync.listen(function(data)
