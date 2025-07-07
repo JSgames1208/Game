@@ -8,7 +8,7 @@ local HealthBarTemplate = UIAssets:FindFirstChild("HealthBar")
 
 local player = Players.LocalPlayer
 
-local island = workspace:FindFirstChild("IslandsFolder"):WaitForChild(player.Name .. "_Island")
+local island = workspace:FindFirstChild("IslandsFolder"):WaitForChild(player.UserId .. "_Island")
 
 local BlockHealthBar = {}
 

@@ -72,25 +72,30 @@ function ToolManager.Start()
 			local target = Mouse.Target
 			if target then
 				if target:HasTag("Block") then
-					if target ~= highlight.Adornee and target.Parent ~= highlight.Adornee then
-						if target.Parent:HasTag("Block") then
-							highlight.Adornee = target.Parent
-						else
-							highlight.Adornee = target
-						end
-					end
-
-					if ToolManager.MouseDown and currentMiningCooldown <= 0 then
-						StartAnimation("miningAnimation")
-						currentMiningCooldown = miningAnimation.Length / miningAnimation.Speed
-						coroutine.wrap(function()
-							task.wait(0.4)
+					if
+						target.Parent.Name == player.UserId .. "_Island"
+						or target.Parent.Parent.Name == player.UserId .. "_Island"
+					then
+						if target ~= highlight.Adornee and target.Parent ~= highlight.Adornee then
 							if target.Parent:HasTag("Block") then
-								packets.MineBlock.send({ blockPosStr = target.Parent.Name })
+								highlight.Adornee = target.Parent
 							else
-								packets.MineBlock.send({ blockPosStr = target.Name })
+								highlight.Adornee = target
 							end
-						end)()
+						end
+
+						if ToolManager.MouseDown and currentMiningCooldown <= 0 then
+							StartAnimation("miningAnimation")
+							currentMiningCooldown = miningAnimation.Length / miningAnimation.Speed
+							coroutine.wrap(function()
+								task.wait(0.4)
+								if target.Parent:HasTag("Block") then
+									packets.MineBlock.send({ blockPosStr = target.Parent.Name })
+								else
+									packets.MineBlock.send({ blockPosStr = target.Name })
+								end
+							end)()
+						end
 					end
 				else
 					highlight.Adornee = highlightpart

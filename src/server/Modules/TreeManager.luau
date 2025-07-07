@@ -26,8 +26,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 			for posStr, sapling in playerSaplings do
 				sapling.growTime -= 0.1
 				if sapling.growTime <= 0 then
-					local blocks =
-						workspace.IslandsFolder:FindFirstChild(Players:GetPlayerByUserId(userId).Name .. "_Island")
+					local blocks = workspace.IslandsFolder:FindFirstChild(userId .. "_Island")
 					if
 						blocks:FindFirstChild(BlockCoord.GetName(BlockCoord.ParsePos(posStr) + Vector3.new(0, 1, 0)))
 					then

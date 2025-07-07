@@ -33,7 +33,6 @@ function IslandRenderer.SetBlock(islandModel, relativePos, blockId)
 	local blockPart = BlockLibrary.CreateBlockPart(blockId)
 	blockPart:PivotTo(CFrame.new(relativePos * BLOCK_SIZE))
 	blockPart.Parent = islandModel
-	blockPart.Name = BlockCoord.GetName(relativePos)
 	blockPart:SetAttribute("maxhp", ItemLibrary.itemDefinitions[blockId].hp)
 	blockPart:SetAttribute("hp", ItemLibrary.itemDefinitions[blockId].hp)
 	return blockPart

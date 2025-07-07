@@ -17,7 +17,6 @@ end
 
 function InventoryManager.SendToClient(player: Player)
 	local inventory = InventoryManager.Get(player)
-	print(inventory)
 	packets.InventorySync.sendTo(inventory, player)
 end
 
@@ -31,7 +30,8 @@ function InventoryManager.PlayerJoined(player: Player)
 			item.itemInfo.id = "nothing"
 		end
 	end
-	--InventoryManager.GiveItem(player, "pine tree sapling", 16)
+	InventoryManager.GiveItem(player, "pine tree sapling", 100)
+	InventoryManager.GiveItem(player, "sand", 100)
 
 	InventoryManager.SendToClient(player)
 end
@@ -64,7 +64,6 @@ function InventoryManager.RemoveItem(player: Player, amount: number)
 end
 
 function InventoryManager.GiveItem(player: Player, itemId: string, amount: number)
-	print(itemId, amount)
 	local inventory = InventoryManager.Get(player)
 	local maxStack = ItemLibrary.itemDefinitions[itemId].maxStack
 	for _, item in ipairs(inventory) do

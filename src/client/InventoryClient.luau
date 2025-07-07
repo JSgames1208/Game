@@ -80,8 +80,86 @@ function InventoryClient.PopulateHotbar(data)
 	end
 end
 
+function InventoryClient.PopulateInventory(data)
+	for i = 1, 45 do
+		local newItem = data[i]
+		inventory[i] = newItem
+
+		local row = (i - 1) // 9
+
+		if row == 0 then
+			for _, slot in OpenHotbar:GetChildren() do
+				if slot:GetAttribute("SlotIndex") == i then
+					local viewport = slot:FindFirstChild("IconViewport")
+					local amount = slot:FindFirstChild("Amount")
+
+					if newItem.count <= 0 then
+						viewport:ClearAllChildren()
+						amount.Text = ""
+						continue
+					end
+
+					if viewport and newItem then
+						RenderBlockToViewport(viewport, newItem.itemInfo.id)
+						if
+							ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "block"
+							or ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "sapling"
+						then
+							amount.Text = newItem.count > 0 and tostring(newItem.count) or ""
+						elseif
+							ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "tool"
+							or ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "nothing"
+						then
+							amount.Text = ""
+						end
+					elseif viewport then
+						viewport:ClearAllChildren()
+					end
+				end
+			end
+		else
+			for _, frame in MainInventory:GetChildren() do
+				if frame:GetAttribute("RowIndex") == row then
+					local slotIndex = i % 9
+
+					for _, slot in frame:GetChildren() do
+						if slot:GetAttribute("SlotIndex") == slotIndex then
+							local viewport = slot:FindFirstChild("IconViewport")
+							local amount = slot:FindFirstChild("Amount")
+
+							if newItem.count <= 0 then
+								viewport:ClearAllChildren()
+								amount.Text = ""
+								continue
+							end
+
+							if viewport and newItem then
+								RenderBlockToViewport(viewport, newItem.itemInfo.id)
+								if
+									ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "block"
+									or ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "sapling"
+								then
+									amount.Text = newItem.count > 0 and tostring(newItem.count) or ""
+								elseif
+									ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "tool"
+									or ItemLibrary.itemDefinitions[newItem.itemInfo.id].type == "nothing"
+								then
+									amount.Text = ""
+								end
+							elseif viewport then
+								viewport:ClearAllChildren()
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 function InventoryClient.UpdateSlots(data)
 	InventoryClient.PopulateHotbar(data)
+	InventoryClient.PopulateInventory(data)
 end
 
 local selectedSlot = nil
@@ -142,16 +220,23 @@ function InventoryClient.OpenInventory()
 	end
 end
 
+local lastSelectedSlot = nil
+
 function InventoryClient.ToggleVisibility()
 	if visible then
 		InventoryClient.CloseInventory()
 		visible = false
+		if lastSelectedSlot then
+			InventoryClient.SlotPressed(lastSelectedSlot)
+		end
+		lastSelectedSlot = nil
 	else
 		InventoryClient.OpenInventory()
 		visible = true
 		if selectedSlot then
 			local slotIndex = selectedSlot:GetAttribute("SlotIndex")
 			InventoryClient.SlotPressed(slotIndex)
+			lastSelectedSlot = slotIndex
 		end
 	end
 end

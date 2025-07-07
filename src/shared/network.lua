@@ -11,7 +11,6 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 
 	return {
 		PlaceBlock = ByteNet.definePacket({
-			-- Use `value`, not `structure` or dataTypes
 			value = ByteNet.struct({
 				x = ByteNet.int32, -- or `ByteNet.int32` if blocks are at integer positions
 				y = ByteNet.int32,
@@ -19,7 +18,11 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 				blockId = ByteNet.string,
 				slot = ByteNet.int32,
 			}),
-			reliabilityType = "reliable", -- ensure the block place request always reaches the server
+			reliabilityType = "reliable",
+		}),
+		AssignPlot = ByteNet.definePacket({
+			value = ByteNet.vec3,
+			reliabilityType = "reliable",
 		}),
 		InventorySync = ByteNet.definePacket({
 			value = ByteNet.array(SlotStruct),
@@ -36,6 +39,7 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			value = ByteNet.struct({
 				blockPosStr = ByteNet.string,
 			}),
+			reliabilityType = "reliable",
 		}),
 	}
 end)

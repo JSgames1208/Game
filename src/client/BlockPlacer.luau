@@ -15,6 +15,8 @@ local blockPreview = nil
 
 local currentSlot = nil
 
+local plotPosition = nil
+
 local normalMap = {
 	[Enum.NormalId.Top] = Vector3.new(0, 1, 0),
 	[Enum.NormalId.Bottom] = Vector3.new(0, -1, 0),
@@ -97,10 +99,12 @@ end
 
 function BlockPlacer.Place()
 	if not currentBlock then
+		print("HEre")
 		return
 	end
 	local target = Mouse.Target
 	if not target or not target:HasTag("Block") then
+		print("GFY")
 		return
 	end
 
@@ -110,10 +114,16 @@ function BlockPlacer.Place()
 	local blockId = currentBlock
 
 	if normal then
+		if not plotPosition then
+			print("NO FLIPPING PLOT POSS")
+			return
+		end
+		local relativePos = target.Position - plotPosition
+
 		local placePos = Vector3.new(
-			math.floor(target.Position.X / 4 + 0.5) + normal.X,
-			math.floor(target.Position.Y / 4 + 0.5) + normal.Y,
-			math.floor(target.Position.Z / 4 + 0.5) + normal.Z
+			math.floor(relativePos.X / 4 + 0.5) + normal.X,
+			math.floor(relativePos.Y / 4 + 0.5) + normal.Y,
+			math.floor(relativePos.Z / 4 + 0.5) + normal.Z
 		)
 		packets.PlaceBlock.send({
 			x = placePos.X,
@@ -132,6 +142,10 @@ packets.InventorySync.listen(function(data)
 	if data and data[currentSlot] and data[currentSlot].count <= 0 then
 		BlockPlacer.SelectBlock("nothing", currentSlot)
 	end
+end)
+
+packets.AssignPlot.listen(function(pos)
+	plotPosition = pos
 end)
 
 return BlockPlacer

@@ -19,6 +19,9 @@ local function GetBaseInventory()
 	inventory[3] = { itemInfo = { id = "diamond pickaxe" }, count = 1 }
 	inventory[4] = { itemInfo = { id = "obsidian pickaxe" }, count = 1 }
 	for i = 5, 9 do
+		inventory[i] = { itemInfo = { id = "dirt" }, count = 1 }
+	end
+	for i = 10, 45 do
 		inventory[i] = { itemInfo = { id = "nothing" }, count = 0 }
 	end
 	return inventory
