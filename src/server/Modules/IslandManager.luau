@@ -200,11 +200,9 @@ local function CheckBlockAbove(player: Player, pos: string)
 	if blocks[checkPosStr] then
 		local type = ItemLibrary.itemDefinitions[blocks[checkPosStr].id].type
 		if type == "tree" or type == "sapling" then
-			InventoryManager.GiveItem(
-				player,
-				blocks[checkPosStr].id,
-				ItemLibrary.itemDefinitions[blocks[checkPosStr].id].dropAmount
-			)
+			for drop, amount in ItemLibrary.itemDefinitions[blocks[checkPosStr].id].drops do
+				InventoryManager.GiveItem(player, drop, amount)
+			end
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
 			blocks[checkPosStr] = nil
 		end
