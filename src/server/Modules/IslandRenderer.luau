@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
-local BlockCoord = require(ReplicatedStorage.Shared.Utility.BlockCoord)
+local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 
 local BLOCK_SIZE = 4
 

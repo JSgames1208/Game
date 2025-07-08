@@ -1,8 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
+local EntityManager = require(ReplicatedStorage.Shared.Entity.EntityManager)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
-local BlockCoord = require(ReplicatedStorage.Shared.Utility.BlockCoord)
+local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
+local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
 local packets = require(ReplicatedStorage.Shared.network)
 local IslandRenderer = require(script.Parent.IslandRenderer)
 local DataStore = require(script.Parent.DataStore)
@@ -51,15 +53,34 @@ function IslandManager.ReleasePlot(player: Player)
 end
 
 function IslandManager.PlayerJoined(player: Player)
-	task.wait(0.5)
 	IslandManager.LoadIsland(player)
+	task.wait(1.5)
 	IslandManager.TeleportToIsland(player)
 
 	TreeManager.PlayerJoined(player)
 end
 
+function IslandManager.LoadIsland(player: Player)
+	local plotIndex, plotPos = IslandManager.AssignPlotToPlayer(player)
+	local islandData = DataStore.LoadPlayerData(player.UserId) or {}
+
+	local islandModel = IslandRenderer.RenderIsland(islandData, plotPos)
+	islandModel.Name = player.UserId .. "_Island"
+	islandModel.Parent = workspace.IslandsFolder
+
+	PlayerIslands[player.UserId] = {
+		PlotIndex = plotIndex,
+		PlotPosition = plotPos,
+		IslandData = islandData,
+		IslandModel = islandModel,
+	}
+
+	packets.AssignPlot.sendTo(plotPos, player)
+	--return islandModel
+end
+
 function IslandManager.TeleportToIsland(player: Player)
-	task.wait(2)
+	task.wait(0.5)
 	if not player then
 		return
 	end
@@ -96,12 +117,27 @@ local function CheckGrass(player: Player, pos: Vector3)
 			and ItemLibrary.itemDefinitions[blocks[checkPosStr].id].type == "block"
 			and not BlockLibrary.blockDefinitions[blocks[checkPosStr].id].transparent
 		then
+			print(posStr)
 			blocks[posStr].id = "dirt"
 			IslandRenderer.RemoveBlock(island.IslandModel, BlockCoord.GetName(pos))
-			local block = IslandRenderer.SetBlock(island.IslandModel, checkPos + island.PlotPosition / 4, "dirt")
+			local block = IslandRenderer.SetBlock(island.IslandModel, pos + island.PlotPosition / 4, "dirt")
 			block.Name = BlockCoord.GetName(pos)
 		end
 	end
+end
+
+function IslandManager.PlaceFallingBlock(player: Player, gridPos: Vector3, blockId: string)
+	print(gridPos)
+
+	EntityManager.SpawnFallingBlock(
+		player,
+		gridPos * 4,
+		blockId,
+		function(player: Player, gridPos: Vector3, blockId: string)
+			print(gridPos)
+			IslandManager.PlaceBlock(player, gridPos, blockId)
+		end
+	)
 end
 
 function IslandManager.PlaceBlock(player: Player, pos, blockId)
@@ -113,7 +149,6 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 	local blocks = island.IslandData.Blocks
 
 	local gridPos = pos --Vector3.new(math.floor(pos.X + 0.5), math.floor(pos.Y + 0.5), math.floor(pos.Z + 0.5))
-
 	if
 		not BlockLibrary.blockDefinitions[blockId].transparent
 		and ItemLibrary.itemDefinitions[blockId].type ~= "sapling"
@@ -122,6 +157,18 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 	end
 
 	local key = getBlockKey(gridPos)
+
+	if blocks[key] and blocks[key].parent then
+		return false
+	end
+
+	if ItemLibrary.itemDefinitions[blockId].type == "block" and ItemLibrary.itemDefinitions[blockId].falling then
+		if not blocks[getBlockKey(GridMath.gridPosUnder(gridPos))] then
+			IslandManager.PlaceFallingBlock(player, gridPos, blockId)
+			return true
+		end
+	end
+
 	if ItemLibrary.itemDefinitions[blockId].type == "block" then
 		blocks[key] = { id = blockId }
 	elseif ItemLibrary.itemDefinitions[blockId].type == "sapling" then
@@ -198,13 +245,22 @@ local function CheckBlockAbove(player: Player, pos: string)
 	local checkPos: Vector3 = Vector3.new(removedPos.X, removedPos.Y + 1, removedPos.Z)
 	local checkPosStr: string = BlockCoord.GetName(checkPos)
 	if blocks[checkPosStr] then
-		local type = ItemLibrary.itemDefinitions[blocks[checkPosStr].id].type
+		local id = blocks[checkPosStr].id
+		local itemDef = ItemLibrary.itemDefinitions[id]
+		local type: string = itemDef.type
+		local falling: boolean = itemDef.falling
 		if type == "tree" or type == "sapling" then
-			for drop, amount in ItemLibrary.itemDefinitions[blocks[checkPosStr].id].drops do
+			for drop, amount in itemDef.drops do
 				InventoryManager.GiveItem(player, drop, amount)
 			end
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
 			blocks[checkPosStr] = nil
+		elseif type == "block" and falling then
+			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
+			blocks[checkPosStr] = nil
+			IslandManager.PlaceFallingBlock(player, checkPos, id)
+			task.wait(0.05)
+			CheckBlockAbove(player, checkPosStr)
 		end
 	end
 end
@@ -224,7 +280,7 @@ function IslandManager.MineBlock(player: Player, pos: string)
 			if island.IslandModel:FindFirstChild(pos):GetAttribute("hp") <= 0 then
 				IslandRenderer.RemoveBlock(island.IslandModel, pos)
 				if blocks[pos].blocked then
-					for _, blockedPos in island.IslandData.Blocks[pos].blocked do
+					for _, blockedPos in blocks[pos].blocked do
 						if blocks[blockedPos].parent == pos then
 							blocks[blockedPos] = nil
 						end
@@ -248,25 +304,6 @@ end
 packets.MineBlock.listen(function(data, player: Player)
 	IslandManager.MineBlock(player, data.blockPosStr)
 end)
-
-function IslandManager.LoadIsland(player: Player)
-	local plotIndex, plotPos = IslandManager.AssignPlotToPlayer(player)
-	local islandData = DataStore.LoadPlayerData(player.UserId) or {}
-
-	local islandModel = IslandRenderer.RenderIsland(islandData, plotPos)
-	islandModel.Name = player.UserId .. "_Island"
-	islandModel.Parent = workspace.IslandsFolder
-
-	PlayerIslands[player.UserId] = {
-		PlotIndex = plotIndex,
-		PlotPosition = plotPos,
-		IslandData = islandData,
-		IslandModel = islandModel,
-	}
-
-	packets.AssignPlot.sendTo(plotPos, player)
-	--return islandModel
-end
 
 function IslandManager.PlayerLeaving(player: Player)
 	TreeManager.PlayerLeaving(player)

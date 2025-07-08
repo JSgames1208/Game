@@ -1,14 +1,18 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local EntityManager = require(ReplicatedStorage.Shared.Entity.EntityManager)
 local TreeManager = require(script.Modules.TreeManager)
 local InventoryManager = require(script.Modules.InventoryManager)
 require(ReplicatedStorage.Shared.network)
 local IslandManager = require(script.Modules.IslandManager)
 
 Players.PlayerAdded:Connect(function(player: Player)
+	local character = player.Character or player.CharacterAdded:Wait()
+	character:WaitForChild("HumanoidRootPart"):PivotTo(CFrame.new(Vector3.new(100, 0, 0)))
 	IslandManager.PlayerJoined(player)
 	InventoryManager.PlayerJoined(player)
 	TreeManager.PlayerJoined(player)
+	EntityManager.Start()
 end)
 
 Players.PlayerRemoving:Connect(function(player: Player)

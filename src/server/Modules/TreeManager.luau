@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
-local BlockCoord = require(ReplicatedStorage.Shared.Utility.BlockCoord)
+local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 local DataStore = require(ServerScriptService.Server.Modules.DataStore)
 local TreeManager = {}
 
@@ -59,6 +59,9 @@ end
 function TreeManager.PlayerLeaving(player: Player)
 	local profile = DataStore.profiles[player.UserId]
 	local blocks = profile.Data.Blocks
+	if not saplings[player.UserId] then
+		return
+	end
 	for posStr, sapling in saplings[player.UserId] do
 		if blocks[posStr] then
 			blocks[posStr] = sapling

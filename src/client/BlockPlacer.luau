@@ -115,7 +115,7 @@ function BlockPlacer.Place()
 
 	if normal then
 		if not plotPosition then
-			print("NO FLIPPING PLOT POSS")
+			warn("No plot position!")
 			return
 		end
 		local relativePos = target.Position - plotPosition
