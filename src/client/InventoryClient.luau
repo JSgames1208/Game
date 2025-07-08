@@ -1,7 +1,9 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local ItemManager = require(script.Parent.ItemManager)
 local RenderBlockToViewport = require(StarterPlayer.StarterPlayerScripts.Client.Utility.RenderItemIcon)
@@ -11,7 +13,8 @@ local PlayerGui = player.PlayerGui
 
 local visible = false
 
-local slotTweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local slotSizeTweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local slotColorTweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
 local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
 local Hotbar: Frame = InventoryGui:WaitForChild("Hotbar") :: Frame
@@ -20,7 +23,7 @@ local InventoryFrame: Frame = InventoryGui:WaitForChild("Inventory") :: Frame
 local OpenHotbar: Frame = InventoryFrame:WaitForChild("Hotbar") :: Frame
 local MainInventory: Frame = InventoryFrame:WaitForChild("MainInventory") :: Frame
 
-local inventory = table.create(9, nil)
+local inventory = table.create(45, nil)
 
 local InventoryClient = {}
 
@@ -28,14 +31,42 @@ function InventoryClient.Start()
 	return
 end
 
-for _, slot in Hotbar:GetChildren() do
-	if slot:IsA("Frame") then
+local function setSizeTween(slot)
+	if slot:IsA("Frame") and slot:GetAttribute("SlotIndex") then
 		slot.MouseEnter:Connect(function()
-			TweenService:Create(slot, slotTweenInfo, { Size = UDim2.new(1.1, 0, 1.1, 0) }):Play()
+			TweenService:Create(slot, slotSizeTweenInfo, { Size = UDim2.new(1.1, 0, 1.1, 0) }):Play()
 		end)
 		slot.MouseLeave:Connect(function()
-			TweenService:Create(slot, slotTweenInfo, { Size = UDim2.new(1, 0, 1, 0) }):Play()
+			TweenService:Create(slot, slotSizeTweenInfo, { Size = UDim2.new(1, 0, 1, 0) }):Play()
 		end)
+	end
+end
+
+local function setColorTween(slot)
+	if slot:IsA("Frame") and slot:GetAttribute("SlotIndex") then
+		slot.MouseEnter:Connect(function()
+			TweenService:Create(slot, slotColorTweenInfo, { BackgroundTransparency = 0.5 }):Play()
+		end)
+		slot.MouseLeave:Connect(function()
+			TweenService:Create(slot, slotColorTweenInfo, { BackgroundTransparency = 0.6 }):Play()
+		end)
+	end
+end
+
+for _, slot in Hotbar:GetChildren() do
+	setSizeTween(slot)
+	setColorTween(slot)
+end
+
+for _, slot in OpenHotbar:GetChildren() do
+	setSizeTween(slot)
+end
+
+for _, row in MainInventory:GetChildren() do
+	if row:IsA("Frame") and row:GetAttribute("RowIndex") then
+		for _, slot in row:GetChildren() do
+			setColorTween(slot)
+		end
 	end
 end
 
@@ -120,7 +151,7 @@ function InventoryClient.PopulateInventory(data)
 		else
 			for _, frame in MainInventory:GetChildren() do
 				if frame:GetAttribute("RowIndex") == row then
-					local slotIndex = i % 9
+					local slotIndex = (i - 1) % 9 + 1
 
 					for _, slot in frame:GetChildren() do
 						if slot:GetAttribute("SlotIndex") == slotIndex then
@@ -238,6 +269,108 @@ function InventoryClient.ToggleVisibility()
 			InventoryClient.SlotPressed(slotIndex)
 			lastSelectedSlot = slotIndex
 		end
+	end
+end
+
+local hoveredSlotIndex = nil
+local hoveredSlot = nil
+local dragging = false
+local dragClone = nil
+local dragOffset = Vector2.new()
+local originalSlotIndex = nil
+local originalSlot = nil
+
+UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: boolean)
+	if gameProcessed then
+		return
+	end
+	if
+		input.UserInputType == Enum.UserInputType.MouseButton1
+		and hoveredSlot
+		and inventory[hoveredSlotIndex].itemInfo.id ~= "nothing"
+	then
+		dragging = true
+		originalSlot = hoveredSlot
+		originalSlotIndex = hoveredSlotIndex
+		dragClone = originalSlot:Clone()
+		dragClone.AnchorPoint = Vector2.new(0, 0)
+		dragClone.Size = UDim2.new(0, originalSlot.AbsoluteSize.X, 0, originalSlot.AbsoluteSize.Y)
+		dragClone.Position = UDim2.new(0, originalSlot.AbsolutePosition.X, 0, originalSlot.AbsolutePosition.Y)
+		dragClone.Parent = InventoryGui
+		dragClone.ZIndex = 1000
+		dragClone.BackgroundTransparency = 0.7
+
+		originalSlot.BackgroundTransparency = 1
+		originalSlot.IconViewport.Visible = false
+		originalSlot.Amount.Visible = false
+		if originalSlot:FindFirstChild("TextLabel") then
+			originalSlot.TextLabel.Visible = false
+		end
+
+		dragOffset = UserInputService:GetMouseLocation() - originalSlot.AbsolutePosition
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input: InputObject)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and dragging then
+		dragging = false
+		if dragClone then
+			dragClone:Destroy()
+			dragClone = nil
+		end
+
+		if hoveredSlot and hoveredSlot ~= originalSlot then
+			packets.SwapSlots.send({ from = originalSlotIndex, to = hoveredSlotIndex })
+			originalSlot.Amount.Text = ""
+			if originalSlot:FindFirstChild("TextLabel") then
+				originalSlot.TextLabel.Text = ""
+			end
+		end
+		task.wait()
+		originalSlot.BackgroundTransparency = 0.6
+		originalSlot.IconViewport.Visible = true
+		originalSlot.Amount.Visible = true
+		if originalSlot:FindFirstChild("TextLabel") then
+			originalSlot.TextLabel.Visible = true
+		end
+		return
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if dragging then
+		local mousePos = UserInputService:GetMouseLocation()
+		dragClone.Position = UDim2.fromOffset(mousePos.X - dragOffset.X, mousePos.Y - dragOffset.Y)
+	end
+end)
+
+for _, row in MainInventory:GetChildren() do
+	if row:GetAttribute("RowIndex") then
+		for _, slot in row:GetChildren() do
+			if slot:GetAttribute("SlotIndex") and slot:IsA("Frame") then
+				slot.MouseEnter:Connect(function()
+					hoveredSlotIndex = slot:GetAttribute("SlotIndex") + 9 * row:GetAttribute("RowIndex")
+					hoveredSlot = slot
+				end)
+				slot.MouseLeave:Connect(function()
+					hoveredSlotIndex = nil
+					hoveredSlot = nil
+				end)
+			end
+		end
+	end
+end
+
+for _, slot in OpenHotbar:GetChildren() do
+	if slot:GetAttribute("SlotIndex") and slot:IsA("Frame") then
+		slot.MouseEnter:Connect(function()
+			hoveredSlotIndex = slot:GetAttribute("SlotIndex")
+			hoveredSlot = slot
+		end)
+		slot.MouseLeave:Connect(function()
+			hoveredSlotIndex = nil
+			hoveredSlot = nil
+		end)
 	end
 end
 

@@ -41,6 +41,13 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		SwapSlots = ByteNet.definePacket({
+			value = ByteNet.struct({
+				from = ByteNet.int32,
+				to = ByteNet.int32,
+			}),
+			reliabilityType = "reliable",
+		}),
 	}
 end)
 

@@ -30,8 +30,11 @@ function InventoryManager.PlayerJoined(player: Player)
 			item.itemInfo.id = "nothing"
 		end
 	end
-	InventoryManager.GiveItem(player, "pine tree sapling", 100)
-	InventoryManager.GiveItem(player, "sand", 100)
+	--InventoryManager.GiveItem(player, "pine tree sapling", 400)
+	--InventoryManager.GiveItem(player, "sand", 400)
+
+	--InventoryManager.RemoveItem(player, 1000, "pine tree sapling")
+	--InventoryManager.RemoveItem(player, 1000, "sand")
 
 	InventoryManager.SendToClient(player)
 end
@@ -49,18 +52,30 @@ function InventoryManager.IsAvailable(player: Player, amount: number)
 	end
 end
 
-function InventoryManager.RemoveItem(player: Player, amount: number)
-	if not SelectedSlots[player.UserId] then
-		return
-	end
+function InventoryManager.RemoveItem(player: Player, amount: number, itemId: string?)
 	local inventory = InventoryManager.Get(player)
-	inventory[SelectedSlots[player.UserId]].count -= amount
-	if inventory[SelectedSlots[player.UserId]].count <= 0 then
-		inventory[SelectedSlots[player.UserId]].itemInfo.id = "nothing"
-		inventory[SelectedSlots[player.UserId]].count = 0
+	if itemId then
+		for _, item in inventory do
+			if item.itemInfo.id == itemId then
+				local removeAmount = math.min(ItemLibrary.itemDefinitions[itemId].maxStack, amount)
+				item.count -= removeAmount
+				amount -= removeAmount
+			end
+		end
 		DataStore.profiles[player.UserId].Data.Inventory = inventory
+		InventoryManager.SendToClient(player)
+	else
+		if not SelectedSlots[player.UserId] then
+			return
+		end
+		inventory[SelectedSlots[player.UserId]].count -= amount
+		if inventory[SelectedSlots[player.UserId]].count <= 0 then
+			inventory[SelectedSlots[player.UserId]].itemInfo.id = "nothing"
+			inventory[SelectedSlots[player.UserId]].count = 0
+			DataStore.profiles[player.UserId].Data.Inventory = inventory
+		end
+		InventoryManager.SendToClient(player)
 	end
-	InventoryManager.SendToClient(player)
 end
 
 function InventoryManager.GiveItem(player: Player, itemId: string, amount: number)
@@ -96,12 +111,39 @@ function InventoryManager.GiveItem(player: Player, itemId: string, amount: numbe
 	InventoryManager.SendToClient(player)
 end
 
+function InventoryManager.SwapSlots(player: Player, from: number, to: number)
+	print(`Swapping slots {tostring(from)} and {tostring(to)} for player: {player.Name}`)
+	local inventory = InventoryManager.Get(player)
+	if inventory[from].itemInfo.id == inventory[to].itemInfo.id then
+		local toAdd = math.min(
+			ItemLibrary.itemDefinitions[inventory[from].itemInfo.id].maxStack - inventory[to].count,
+			inventory[from].count
+		)
+		inventory[to].count = inventory[to].count + toAdd
+		inventory[from].count = inventory[from].count - toAdd
+		if inventory[from].count <= 0 then
+			inventory[from].itemInfo.id = "nothing"
+			inventory[from].count = 0
+		end
+	else
+		local holder = table.clone(inventory[to])
+		inventory[to] = inventory[from]
+		inventory[from] = holder
+	end
+
+	InventoryManager.SendToClient(player)
+end
+
 function InventoryManager.PlayerLeaving(player: Player)
 	Inventories[player.UserId] = nil
 end
 
 packets.SlotPressed.listen(function(data, player: Player)
 	SelectedSlots[player.UserId] = data.slotIndex > 0 and data.slotIndex or nil
+end)
+
+packets.SwapSlots.listen(function(data: { from: number, to: number }, player: Player)
+	InventoryManager.SwapSlots(player, data.from, data.to)
 end)
 
 return InventoryManager
