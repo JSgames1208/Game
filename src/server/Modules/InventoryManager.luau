@@ -31,7 +31,7 @@ function InventoryManager.PlayerJoined(player: Player)
 		end
 	end
 	--InventoryManager.GiveItem(player, "pine tree sapling", 400)
-	--InventoryManager.GiveItem(player, "sand", 400)
+	--InventoryManager.GiveItem(player, "sand", 64)
 
 	--InventoryManager.RemoveItem(player, 1000, "pine tree sapling")
 	--InventoryManager.RemoveItem(player, 1000, "sand")
@@ -112,7 +112,6 @@ function InventoryManager.GiveItem(player: Player, itemId: string, amount: numbe
 end
 
 function InventoryManager.SwapSlots(player: Player, from: number, to: number)
-	print(`Swapping slots {tostring(from)} and {tostring(to)} for player: {player.Name}`)
 	local inventory = InventoryManager.Get(player)
 	if inventory[from].itemInfo.id == inventory[to].itemInfo.id then
 		local toAdd = math.min(

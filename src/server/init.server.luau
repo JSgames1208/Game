@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+require(script.Modules.DialogueManager)
 local EntityManager = require(ReplicatedStorage.Shared.Entity.EntityManager)
 local TreeManager = require(script.Modules.TreeManager)
 local InventoryManager = require(script.Modules.InventoryManager)

@@ -1,7 +1,12 @@
 local GridMath = {}
 
-function GridMath.posToGridPos(pos: Vector3)
-	return Vector3.new(math.floor(pos.X / 4 + 0.5), math.floor(pos.Y / 4 + 0.5), math.floor(pos.Z / 4 + 0.5))
+function GridMath.posToGridPos(pos: Vector3, plotPosition: Vector3)
+	local relativePos = pos - plotPosition
+	return Vector3.new(
+		math.floor(relativePos.X / 4 + 0.5),
+		math.floor(relativePos.Y / 4 + 0.5),
+		math.floor(relativePos.Z / 4 + 0.5)
+	)
 end
 
 function GridMath.gridPosToPos(gridPos: Vector3, plotPosition: Vector3)

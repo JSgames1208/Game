@@ -56,9 +56,8 @@ function Entity:Move(dt)
 
 		if self.type == "fallingBlock" then
 			self:Destroy()
-			local gridPos = GridMath.posToGridPos(self.position)
 			if self.placeBlockCallback then
-				self.placeBlockCallback(self.player, gridPos, self.blockId)
+				self.placeBlockCallback(self.player, self.position, self.blockId)
 			end
 			return
 		end
@@ -76,6 +75,7 @@ function Entity:Destroy()
 		self.model = nil
 	end
 	self.isDestroyed = true
+	print("HERE")
 end
 
 -- public getters

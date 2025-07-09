@@ -10,8 +10,6 @@ function EntityManager.Start()
 			local entity = Entities[i]
 			if entity.isDestroyed then
 				table.remove(Entities, i)
-			else
-				entity:Update(dt)
 			end
 		end
 

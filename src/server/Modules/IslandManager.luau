@@ -9,6 +9,7 @@ local packets = require(ReplicatedStorage.Shared.network)
 local IslandRenderer = require(script.Parent.IslandRenderer)
 local DataStore = require(script.Parent.DataStore)
 local InventoryManager = require(script.Parent.InventoryManager)
+local QuestManager = require(script.Parent.QuestManager)
 local TreeManager = require(script.Parent.TreeManager)
 
 local IslandManager = {}
@@ -117,7 +118,6 @@ local function CheckGrass(player: Player, pos: Vector3)
 			and ItemLibrary.itemDefinitions[blocks[checkPosStr].id].type == "block"
 			and not BlockLibrary.blockDefinitions[blocks[checkPosStr].id].transparent
 		then
-			print(posStr)
 			blocks[posStr].id = "dirt"
 			IslandRenderer.RemoveBlock(island.IslandModel, BlockCoord.GetName(pos))
 			local block = IslandRenderer.SetBlock(island.IslandModel, pos + island.PlotPosition / 4, "dirt")
@@ -127,14 +127,12 @@ local function CheckGrass(player: Player, pos: Vector3)
 end
 
 function IslandManager.PlaceFallingBlock(player: Player, gridPos: Vector3, blockId: string)
-	print(gridPos)
-
 	EntityManager.SpawnFallingBlock(
 		player,
-		gridPos * 4,
+		PlayerIslands[player.UserId].PlotPosition + gridPos * 4,
 		blockId,
-		function(player: Player, gridPos: Vector3, blockId: string)
-			print(gridPos)
+		function(player: Player, pos: Vector3, blockId: string)
+			local gridPos = GridMath.posToGridPos(pos, PlayerIslands[player.UserId].PlotPosition)
 			IslandManager.PlaceBlock(player, gridPos, blockId)
 		end
 	)
@@ -163,9 +161,15 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 	end
 
 	if ItemLibrary.itemDefinitions[blockId].type == "block" and ItemLibrary.itemDefinitions[blockId].falling then
-		if not blocks[getBlockKey(GridMath.gridPosUnder(gridPos))] then
-			IslandManager.PlaceFallingBlock(player, gridPos, blockId)
-			return true
+		local blockBelowKey = getBlockKey(GridMath.gridPosUnder(gridPos))
+		if not blocks[blockBelowKey] then
+			-- raycast down a bit to see if there's any anchored baseplate or part
+			local worldPos = gridPos * 4 + island.PlotPosition
+			local result = workspace:Raycast(worldPos, Vector3.new(0, -5, 0))
+			if not (result and result.Instance and result.Instance.Anchored) then
+				IslandManager.PlaceFallingBlock(player, gridPos, blockId)
+				return true
+			end
 		end
 	end
 
@@ -252,8 +256,14 @@ local function CheckBlockAbove(player: Player, pos: string)
 		if type == "tree" or type == "sapling" then
 			for drop, amount in itemDef.drops do
 				InventoryManager.GiveItem(player, drop, amount)
+				QuestManager.OnItemCollected(player, drop, amount)
 			end
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
+			for _, posStr in blocks[checkPosStr].blocked do
+				if blocks[posStr].parent == checkPosStr then
+					blocks[posStr] = nil
+				end
+			end
 			blocks[checkPosStr] = nil
 		elseif type == "block" and falling then
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
@@ -290,6 +300,7 @@ function IslandManager.MineBlock(player: Player, pos: string)
 
 				for itemId, amount in ItemLibrary.itemDefinitions[block.id].drops do
 					InventoryManager.GiveItem(player, itemId, amount)
+					QuestManager.OnItemCollected(player, itemId, amount)
 				end
 				--InventoryManager.GiveItem(player, block.id, ItemLibrary.itemDefinitions[block.id].dropAmount)
 

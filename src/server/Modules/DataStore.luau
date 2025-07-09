@@ -1,4 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local ProfileService = require(ServerScriptService.ServerPackages.ProfileService)
 
 local defaultBlocks = {}
@@ -27,10 +29,18 @@ local function GetBaseInventory()
 	return inventory
 end
 
+export type ProfileData = {
+	Blocks: { any },
+	Inventory: { any },
+	QuestInfo: { QuestData.QuestInfo },
+	Currency: number,
+}
+
 local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
 	Blocks = {},
-	Progress = {},
 	Inventory = GetBaseInventory(),
+	QuestInfo = {},
+	Currency = 0,
 })
 
 local DataStore = {}
@@ -54,6 +64,10 @@ function DataStore.LoadPlayerData(userId)
 		if not profile.Data.Blocks or next(profile.Data.Blocks) == nil then
 			profile.Data.Blocks = table.clone(defaultBlocks)
 		end
+
+		profile.Data = profile.Data :: ProfileData
+
+		print(profile.Data)
 
 		DataStore.profiles[userId] = profile
 

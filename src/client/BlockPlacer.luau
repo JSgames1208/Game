@@ -99,12 +99,10 @@ end
 
 function BlockPlacer.Place()
 	if not currentBlock then
-		print("HEre")
 		return
 	end
 	local target = Mouse.Target
 	if not target or not target:HasTag("Block") then
-		print("GFY")
 		return
 	end
 

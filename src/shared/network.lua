@@ -48,6 +48,40 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		ShowDialogue = ByteNet.definePacket({
+			value = ByteNet.struct({
+				text = ByteNet.string,
+				options = ByteNet.optional(ByteNet.array(ByteNet.struct({
+					text = ByteNet.string,
+					callback = ByteNet.string,
+					shopId = ByteNet.optional(ByteNet.string),
+				}))),
+			}),
+			reliabilityType = "reliable",
+		}),
+		ChooseDialogueOption = ByteNet.definePacket({
+			value = ByteNet.struct({
+				callback = ByteNet.string,
+				shopId = ByteNet.string,
+			}),
+			reliabilityType = "reliable",
+		}),
+		OpenShop = ByteNet.definePacket({
+			value = ByteNet.struct({
+				shopId = ByteNet.string,
+			}),
+			reliabilityType = "reliable",
+		}),
+		CloseDialogue = ByteNet.definePacket({
+			value = ByteNet.struct({}),
+			reliabilityType = "reliable",
+		}),
+		StartDialogue = ByteNet.definePacket({
+			value = ByteNet.struct({
+				npcId = ByteNet.string,
+			}),
+			reliabilityType = "reliable",
+		}),
 	}
 end)
 

@@ -322,9 +322,6 @@ UserInputService.InputEnded:Connect(function(input: InputObject)
 		if hoveredSlot and hoveredSlot ~= originalSlot then
 			packets.SwapSlots.send({ from = originalSlotIndex, to = hoveredSlotIndex })
 			originalSlot.Amount.Text = ""
-			if originalSlot:FindFirstChild("TextLabel") then
-				originalSlot.TextLabel.Text = ""
-			end
 		end
 		task.wait()
 		originalSlot.BackgroundTransparency = 0.6
