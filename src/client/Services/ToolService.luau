@@ -65,12 +65,10 @@ local currentMiningCooldown = 0
 
 function ToolService.Start()
 	RunService.RenderStepped:Connect(function(dt: number)
-		print(currentTool)
 		if currentMiningCooldown > 0 then
 			currentMiningCooldown = math.max(0, currentMiningCooldown - dt)
 		end
 		if currentTool then
-			print(currentTool)
 			ItemEquip.Equip(currentTool)
 			local target = Mouse.Target
 			if target then
@@ -118,27 +116,22 @@ function ToolService.Start()
 end
 
 function ToolService.SelectTool(toolId: string, slotIndex)
-	print("Select", toolId, slotIndex)
 	currentSlot = slotIndex
 	if toolId == "nothing" then
 		ItemEquip.UnEquip()
 		currentTool = nil
-		print("Unequip")
 	else
 		currentTool = toolId
-		print("Equip")
 	end
 end
 
 function ToolService.Unselect()
-	print("Unselect")
 	currentTool = nil
 	ToolService.SelectTool("nothing", 0)
 end
 
 packets.InventorySync.listen(function(data)
 	if not currentSlot then
-		print("Here")
 		return
 	end
 	if data[currentSlot] then

@@ -16,11 +16,9 @@ function ItemManager.SelectItem(itemId, slotIndex)
 		BlockPlacerService.SelectBlock(itemId, slotIndex)
 	elseif itemType == "tool" then
 		ToolService.SelectTool(itemId, slotIndex)
-		print("Equip tool")
 	else
 		-- nothing
 		ItemEquip.UnEquip()
-		print("Equip nothing")
 	end
 end
 
