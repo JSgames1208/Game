@@ -347,4 +347,10 @@ TreeManager.SetOnSaplingGrownCallback(function(player: Player, posStr: string, _
 	end
 end)
 
+--public getters
+
+function IslandManager.Get(player: Player)
+	return PlayerIslands[player.UserId]
+end
+
 return IslandManager

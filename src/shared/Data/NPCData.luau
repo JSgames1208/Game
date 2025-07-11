@@ -1,14 +1,13 @@
-export type NPCConfig = {
-	questLine: { string }, -- quest ids
-	idleDialogue: string,
-	shopId: string?,
-}
-
-local NPCData: { [string]: NPCConfig } = {
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Types = require(ReplicatedStorage.Shared.Types)
+local NPCData: { [string]: Types.NPCConfig } = {
 	NPC = {
+		name = "NPC",
+		id = "NPC",
 		questLine = {
 			"quest1",
 			"quest2",
+			"quest3",
 		},
 		idleDialogue = "Hi there!",
 		shopId = "Shop",

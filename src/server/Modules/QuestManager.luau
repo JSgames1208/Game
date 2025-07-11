@@ -4,6 +4,7 @@ local DataStore = require(script.Parent.DataStore)
 local InventoryManager = require(script.Parent.InventoryManager)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
+local Types = require(ReplicatedStorage.Shared.Types)
 local QuestManager = {}
 
 --private functions
@@ -13,7 +14,7 @@ local function getQuestInfo(player: Player, questId: string): { any }
 	return profile.Data.QuestInfo[questId]
 end
 
-local function setQuestState(player: Player, questId: string, newState: QuestData.QuestState): ()
+local function setQuestState(player: Player, questId: string, newState: Types.QuestState): ()
 	local profile = DataStore.profiles[player.UserId]
 	local qi = profile.Data.QuestInfo[questId]
 	print(qi)
@@ -71,7 +72,7 @@ function QuestManager.OnItemCollected(player: Player, itemId: string, amount: nu
 
 	for questId, qi in pairs(qiTable) do
 		if qi.state == "in_progress" then
-			local def: QuestData.QuestDef = QuestData[questId]
+			local def: Types.QuestDef = QuestData[questId]
 			if def.requirements.collect and def.requirements.collect[itemId] then
 				updateQuestProgress(player, questId, itemId, amount)
 

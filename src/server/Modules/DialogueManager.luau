@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local QuestManager = require(script.Parent.QuestManager)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
+local Types = require(ReplicatedStorage.Shared.Types)
 local packets = require(ReplicatedStorage.Shared.network)
 local DialogueManager = {}
 
@@ -16,7 +17,7 @@ local function getOptions(npcId)
 end
 
 function DialogueManager.StartDialogue(player: Player, npcId: string)
-	local npc: NPCData.NPCConfig = NPCData[npcId]
+	local npc: Types.NPCConfig = NPCData[npcId]
 	local nextQuestId: string? = QuestManager.StartNextQuest(player, npcId)
 	local state = nextQuestId and QuestManager.GetPlayerQuestState(player, nextQuestId) or nil
 
