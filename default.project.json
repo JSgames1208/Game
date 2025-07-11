@@ -27,6 +27,12 @@
           "$path": "src/client"
         }
       }
+    },
+
+    "StarterGui": {
+      "UI": {
+        "$path": "src/UI"
+      }
     }
   }
 }
