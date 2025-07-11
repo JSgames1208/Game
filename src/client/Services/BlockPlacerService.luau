@@ -5,15 +5,14 @@ local Mouse = player:GetMouse()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
+local SoundService = require(script.Parent.SoundService)
+local PlacementPreview = require(StarterPlayer.StarterPlayerScripts.Client.Modules.BlockPlacing.PlacementPreview)
 local ItemEquip = require(StarterPlayer.StarterPlayerScripts.Client.Modules.ItemEquip)
-local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local packets = require(ReplicatedStorage.Shared.network)
 
 local BlockPlacerService = {}
 
 local currentBlock = nil
-local blockPreview = nil
-
 local currentSlot = nil
 
 local plotPosition = nil
@@ -31,29 +30,6 @@ function BlockPlacerService.Start()
 	RunService.RenderStepped:Connect(function()
 		if currentBlock then
 			ItemEquip.Equip(currentBlock)
-			if not blockPreview then
-				blockPreview = BlockLibrary.CreateBlockPart(currentBlock)
-				for _, child in blockPreview:GetDescendants() do
-					if child:IsA("Texture") then
-						child.Transparency = 0.6
-					elseif child:IsA("MeshPart") then
-						child.Transparency = 0.6
-						child.CanCollide = false
-						child.CanQuery = false
-					elseif child:IsA("Part") then
-						child.CanCollide = false
-						child.CanQuery = false
-					end
-				end
-
-				if blockPreview:IsA("Part") then
-					blockPreview.Transparency = 1
-					blockPreview.CanCollide = false
-					blockPreview.CanQuery = false
-				end
-
-				blockPreview.Parent = workspace
-			end
 
 			local target = Mouse.Target
 			if not target then
@@ -69,7 +45,7 @@ function BlockPlacerService.Start()
 					math.floor(target.Position.Y / 4 + 0.5) + normal.Y,
 					math.floor(target.Position.Z / 4 + 0.5) + normal.Z
 				)
-				blockPreview:PivotTo(CFrame.new(placePos * 4))
+				PlacementPreview.RenderPreview(currentBlock, placePos * 4)
 			end
 		end
 	end)
@@ -80,17 +56,10 @@ function BlockPlacerService.SelectBlock(blockId: string, slot: number)
 	if blockId == "nothing" then
 		ItemEquip.UnEquip()
 		currentBlock = nil
-		if blockPreview then
-			blockPreview:Destroy()
-			blockPreview = nil
-		end
 	else
 		currentBlock = blockId
-		if blockPreview then
-			blockPreview:Destroy()
-			blockPreview = nil
-		end
 	end
+	PlacementPreview.RemovePreview()
 end
 
 function BlockPlacerService.Unselect()
@@ -131,6 +100,7 @@ function BlockPlacerService.Place()
 			blockId = blockId,
 			slot = currentSlot,
 		})
+		print("Event sent!")
 	end
 end
 
@@ -145,6 +115,10 @@ end)
 
 packets.AssignPlot.listen(function(pos)
 	plotPosition = pos
+end)
+
+packets.BlockPlaced.listen(function(vec3)
+	SoundService:Play("place", vec3)
 end)
 
 return BlockPlacerService

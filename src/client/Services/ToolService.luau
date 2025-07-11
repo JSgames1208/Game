@@ -2,6 +2,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
+local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
+local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
+local SoundService = require(script.Parent.SoundService)
 local ItemEquip = require(StarterPlayer.StarterPlayerScripts.Client.Modules.ItemEquip)
 local packets = require(ReplicatedStorage.Shared.network)
 
@@ -15,6 +18,8 @@ local animator: Animator = humanoid:WaitForChild("Animator") :: Animator
 local ToolService = {}
 
 ToolService.MouseDown = false
+
+local plotPosition
 
 local currentTool = nil
 local currentSlot = nil
@@ -139,6 +144,15 @@ packets.InventorySync.listen(function(data)
 			ToolService.SelectTool("nothing", currentSlot)
 		end
 	end
+end)
+
+packets.MineBlock.listen(function(data)
+	local pos = GridMath.gridPosToPos(BlockCoord.ParsePos(data.blockPosStr), plotPosition)
+	SoundService:Play("mine", pos)
+end)
+
+packets.AssignPlot.listen(function(vec3)
+	plotPosition = vec3
 end)
 
 return ToolService

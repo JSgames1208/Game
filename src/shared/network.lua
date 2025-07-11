@@ -82,6 +82,11 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		--server -> client (for SFX)
+		BlockPlaced = ByteNet.definePacket({
+			value = ByteNet.vec3,
+			reliabilityType = "reliable",
+		}),
 	}
 end)
 

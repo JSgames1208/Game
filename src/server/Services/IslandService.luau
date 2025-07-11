@@ -77,6 +77,19 @@ function IslandService.LoadIsland(player: Player)
 		IslandModel = islandModel,
 	}
 
+	local blocks = PlayerIslands[player.UserId].IslandData.Blocks
+
+	for posStr, block in blocks do
+		if block.parent then
+			print(posStr, "has parent")
+			if blocks[block.parent] then
+				if not (blocks[block.parent].blocked and table.find(blocks[block.parent].blocked, posStr)) then
+					blocks[posStr] = nil
+				end
+			end
+		end
+	end
+
 	packets.AssignPlot.sendTo(plotPos, player)
 	--return islandModel
 end
@@ -331,7 +344,10 @@ packets.PlaceBlock.listen(function(data, player)
 	if InventoryServer.IsAvailable(player, 1) then
 		local placed = IslandService.PlaceBlock(player, pos, blockId)
 		if placed then
+			local island = PlayerIslands[player.UserId]
 			InventoryServer.RemoveItem(player, 1)
+			local position: Vector3 = pos * 4 + island.PlotPosition
+			packets.BlockPlaced.sendTo(position, player)
 		end
 	end
 end)

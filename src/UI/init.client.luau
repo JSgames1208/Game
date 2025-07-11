@@ -1,4 +1,4 @@
-local Players = game:GetService("Players")
+--[[local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextLabel = require(script.Components.TextLabel)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
@@ -21,7 +21,7 @@ local colorSequence: ColorSequence = ColorSequence.new({
 	ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 204, 255)),
 	ColorSequenceKeypoint.new(0.83, Color3.fromRGB(0, 4, 255)),
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(247, 0, 255)),
-})
+})]]
 
 --[[
 scope:New("ScreenGui")({
