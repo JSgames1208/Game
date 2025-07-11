@@ -1,7 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local ItemEquip = require(script.Parent.ItemEquip)
+local StarterPlayer = game:GetService("StarterPlayer")
+local ItemEquip = require(StarterPlayer.StarterPlayerScripts.Client.Modules.ItemEquip)
 local packets = require(ReplicatedStorage.Shared.network)
 
 local player = Players.LocalPlayer
@@ -11,9 +12,9 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid: Humanoid = character:WaitForChild("Humanoid")
 local animator: Animator = humanoid:WaitForChild("Animator") :: Animator
 
-local ToolManager = {}
+local ToolService = {}
 
-ToolManager.MouseDown = false
+ToolService.MouseDown = false
 
 local currentTool = nil
 local currentSlot = nil
@@ -62,12 +63,14 @@ end)
 
 local currentMiningCooldown = 0
 
-function ToolManager.Start()
+function ToolService.Start()
 	RunService.RenderStepped:Connect(function(dt: number)
+		print(currentTool)
 		if currentMiningCooldown > 0 then
 			currentMiningCooldown = math.max(0, currentMiningCooldown - dt)
 		end
 		if currentTool then
+			print(currentTool)
 			ItemEquip.Equip(currentTool)
 			local target = Mouse.Target
 			if target then
@@ -84,7 +87,7 @@ function ToolManager.Start()
 							end
 						end
 
-						if ToolManager.MouseDown and currentMiningCooldown <= 0 then
+						if ToolService.MouseDown and currentMiningCooldown <= 0 then
 							StartAnimation("miningAnimation")
 							currentMiningCooldown = miningAnimation.Length / miningAnimation.Speed
 							coroutine.wrap(function()
@@ -106,7 +109,7 @@ function ToolManager.Start()
 		else
 			highlight.Adornee = highlightpart
 		end
-		if not ToolManager.MouseDown then
+		if not ToolService.MouseDown then
 			if miningAnimation.IsPlaying then
 				StopAnimation("miningAnimation")
 			end
@@ -114,31 +117,35 @@ function ToolManager.Start()
 	end)
 end
 
-function ToolManager.SelectTool(toolId: string, slotIndex)
+function ToolService.SelectTool(toolId: string, slotIndex)
+	print("Select", toolId, slotIndex)
 	currentSlot = slotIndex
-	currentTool = toolId
 	if toolId == "nothing" then
 		ItemEquip.UnEquip()
 		currentTool = nil
+		print("Unequip")
 	else
 		currentTool = toolId
+		print("Equip")
 	end
 end
 
-function ToolManager.Unselect()
+function ToolService.Unselect()
+	print("Unselect")
 	currentTool = nil
-	ToolManager.SelectTool("nothing", 0)
+	ToolService.SelectTool("nothing", 0)
 end
 
 packets.InventorySync.listen(function(data)
 	if not currentSlot then
+		print("Here")
 		return
 	end
 	if data[currentSlot] then
 		if data[currentSlot].count <= 0 then
-			ToolManager.SelectTool("nothing", currentSlot)
+			ToolService.SelectTool("nothing", currentSlot)
 		end
 	end
 end)
 
-return ToolManager
+return ToolService

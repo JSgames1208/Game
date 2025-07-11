@@ -1,26 +1,27 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local DataStore = require(script.Parent.DataStore)
+local ServerScriptService = game:GetService("ServerScriptService")
+local DataStore = require(ServerScriptService.Server.Services.DataStore)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local packets = require(ReplicatedStorage.Shared.network)
-local InventoryManager = {}
+local InventoryService = {}
 
 local Inventories = {} -- [userId] = {...}
 local SelectedSlots = {} -- [userId] = slotId
 
-function InventoryManager.Get(player: Player)
+function InventoryService.Get(player: Player)
 	return Inventories[player.UserId] or table.create(9, nil)
 end
 
-function InventoryManager.GetSelected(player: Player)
-	return InventoryManager.Get(player)[SelectedSlots[player.UserId]].itemInfo.id
+function InventoryService.GetSelected(player: Player)
+	return InventoryService.Get(player)[SelectedSlots[player.UserId]].itemInfo.id
 end
 
-function InventoryManager.SendToClient(player: Player)
-	local inventory = InventoryManager.Get(player)
+function InventoryService.SendToClient(player: Player)
+	local inventory = InventoryService.Get(player)
 	packets.InventorySync.sendTo(inventory, player)
 end
 
-function InventoryManager.PlayerJoined(player: Player)
+function InventoryService.PlayerJoined(player: Player)
 	local inventory = DataStore.profiles[player.UserId].Data.Inventory
 
 	Inventories[player.UserId] = inventory
@@ -30,20 +31,20 @@ function InventoryManager.PlayerJoined(player: Player)
 			item.itemInfo.id = "nothing"
 		end
 	end
-	--InventoryManager.GiveItem(player, "pine tree sapling", 400)
-	--InventoryManager.GiveItem(player, "sand", 64)
+	--InventoryService.GiveItem(player, "pine tree sapling", 400)
+	--InventoryService.GiveItem(player, "sand", 64)
 
-	--InventoryManager.RemoveItem(player, 1000, "pine tree sapling")
-	--InventoryManager.RemoveItem(player, 1000, "sand")
+	--InventoryService.RemoveItem(player, 1000, "pine tree sapling")
+	--InventoryService.RemoveItem(player, 1000, "sand")
 
-	InventoryManager.SendToClient(player)
+	InventoryService.SendToClient(player)
 end
 
-function InventoryManager.IsAvailable(player: Player, amount: number)
+function InventoryService.IsAvailable(player: Player, amount: number)
 	if not SelectedSlots[player.UserId] then
 		return
 	end
-	local inventory = InventoryManager.Get(player)
+	local inventory = InventoryService.Get(player)
 	local item = inventory[SelectedSlots[player.UserId]]
 	if item and item.count >= amount then
 		return true
@@ -52,8 +53,8 @@ function InventoryManager.IsAvailable(player: Player, amount: number)
 	end
 end
 
-function InventoryManager.RemoveItem(player: Player, amount: number, itemId: string?)
-	local inventory = InventoryManager.Get(player)
+function InventoryService.RemoveItem(player: Player, amount: number, itemId: string?)
+	local inventory = InventoryService.Get(player)
 	if itemId then
 		for _, item in inventory do
 			if item.itemInfo.id == itemId then
@@ -63,7 +64,7 @@ function InventoryManager.RemoveItem(player: Player, amount: number, itemId: str
 			end
 		end
 		DataStore.profiles[player.UserId].Data.Inventory = inventory
-		InventoryManager.SendToClient(player)
+		InventoryService.SendToClient(player)
 	else
 		if not SelectedSlots[player.UserId] then
 			return
@@ -74,12 +75,12 @@ function InventoryManager.RemoveItem(player: Player, amount: number, itemId: str
 			inventory[SelectedSlots[player.UserId]].count = 0
 			DataStore.profiles[player.UserId].Data.Inventory = inventory
 		end
-		InventoryManager.SendToClient(player)
+		InventoryService.SendToClient(player)
 	end
 end
 
-function InventoryManager.GiveItem(player: Player, itemId: string, amount: number)
-	local inventory = InventoryManager.Get(player)
+function InventoryService.GiveItem(player: Player, itemId: string, amount: number)
+	local inventory = InventoryService.Get(player)
 	local maxStack = ItemLibrary.itemDefinitions[itemId].maxStack
 	for _, item in ipairs(inventory) do
 		if item.itemInfo.id == itemId and item.count < maxStack then
@@ -108,11 +109,11 @@ function InventoryManager.GiveItem(player: Player, itemId: string, amount: numbe
 
 	DataStore.profiles[player.UserId].Data.Inventory = inventory
 
-	InventoryManager.SendToClient(player)
+	InventoryService.SendToClient(player)
 end
 
-function InventoryManager.SwapSlots(player: Player, from: number, to: number)
-	local inventory = InventoryManager.Get(player)
+function InventoryService.SwapSlots(player: Player, from: number, to: number)
+	local inventory = InventoryService.Get(player)
 	if inventory[from].itemInfo.id == inventory[to].itemInfo.id then
 		local toAdd = math.min(
 			ItemLibrary.itemDefinitions[inventory[from].itemInfo.id].maxStack - inventory[to].count,
@@ -130,10 +131,10 @@ function InventoryManager.SwapSlots(player: Player, from: number, to: number)
 		inventory[from] = holder
 	end
 
-	InventoryManager.SendToClient(player)
+	InventoryService.SendToClient(player)
 end
 
-function InventoryManager.PlayerLeaving(player: Player)
+function InventoryService.PlayerLeaving(player: Player)
 	Inventories[player.UserId] = nil
 end
 
@@ -142,7 +143,7 @@ packets.SlotPressed.listen(function(data, player: Player)
 end)
 
 packets.SwapSlots.listen(function(data: { from: number, to: number }, player: Player)
-	InventoryManager.SwapSlots(player, data.from, data.to)
+	InventoryService.SwapSlots(player, data.from, data.to)
 end)
 
-return InventoryManager
+return InventoryService

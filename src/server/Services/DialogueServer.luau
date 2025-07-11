@@ -1,10 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local QuestManager = require(script.Parent.QuestManager)
+local ServerScriptService = game:GetService("ServerScriptService")
+local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local Types = require(ReplicatedStorage.Shared.Types)
 local packets = require(ReplicatedStorage.Shared.network)
-local DialogueManager = {}
+local DialogueService = {}
 
 local function getOptions(npcId)
 	local opts = {}
@@ -16,10 +17,10 @@ local function getOptions(npcId)
 	return opts
 end
 
-function DialogueManager.StartDialogue(player: Player, npcId: string)
+function DialogueService.StartDialogue(player: Player, npcId: string)
 	local npc: Types.NPCConfig = NPCData[npcId]
-	local nextQuestId: string? = QuestManager.StartNextQuest(player, npcId)
-	local state = nextQuestId and QuestManager.GetPlayerQuestState(player, nextQuestId) or nil
+	local nextQuestId: string? = QuestService.StartNextQuest(player, npcId)
+	local state = nextQuestId and QuestService.GetPlayerQuestState(player, nextQuestId) or nil
 
 	print(npc, nextQuestId, state)
 
@@ -34,7 +35,7 @@ function DialogueManager.StartDialogue(player: Player, npcId: string)
 				text = QuestData[nextQuestId].completeDialogue,
 			}, player)
 
-			QuestManager.CompleteQuest(player, nextQuestId)
+			QuestService.CompleteQuest(player, nextQuestId)
 
 			packets.ShowDialogue.sendTo({
 				text = "",
@@ -45,7 +46,7 @@ function DialogueManager.StartDialogue(player: Player, npcId: string)
 				text = QuestData[nextQuestId].startDialogue,
 			}, player)
 
-			QuestManager.StartNextQuest(player, npcId)
+			QuestService.StartNextQuest(player, npcId)
 
 			packets.ShowDialogue.sendTo({
 				text = "",
@@ -75,8 +76,8 @@ end)
 
 packets.StartDialogue.listen(function(data, player)
 	if data.npcId then
-		DialogueManager.StartDialogue(player, data.npcId)
+		DialogueService.StartDialogue(player, data.npcId)
 	end
 end)
 
-return DialogueManager
+return DialogueService

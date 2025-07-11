@@ -1,11 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CurrencyManager = require(script.Parent.CurrencyManager)
+local CurrencyService = require(script.Parent.CurrencyService)
 local DataStore = require(script.Parent.DataStore)
-local InventoryManager = require(script.Parent.InventoryManager)
+local InventoryServer = require(script.Parent.InventoryServer)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local Types = require(ReplicatedStorage.Shared.Types)
-local QuestManager = {}
+local QuestService = {}
 
 --private functions
 
@@ -42,7 +42,7 @@ end
 
 --public functions
 
-function QuestManager.StartNextQuest(player: Player, npcId: string): string?
+function QuestService.StartNextQuest(player: Player, npcId: string): string?
 	local npcConfig = NPCData[npcId]
 	local profile = DataStore.profiles[player.UserId]
 	local qiTable = profile.Data.QuestInfo
@@ -66,7 +66,7 @@ function QuestManager.StartNextQuest(player: Player, npcId: string): string?
 	return nil
 end
 
-function QuestManager.OnItemCollected(player: Player, itemId: string, amount: number): ()
+function QuestService.OnItemCollected(player: Player, itemId: string, amount: number): ()
 	local profile = DataStore.profiles[player.UserId]
 	local qiTable = profile.Data.QuestInfo
 
@@ -91,7 +91,7 @@ function QuestManager.OnItemCollected(player: Player, itemId: string, amount: nu
 	end
 end
 
-function QuestManager.CompleteQuest(player: Player, questId: string): ()
+function QuestService.CompleteQuest(player: Player, questId: string): ()
 	local profile = DataStore.profiles[player.UserId]
 	local qi = profile.Data.QuestInfo[questId]
 	if not (qi and qi.state == "ready_to_turn_in") then
@@ -102,21 +102,21 @@ function QuestManager.CompleteQuest(player: Player, questId: string): ()
 	local def = QuestData[questId]
 
 	if def.rewards.currency then
-		CurrencyManager.AddCurrency(player, def.rewards.currency)
+		CurrencyService.AddCurrency(player, def.rewards.currency)
 	end
 
 	if def.rewards.items then
 		for _, item in pairs(def.rewards.items) do
-			InventoryManager.GiveItem(player, item.id, item.amount)
+			InventoryServer.GiveItem(player, item.id, item.amount)
 		end
 	end
 end
 
 --public getters
 
-function QuestManager.GetPlayerQuestState(player: Player, questId: string)
+function QuestService.GetPlayerQuestState(player: Player, questId: string)
 	local qi = getQuestInfo(player, questId)
 	return qi and qi.state or "not_started"
 end
 
-return QuestManager
+return QuestService

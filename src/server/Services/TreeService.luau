@@ -1,17 +1,16 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local ServerScriptService = game:GetService("ServerScriptService")
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
-local DataStore = require(ServerScriptService.Server.Modules.DataStore)
-local TreeManager = {}
+local DataStore = require(script.Parent.DataStore)
+local TreeService = {}
 
 local saplings = {}
 
 local growCallback = nil
 
-function TreeManager.SetOnSaplingGrownCallback(callback)
+function TreeService.SetOnSaplingGrownCallback(callback)
 	growCallback = callback
 end
 
@@ -42,7 +41,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 	end
 end)
 
-function TreeManager.PlayerJoined(player: Player)
+function TreeService.PlayerJoined(player: Player)
 	saplings[player.UserId] = {}
 
 	local profile = DataStore.profiles[player.UserId]
@@ -56,7 +55,7 @@ function TreeManager.PlayerJoined(player: Player)
 	end
 end
 
-function TreeManager.PlayerLeaving(player: Player)
+function TreeService.PlayerLeaving(player: Player)
 	local profile = DataStore.profiles[player.UserId]
 	local blocks = profile.Data.Blocks
 	if not saplings[player.UserId] then
@@ -71,10 +70,10 @@ function TreeManager.PlayerLeaving(player: Player)
 	saplings[player.UserId] = nil
 end
 
-function TreeManager.AddSapling(player: Player, posStr: string, block)
+function TreeService.AddSapling(player: Player, posStr: string, block)
 	if ItemLibrary.itemDefinitions[block.id].type == "sapling" then
 		saplings[player.UserId][posStr] = { id = block.id, growTime = ItemLibrary.itemDefinitions[block.id].growTime }
 	end
 end
 
-return TreeManager
+return TreeService

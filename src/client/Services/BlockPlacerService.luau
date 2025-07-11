@@ -4,11 +4,12 @@ local Mouse = player:GetMouse()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local ItemEquip = require(script.Parent.ItemEquip)
+local StarterPlayer = game:GetService("StarterPlayer")
+local ItemEquip = require(StarterPlayer.StarterPlayerScripts.Client.Modules.ItemEquip)
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local packets = require(ReplicatedStorage.Shared.network)
 
-local BlockPlacer = {}
+local BlockPlacerService = {}
 
 local currentBlock = nil
 local blockPreview = nil
@@ -26,7 +27,7 @@ local normalMap = {
 	[Enum.NormalId.Back] = Vector3.new(0, 0, 1),
 }
 
-function BlockPlacer.Start()
+function BlockPlacerService.Start()
 	RunService.RenderStepped:Connect(function()
 		if currentBlock then
 			ItemEquip.Equip(currentBlock)
@@ -74,7 +75,7 @@ function BlockPlacer.Start()
 	end)
 end
 
-function BlockPlacer.SelectBlock(blockId: string, slot: number)
+function BlockPlacerService.SelectBlock(blockId: string, slot: number)
 	currentSlot = slot
 	if blockId == "nothing" then
 		ItemEquip.UnEquip()
@@ -92,12 +93,12 @@ function BlockPlacer.SelectBlock(blockId: string, slot: number)
 	end
 end
 
-function BlockPlacer.Unselect()
+function BlockPlacerService.Unselect()
 	currentBlock = nil
-	BlockPlacer.SelectBlock("nothing", 0)
+	BlockPlacerService.SelectBlock("nothing", 0)
 end
 
-function BlockPlacer.Place()
+function BlockPlacerService.Place()
 	if not currentBlock then
 		return
 	end
@@ -138,7 +139,7 @@ packets.InventorySync.listen(function(data)
 		return
 	end
 	if data and data[currentSlot] and data[currentSlot].count <= 0 then
-		BlockPlacer.SelectBlock("nothing", currentSlot)
+		BlockPlacerService.SelectBlock("nothing", currentSlot)
 	end
 end)
 
@@ -146,4 +147,4 @@ packets.AssignPlot.listen(function(pos)
 	plotPosition = pos
 end)
 
-return BlockPlacer
+return BlockPlacerService

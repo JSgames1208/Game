@@ -57,16 +57,19 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 
 	local Frame
 	local BackgroundGradient
+
+	Frame = scope:New("Frame")({
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundColor3 = props.BackgroundColor3,
+		ZIndex = props.ZIndex :: number - 2,
+	})
 	if typeof(props.BackgroundColor3) == "ColorSequence" then
-		Frame = scope:New("Frame")({
-			Size = UDim2.new(1, 0, 1, 0),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		})
 		BackgroundGradient = scope:UIGradient(
 			{ Color = props.BackgroundColor3, Rotation = props.BackgroundColorRotation } :: UIGradient.UIGradientProps
 		)
 		BackgroundGradient.Parent = Frame
 		props.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		props.BackgroundTransparency = 1
 	end
 
@@ -76,10 +79,26 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 		Stroke = scope:UIStroke(props.Stroke)
 	end
 
+	local t
 	local TextStroke
+	t = scope:New("TextLabel")({
+		Text = props.Text,
+		Size = UDim2.new(1, 0, 1, 0),
+		Position = props.Position,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		Font = props.Font,
+		TextScaled = props.TextScaled,
+		ZIndex = props.ZIndex :: number - 1,
+		TextSize = props.TextSize or 1,
+
+		AnchorPoint = Vector2.new(0.5, 0.5),
+	})
 	if props.TextStroke then
 		props.TextStroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Contextual
 		TextStroke = scope:UIStroke(props.TextStroke)
+		TextStroke.Parent = t
 	end
 
 	local Corner
@@ -91,8 +110,8 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 		Text = props.Text,
 		Size = props.Size,
 		Position = props.Position,
-		BackgroundColor3 = props.BackgroundColor3,
-		BackgroundTransparency = props.BackgroundTransparency,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
 		TextColor3 = props.TextColor3,
 		Font = props.Font,
 		TextScaled = props.TextScaled,
@@ -105,7 +124,7 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 			Gradient,
 			Frame,
 			Stroke,
-			TextStroke,
+			t,
 			Corner,
 		},
 	})

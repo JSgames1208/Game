@@ -1,21 +1,22 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
+local BlockPlacerService = require(StarterPlayer.StarterPlayerScripts.Client.Services.BlockPlacerService)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
-local BlockPlacer = require(script.Parent.BlockPlacer)
 local InventoryClient = require(script.Parent.InventoryClient)
-local ToolManager = require(script.Parent.ToolManager)
+local ToolService = require(StarterPlayer.StarterPlayerScripts.Client.Services.ToolService)
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
 
 local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
 local Hotbar = InventoryGui:WaitForChild("Hotbar")
 
-local InputManager = {}
+local InputService = {}
 
 local hoveredSlot = nil
 
-function InputManager.Start()
+function InputService.Start()
 	for _, slot in Hotbar:GetChildren() do
 		if slot:IsA("Frame") then
 			slot.MouseEnter:Connect(function()
@@ -28,7 +29,7 @@ function InputManager.Start()
 	end
 end
 
-function InputManager.IsOnSlot()
+function InputService.IsOnSlot()
 	return hoveredSlot and true or false
 end
 
@@ -47,7 +48,7 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if hoveredSlot then
 			InventoryClient.SlotPressed(hoveredSlot:GetAttribute("SlotIndex"))
-			ToolManager.MouseDown = false
+			ToolService.MouseDown = false
 		else
 			local _, currentItem = InventoryClient.GetItem()
 			if currentItem then
@@ -55,9 +56,9 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 				if id then
 					local type = ItemLibrary.itemDefinitions[id].type
 					if type == "block" or type == "sapling" then
-						BlockPlacer.Place()
+						BlockPlacerService.Place()
 					elseif type == "tool" then
-						ToolManager.MouseDown = true
+						ToolService.MouseDown = true
 					end
 				end
 			end
@@ -90,8 +91,8 @@ end)
 
 UserInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		ToolManager.MouseDown = false
+		ToolService.MouseDown = false
 	end
 end)
 
-return InputManager
+return InputService

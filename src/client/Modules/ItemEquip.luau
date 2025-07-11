@@ -20,6 +20,7 @@ local item = nil
 local equippedItem = nil
 
 function ItemEquip.Equip(itemName: string)
+	print(itemName)
 	if itemName == equippedItem then
 		return
 	end

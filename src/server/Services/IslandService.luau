@@ -1,18 +1,19 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local IslandRenderer = require(ServerScriptService.Server.Modules.IslandRenderer)
+local InventoryServer = require(script.Parent.InventoryServer)
+local DataStore = require(ServerScriptService.Server.Services.DataStore)
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
-local EntityManager = require(ReplicatedStorage.Shared.Entity.EntityManager)
+local EntityService = require(ReplicatedStorage.Shared.Entity.EntityService)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
 local packets = require(ReplicatedStorage.Shared.network)
-local IslandRenderer = require(script.Parent.IslandRenderer)
-local DataStore = require(script.Parent.DataStore)
-local InventoryManager = require(script.Parent.InventoryManager)
-local QuestManager = require(script.Parent.QuestManager)
-local TreeManager = require(script.Parent.TreeManager)
+local TreeService = require(script.Parent.TreeService)
+local QuestService = require(ServerScriptService.Server.Services.QuestService)
 
-local IslandManager = {}
+local IslandService = {}
 
 local PlotSlots = {
 	Vector3.new(0, 0, 0),
@@ -30,7 +31,7 @@ local function getBlockKey(vec)
 	return string.format("%d,%d,%d", vec.X, vec.Y, vec.Z)
 end
 
-function IslandManager.AssignPlotToPlayer(player: Player)
+function IslandService.AssignPlotToPlayer(player: Player)
 	for index, pos in ipairs(PlotSlots) do
 		if not OccupiedSlots[index] then
 			OccupiedSlots[index] = player.UserId
@@ -42,7 +43,7 @@ function IslandManager.AssignPlotToPlayer(player: Player)
 	error("No available plots!")
 end
 
-function IslandManager.ReleasePlot(player: Player)
+function IslandService.ReleasePlot(player: Player)
 	local info = PlayerIslands[player.UserId]
 	if info then
 		OccupiedSlots[info.PlotIndex] = nil
@@ -53,16 +54,16 @@ function IslandManager.ReleasePlot(player: Player)
 	end
 end
 
-function IslandManager.PlayerJoined(player: Player)
-	IslandManager.LoadIsland(player)
+function IslandService.PlayerJoined(player: Player)
+	IslandService.LoadIsland(player)
 	task.wait(1.5)
-	IslandManager.TeleportToIsland(player)
+	IslandService.TeleportToIsland(player)
 
-	TreeManager.PlayerJoined(player)
+	TreeService.PlayerJoined(player)
 end
 
-function IslandManager.LoadIsland(player: Player)
-	local plotIndex, plotPos = IslandManager.AssignPlotToPlayer(player)
+function IslandService.LoadIsland(player: Player)
+	local plotIndex, plotPos = IslandService.AssignPlotToPlayer(player)
 	local islandData = DataStore.LoadPlayerData(player.UserId) or {}
 
 	local islandModel = IslandRenderer.RenderIsland(islandData, plotPos)
@@ -80,7 +81,7 @@ function IslandManager.LoadIsland(player: Player)
 	--return islandModel
 end
 
-function IslandManager.TeleportToIsland(player: Player)
+function IslandService.TeleportToIsland(player: Player)
 	task.wait(0.5)
 	if not player then
 		return
@@ -126,19 +127,19 @@ local function CheckGrass(player: Player, pos: Vector3)
 	end
 end
 
-function IslandManager.PlaceFallingBlock(player: Player, gridPos: Vector3, blockId: string)
-	EntityManager.SpawnFallingBlock(
+function IslandService.PlaceFallingBlock(player: Player, gridPos: Vector3, blockId: string)
+	EntityService.SpawnFallingBlock(
 		player,
 		PlayerIslands[player.UserId].PlotPosition + gridPos * 4,
 		blockId,
 		function(player: Player, pos: Vector3, blockId: string)
 			local gridPos = GridMath.posToGridPos(pos, PlayerIslands[player.UserId].PlotPosition)
-			IslandManager.PlaceBlock(player, gridPos, blockId)
+			IslandService.PlaceBlock(player, gridPos, blockId)
 		end
 	)
 end
 
-function IslandManager.PlaceBlock(player: Player, pos, blockId)
+function IslandService.PlaceBlock(player: Player, pos, blockId)
 	local island = PlayerIslands[player.UserId]
 	if not island then
 		return
@@ -167,7 +168,7 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 			local worldPos = gridPos * 4 + island.PlotPosition
 			local result = workspace:Raycast(worldPos, Vector3.new(0, -5, 0))
 			if not (result and result.Instance and result.Instance.Anchored) then
-				IslandManager.PlaceFallingBlock(player, gridPos, blockId)
+				IslandService.PlaceFallingBlock(player, gridPos, blockId)
 				return true
 			end
 		end
@@ -183,7 +184,7 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 		end
 		if blocks[checkPosStr].id == "grass" then
 			blocks[key] = { id = blockId, growTime = ItemLibrary.itemDefinitions[blockId].growTime }
-			TreeManager.AddSapling(
+			TreeService.AddSapling(
 				player,
 				key,
 				{ id = blockId, growTime = ItemLibrary.itemDefinitions[blockId].growTime }
@@ -203,7 +204,7 @@ function IslandManager.PlaceBlock(player: Player, pos, blockId)
 	return true
 end
 
-function IslandManager.PlaceModel(player: Player, pos: Vector3, modelId: string)
+function IslandService.PlaceModel(player: Player, pos: Vector3, modelId: string)
 	local modelStructure = ModelLibrary[modelId]
 
 	local island = PlayerIslands[player.UserId]
@@ -255,8 +256,8 @@ local function CheckBlockAbove(player: Player, pos: string)
 		local falling: boolean = itemDef.falling
 		if type == "tree" or type == "sapling" then
 			for drop, amount in itemDef.drops do
-				InventoryManager.GiveItem(player, drop, amount)
-				QuestManager.OnItemCollected(player, drop, amount)
+				InventoryServer.GiveItem(player, drop, amount)
+				QuestService.OnItemCollected(player, drop, amount)
 			end
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
 			for _, posStr in blocks[checkPosStr].blocked do
@@ -268,19 +269,19 @@ local function CheckBlockAbove(player: Player, pos: string)
 		elseif type == "block" and falling then
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
 			blocks[checkPosStr] = nil
-			IslandManager.PlaceFallingBlock(player, checkPos, id)
+			IslandService.PlaceFallingBlock(player, checkPos, id)
 			task.wait(0.05)
 			CheckBlockAbove(player, checkPosStr)
 		end
 	end
 end
 
-function IslandManager.MineBlock(player: Player, pos: string)
+function IslandService.MineBlock(player: Player, pos: string)
 	local island = PlayerIslands[player.UserId]
 	local blocks = island.IslandData.Blocks
 	local block = blocks[pos]
 	if block then
-		local toolId = InventoryManager.GetSelected(player)
+		local toolId = InventoryServer.GetSelected(player)
 		if ItemLibrary.itemDefinitions[toolId].type == "tool" then
 			island.IslandModel:FindFirstChild(pos):SetAttribute(
 				"hp",
@@ -299,10 +300,10 @@ function IslandManager.MineBlock(player: Player, pos: string)
 				blocks[pos] = nil
 
 				for itemId, amount in ItemLibrary.itemDefinitions[block.id].drops do
-					InventoryManager.GiveItem(player, itemId, amount)
-					QuestManager.OnItemCollected(player, itemId, amount)
+					InventoryServer.GiveItem(player, itemId, amount)
+					QuestService.OnItemCollected(player, itemId, amount)
 				end
-				--InventoryManager.GiveItem(player, block.id, ItemLibrary.itemDefinitions[block.id].dropAmount)
+				--InventoryServer.GiveItem(player, block.id, ItemLibrary.itemDefinitions[block.id].dropAmount)
 
 				CheckBlockAbove(player, pos)
 
@@ -313,29 +314,29 @@ function IslandManager.MineBlock(player: Player, pos: string)
 end
 
 packets.MineBlock.listen(function(data, player: Player)
-	IslandManager.MineBlock(player, data.blockPosStr)
+	IslandService.MineBlock(player, data.blockPosStr)
 end)
 
-function IslandManager.PlayerLeaving(player: Player)
-	TreeManager.PlayerLeaving(player)
+function IslandService.PlayerLeaving(player: Player)
+	TreeService.PlayerLeaving(player)
 
 	DataStore.ReleasePlayerData(player.UserId)
 	PlayerIslands[player.UserId].IslandModel:Destroy()
-	IslandManager.ReleasePlot(player)
+	IslandService.ReleasePlot(player)
 end
 
 packets.PlaceBlock.listen(function(data, player)
 	local pos = Vector3.new(data.x, data.y, data.z)
 	local blockId = data.blockId
-	if InventoryManager.IsAvailable(player, 1) then
-		local placed = IslandManager.PlaceBlock(player, pos, blockId)
+	if InventoryServer.IsAvailable(player, 1) then
+		local placed = IslandService.PlaceBlock(player, pos, blockId)
 		if placed then
-			InventoryManager.RemoveItem(player, 1)
+			InventoryServer.RemoveItem(player, 1)
 		end
 	end
 end)
 
-TreeManager.SetOnSaplingGrownCallback(function(player: Player, posStr: string, _)
+TreeService.SetOnSaplingGrownCallback(function(player: Player, posStr: string, _)
 	local coord: Vector3 = BlockCoord.ParsePos(posStr)
 	local island = PlayerIslands[player.UserId]
 	if not island.IslandModel:FindFirstChild(posStr) then
@@ -343,14 +344,14 @@ TreeManager.SetOnSaplingGrownCallback(function(player: Player, posStr: string, _
 	end
 	if island then
 		IslandRenderer.RemoveBlock(island.IslandModel, posStr)
-		IslandManager.PlaceModel(player, coord, "pine tree")
+		IslandService.PlaceModel(player, coord, "pine tree")
 	end
 end)
 
 --public getters
 
-function IslandManager.Get(player: Player)
+function IslandService.Get(player: Player)
 	return PlayerIslands[player.UserId]
 end
 
-return IslandManager
+return IslandService

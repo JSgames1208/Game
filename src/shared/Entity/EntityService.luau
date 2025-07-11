@@ -1,10 +1,10 @@
 local RunService = game:GetService("RunService")
 local FallingBlockEntity = require(script.Parent.FallingBlockEntity)
-local EntityManager = {}
+local EntityService = {}
 
 local Entities = {}
 
-function EntityManager.Start()
+function EntityService.Start()
 	RunService.Heartbeat:Connect(function(dt: number)
 		for i = #Entities, 1, -1 do
 			local entity = Entities[i]
@@ -19,7 +19,7 @@ function EntityManager.Start()
 	end)
 end
 
-function EntityManager.SpawnFallingBlock(
+function EntityService.SpawnFallingBlock(
 	player: Player,
 	pos: Vector3,
 	blockId: string,
@@ -29,4 +29,4 @@ function EntityManager.SpawnFallingBlock(
 	table.insert(Entities, fallingBlock)
 end
 
-return EntityManager
+return EntityService
