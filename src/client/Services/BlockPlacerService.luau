@@ -5,7 +5,8 @@ local Mouse = player:GetMouse()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
-local SoundService = require(script.Parent.SoundService)
+local BlockRequestHandler = require(StarterPlayer.StarterPlayerScripts.Client.Modules.BlockPlacing.BlockRequestHandler)
+local PlacementCalculator = require(StarterPlayer.StarterPlayerScripts.Client.Modules.BlockPlacing.PlacementCalculator)
 local PlacementPreview = require(StarterPlayer.StarterPlayerScripts.Client.Modules.BlockPlacing.PlacementPreview)
 local ItemEquip = require(StarterPlayer.StarterPlayerScripts.Client.Modules.ItemEquip)
 local packets = require(ReplicatedStorage.Shared.network)
@@ -16,15 +17,6 @@ local currentBlock = nil
 local currentSlot = nil
 
 local plotPosition = nil
-
-local normalMap = {
-	[Enum.NormalId.Top] = Vector3.new(0, 1, 0),
-	[Enum.NormalId.Bottom] = Vector3.new(0, -1, 0),
-	[Enum.NormalId.Left] = Vector3.new(-1, 0, 0),
-	[Enum.NormalId.Right] = Vector3.new(1, 0, 0),
-	[Enum.NormalId.Front] = Vector3.new(0, 0, -1),
-	[Enum.NormalId.Back] = Vector3.new(0, 0, 1),
-}
 
 function BlockPlacerService.Start()
 	RunService.RenderStepped:Connect(function()
@@ -37,15 +29,9 @@ function BlockPlacerService.Start()
 			end
 
 			local surface = Mouse.TargetSurface
-			local normal = normalMap[surface]
-
-			if normal then
-				local placePos = Vector3.new(
-					math.floor(target.Position.X / 4 + 0.5) + normal.X,
-					math.floor(target.Position.Y / 4 + 0.5) + normal.Y,
-					math.floor(target.Position.Z / 4 + 0.5) + normal.Z
-				)
-				PlacementPreview.RenderPreview(currentBlock, placePos * 4)
+			local previewPos = PlacementCalculator.CalculatePlacePosition(target.Position, surface, plotPosition)
+			if previewPos then
+				PlacementPreview.RenderPreview(currentBlock, previewPos * 4)
 			end
 		end
 	end)
@@ -77,31 +63,10 @@ function BlockPlacerService.Place()
 	end
 
 	local surface = Mouse.TargetSurface
-	local normal = normalMap[surface]
 
-	local blockId = currentBlock
+	local placePos = PlacementCalculator.CalculatePlacePosition(target.Position, surface, plotPosition)
 
-	if normal then
-		if not plotPosition then
-			warn("No plot position!")
-			return
-		end
-		local relativePos = target.Position - plotPosition
-
-		local placePos = Vector3.new(
-			math.floor(relativePos.X / 4 + 0.5) + normal.X,
-			math.floor(relativePos.Y / 4 + 0.5) + normal.Y,
-			math.floor(relativePos.Z / 4 + 0.5) + normal.Z
-		)
-		packets.PlaceBlock.send({
-			x = placePos.X,
-			y = placePos.Y,
-			z = placePos.Z,
-			blockId = blockId,
-			slot = currentSlot,
-		})
-		print("Event sent!")
-	end
+	BlockRequestHandler.PlaceBlock(placePos, currentBlock, currentSlot)
 end
 
 packets.InventorySync.listen(function(data)
@@ -115,10 +80,6 @@ end)
 
 packets.AssignPlot.listen(function(pos)
 	plotPosition = pos
-end)
-
-packets.BlockPlaced.listen(function(vec3)
-	SoundService:Play("place", vec3)
 end)
 
 return BlockPlacerService

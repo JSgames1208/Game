@@ -4,7 +4,7 @@ local PlacementPreview = {}
 
 local blockPreview = nil
 
-function PlacementPreview.RenderPreview(blockId: string, position: Vector3)
+function PlacementPreview.RenderPreview(blockId: string, position: Vector3): ()
 	if not blockPreview then
 		blockPreview = BlockLibrary.CreateBlockPart(blockId)
 		for _, child in blockPreview:GetDescendants() do
@@ -34,7 +34,7 @@ function PlacementPreview.RenderPreview(blockId: string, position: Vector3)
 	end
 end
 
-function PlacementPreview.RemovePreview()
+function PlacementPreview.RemovePreview(): ()
 	if blockPreview then
 		blockPreview:Destroy()
 		blockPreview = nil

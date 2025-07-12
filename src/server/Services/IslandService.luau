@@ -145,9 +145,9 @@ function IslandService.PlaceFallingBlock(player: Player, gridPos: Vector3, block
 		player,
 		PlayerIslands[player.UserId].PlotPosition + gridPos * 4,
 		blockId,
-		function(player: Player, pos: Vector3, blockId: string)
-			local gridPos = GridMath.posToGridPos(pos, PlayerIslands[player.UserId].PlotPosition)
-			IslandService.PlaceBlock(player, gridPos, blockId)
+		function(plr: Player, pos: Vector3, id: string)
+			local gridpos = GridMath.posToGridPos(pos, PlayerIslands[player.UserId].PlotPosition)
+			IslandService.PlaceBlock(plr, gridpos, id)
 		end
 	)
 end
