@@ -9,10 +9,11 @@ export type UIStrokeProps = {
 	ColorRotation: number?,
 	Thickness: number?,
 	Transparency: number?,
+	Enabled: boolean?,
 }
 
 local function UIStroke(scope: typeof(Fusion.scoped(Fusion)), props: UIStrokeProps)
-	local scope = scope:innerScope({
+	local s = scope:innerScope({
 		UIGradient = UIGradient,
 	})
 
@@ -20,11 +21,11 @@ local function UIStroke(scope: typeof(Fusion.scoped(Fusion)), props: UIStrokePro
 	props.Thickness = props.Thickness or 1
 	props.Transparency = props.Transparency or 0
 	props.ColorRotation = props.ColorRotation or 0
+	props.Enabled = props.Enabled or false
 
 	local UIGradient
 	if typeof(props.Color) == "ColorSequence" then
-		UIGradient =
-			scope:UIGradient({ Color = props.Color, Rotation = props.ColorRotation } :: UIGradient.UIGradientProps)
+		UIGradient = s:UIGradient({ Color = props.Color, Rotation = props.ColorRotation } :: UIGradient.UIGradientProps)
 		props.Color = Color3.fromRGB(255, 255, 255)
 	end
 
@@ -33,6 +34,7 @@ local function UIStroke(scope: typeof(Fusion.scoped(Fusion)), props: UIStrokePro
 		Thickness = props.Thickness,
 		Color = props.Color,
 		Transparency = props.Transparency or 0,
+		Enabled = props.Enabled,
 
 		[Children] = {
 			UIGradient,

@@ -1,6 +1,7 @@
---[[local Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TextLabel = require(script.Components.TextLabel)
+local Hotbar = require(script.Frames.Hotbar)
+local InventoryFrame = require(script.Frames.InventoryFrame)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 
@@ -10,10 +11,11 @@ local PlayerGui = player.PlayerGui
 scoped = Fusion.scoped
 
 local scope = scoped(Fusion, {
-	TextLabel = TextLabel,
+	Hotbar = Hotbar,
+	InventoryFrame = InventoryFrame,
 })
 
-local colorSequence: ColorSequence = ColorSequence.new({
+--[[local colorSequence: ColorSequence = ColorSequence.new({
 	ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
 	ColorSequenceKeypoint.new(0.16, Color3.fromRGB(255, 115, 0)),
 	ColorSequenceKeypoint.new(0.33, Color3.fromRGB(255, 238, 0)),
@@ -56,3 +58,28 @@ scope:New("ScreenGui")({
 	},
 })
 ]]
+
+--[[scope:New("ScreenGui")({
+	Parent = PlayerGui,
+	ZIndexBehavior = Enum.ZIndexBehavior.Global,
+	[Children] = {
+		scope:Button({
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Size = UDim2.new(0.2, 0, 0.1, 0),
+			ImageId = "rbxassetid://134471285632211",
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			Stroke = { Thickness = 5, Color = colorSequence, ColorRotation = 20, Transparency = 0 },
+		} :: Button.ButtonProps),
+	},
+})]]
+
+scope:New("ScreenGui")({
+	Name = "InventoryGui",
+	Parent = PlayerGui,
+	ZIndexBehavior = Enum.ZIndexBehavior.Global,
+	[Children] = {
+		scope:Hotbar(),
+		scope:InventoryFrame(),
+	},
+})

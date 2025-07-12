@@ -10,6 +10,7 @@ local RenderBlockToViewport = require(StarterPlayer.StarterPlayerScripts.Client.
 local packets = require(ReplicatedStorage.Shared.network)
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
+local loaded = false
 
 local visible = false
 
@@ -186,6 +187,8 @@ function InventoryClient.PopulateInventory(data)
 			end
 		end
 	end
+
+	loaded = true
 end
 
 function InventoryClient.UpdateSlots(data)
@@ -196,6 +199,9 @@ end
 local selectedSlot = nil
 
 function InventoryClient.SlotPressed(slotIndex: number)
+	if not loaded then
+		return
+	end
 	local slot = nil
 	for _, s in Hotbar:GetChildren() do
 		if s:GetAttribute("SlotIndex") == slotIndex then
@@ -281,7 +287,7 @@ local originalSlotIndex = nil
 local originalSlot = nil
 
 UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: boolean)
-	if gameProcessed then
+	if gameProcessed or not loaded then
 		return
 	end
 	if
@@ -312,6 +318,9 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 end)
 
 UserInputService.InputEnded:Connect(function(input: InputObject)
+	if not loaded then
+		return
+	end
 	if input.UserInputType == Enum.UserInputType.MouseButton1 and dragging then
 		dragging = false
 		if dragClone then

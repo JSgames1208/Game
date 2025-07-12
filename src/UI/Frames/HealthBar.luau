@@ -16,6 +16,7 @@ local function HealthBar(scope: typeof(Fusion), props)
 		Size = UDim2.new(4, 0, 0.4, 0),
 		StudsOffsetWorldSpace = Vector3.new(0, 3.5, 0),
 		Adornee = props.adornee,
+		AlwaysOnTop = true,
 		[Children] = {
 			scope:New("Frame")({
 				Name = "Background",
