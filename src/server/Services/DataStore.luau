@@ -60,8 +60,6 @@ function DataStore.LoadPlayerData(userId)
 
 		profile.Data = profile.Data :: Types.ProfileData
 
-		print(profile.Data)
-
 		DataStore.profiles[userId] = profile
 
 		-- Listen to release to cleanup cache

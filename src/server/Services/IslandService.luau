@@ -7,6 +7,8 @@ local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local EntityService = require(ReplicatedStorage.Shared.Entity.EntityService)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local ModelLibrary = require(ReplicatedStorage.Shared.ModelLibrary)
+local BlockHelpers = require(ReplicatedStorage.Shared.Modules.BlockHelpers)
+local Collision = require(ReplicatedStorage.Shared.Physics.Collision)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
 local packets = require(ReplicatedStorage.Shared.network)
@@ -81,7 +83,6 @@ function IslandService.LoadIsland(player: Player)
 
 	for posStr, block in blocks do
 		if block.parent then
-			print(posStr, "has parent")
 			if blocks[block.parent] then
 				if not (blocks[block.parent].blocked and table.find(blocks[block.parent].blocked, posStr)) then
 					blocks[posStr] = nil
@@ -141,6 +142,7 @@ local function CheckGrass(player: Player, pos: Vector3)
 end
 
 function IslandService.PlaceFallingBlock(player: Player, gridPos: Vector3, blockId: string)
+	--print("PLACE FALLING BLOCK!")
 	EntityService.SpawnFallingBlock(
 		player,
 		PlayerIslands[player.UserId].PlotPosition + gridPos * 4,
@@ -179,7 +181,10 @@ function IslandService.PlaceBlock(player: Player, pos, blockId)
 		if not blocks[blockBelowKey] then
 			-- raycast down a bit to see if there's any anchored baseplate or part
 			local worldPos = gridPos * 4 + island.PlotPosition
-			local result = workspace:Raycast(worldPos, Vector3.new(0, -5, 0))
+			local result = Collision.sweepRay(
+				BlockHelpers.GetBottomCorners(worldPos, Vector3.new(2, 2, 2) * 0.98),
+				Vector3.new(0, -0.1, 0)
+			)
 			if not (result and result.Instance and result.Instance.Anchored) then
 				IslandService.PlaceFallingBlock(player, gridPos, blockId)
 				return true

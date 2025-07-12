@@ -1,6 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BlockHelpers = require(ReplicatedStorage.Shared.Modules.BlockHelpers)
 local Collision = require(ReplicatedStorage.Shared.Physics.Collision)
-local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
 local Entity = {}
 Entity.__index = Entity
 
@@ -24,16 +24,6 @@ function Entity:Update(dt)
 	self:Move(dt)
 end
 
-local function getBottomCorners(center: Vector3, halfSize: Vector3)
-	return {
-		center + Vector3.new(-halfSize.X, -halfSize.Y, -halfSize.Z),
-		center + Vector3.new(halfSize.X, -halfSize.Y, -halfSize.Z),
-		center + Vector3.new(-halfSize.X, -halfSize.Y, halfSize.Z),
-		center + Vector3.new(halfSize.X, -halfSize.Y, halfSize.Z),
-		center + Vector3.new(0, -halfSize.Y, 0),
-	}
-end
-
 function Entity:Move(dt)
 	self.velocity = self:GetVelocity() + Vector3.new(0, self.gravity * dt, 0)
 	local movement = self.velocity * dt
@@ -43,7 +33,7 @@ function Entity:Move(dt)
 	end
 
 	local hit = Collision.sweepRay(
-		getBottomCorners(self.position, self.model.Size / 2),
+		BlockHelpers.GetBottomCorners(self.position, self.model.Size / 2),
 		movement,
 		workspace.Entities.FallingBlocks:GetChildren()
 	)
@@ -75,7 +65,6 @@ function Entity:Destroy()
 		self.model = nil
 	end
 	self.isDestroyed = true
-	print("HERE")
 end
 
 -- public getters
