@@ -6,7 +6,6 @@ local InventorySlots = require(StarterPlayer.StarterPlayerScripts.Client.Modules
 local InventoryUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Inventory.InventoryUI)
 local BlockPlacerService = require(StarterPlayer.StarterPlayerScripts.Client.Services.BlockPlacerService)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
-local InventoryClient = require(script.Parent.InventoryClient)
 local ToolService = require(StarterPlayer.StarterPlayerScripts.Client.Services.ToolService)
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui

@@ -12,7 +12,7 @@ function Entity.new(pos: Vector3, player: Player)
 	self.onGround = false
 	self.noClip = false
 	self.velocity = Vector3.zero
-	self.gravity = -55
+	self.gravity = -196.2
 	self.type = nil
 
 	self.isDestroyed = false

@@ -7,15 +7,13 @@ local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
 local Hotbar: Frame = InventoryGui:WaitForChild("Hotbar") :: Frame
 
 local InventoryFrame: Frame = InventoryGui:WaitForChild("Inventory") :: Frame
-local OpenHotbar: Frame = InventoryFrame:WaitForChild("Hotbar") :: Frame
-local MainInventory: Frame = InventoryFrame:WaitForChild("MainInventory") :: Frame
 
 local visible = false
 
 local InventoryUI = {}
 
 function InventoryUI.OpenInventory()
-	if InventoryFrame.Visible then
+	if Hotbar.Visible then
 		Hotbar.Visible = false
 		InventoryFrame.Visible = true
 	end

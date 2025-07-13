@@ -87,6 +87,15 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			value = ByteNet.vec3,
 			reliabilityType = "reliable",
 		}),
+		UpdateQuest = ByteNet.definePacket({
+			value = ByteNet.struct({
+				questId = ByteNet.string,
+				progress = ByteNet.struct({
+					collect = ByteNet.optional(ByteNet.map(ByteNet.string, ByteNet.int32)),
+				}),
+			}),
+			reliabilityType = "reliable",
+		}),
 	}
 end)
 

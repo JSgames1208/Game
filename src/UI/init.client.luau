@@ -1,7 +1,9 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AutoScaledFrame = require(script.Components.AutoScaledFrame)
 local Hotbar = require(script.Frames.Hotbar)
 local InventoryFrame = require(script.Frames.InventoryFrame)
+local QuestMenu = require(script.Frames.QuestMenu)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 
@@ -13,6 +15,8 @@ scoped = Fusion.scoped
 local scope = scoped(Fusion, {
 	Hotbar = Hotbar,
 	InventoryFrame = InventoryFrame,
+	QuestMenu = QuestMenu,
+	AutoScaledFrame = AutoScaledFrame,
 })
 
 --[[local colorSequence: ColorSequence = ColorSequence.new({
@@ -81,5 +85,14 @@ scope:New("ScreenGui")({
 	[Children] = {
 		scope:Hotbar(),
 		scope:InventoryFrame(),
+	},
+})
+
+scope:New("ScreenGui")({
+	Name = "QuestGui",
+	Parent = PlayerGui,
+	ZIndexBehavior = Enum.ZIndexBehavior.Global,
+	[Children] = {
+		scope:QuestMenu(),
 	},
 })

@@ -31,7 +31,7 @@ function BlockPlacerService.Start()
 			local surface = Mouse.TargetSurface
 			local previewPos = PlacementCalculator.CalculatePlacePosition(target.Position, surface, plotPosition)
 			if previewPos then
-				PlacementPreview.RenderPreview(currentBlock, previewPos * 4)
+				PlacementPreview.RenderPreview(currentBlock, previewPos * 4 + plotPosition)
 			end
 		end
 	end)

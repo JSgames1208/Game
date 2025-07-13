@@ -64,6 +64,7 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 	Frame = scope:New("Frame")({
 		Size = UDim2.new(1, 0, 1, 0),
 		BackgroundColor3 = props.BackgroundColor3,
+		BackgroundTransparency = props.BackgroundTransparency,
 		ZIndex = props.ZIndex :: number - 2,
 	})
 	if typeof(props.BackgroundColor3) == "ColorSequence" then
@@ -79,6 +80,7 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 	local Stroke
 	if props.Stroke then
 		props.Stroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+		props.Stroke["Enabled"] = true
 		Stroke = s:UIStroke(props.Stroke)
 	end
 
@@ -87,7 +89,7 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 	t = scope:New("TextLabel")({
 		Text = props.Text,
 		Size = UDim2.new(1, 0, 1, 0),
-		Position = props.Position,
+		Position = UDim2.new(0, 0, 0, 0),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -96,10 +98,11 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 		ZIndex = props.ZIndex :: number - 1,
 		TextSize = props.TextSize or 1,
 
-		AnchorPoint = Vector2.new(0.5, 0.5),
+		AnchorPoint = Vector2.new(0, 0),
 	})
 	if props.TextStroke then
 		props.TextStroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Contextual
+		props.TextStroke["Enabled"] = true
 		TextStroke = s:UIStroke(props.TextStroke)
 		TextStroke.Parent = t
 	end
@@ -125,7 +128,7 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 		TextXAlignment = props.TextXAlignment,
 		TextYAlignment = props.TextYAlignment,
 
-		AnchorPoint = Vector2.new(0.5, 0.5),
+		AnchorPoint = props.AnchorPoint,
 
 		[Children] = {
 			Gradient,
