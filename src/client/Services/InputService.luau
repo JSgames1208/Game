@@ -2,6 +2,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
+local InventorySlots = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Inventory.InventorySlots)
+local InventoryUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Inventory.InventoryUI)
 local BlockPlacerService = require(StarterPlayer.StarterPlayerScripts.Client.Services.BlockPlacerService)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local InventoryClient = require(script.Parent.InventoryClient)
@@ -37,20 +39,20 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 	if gameProcessed then
 		return
 	end
-	if InventoryClient.IsInventoryOpen() then
+	if InventoryUI.IsInventoryOpen() then
 		if input.UserInputType == Enum.UserInputType.Keyboard then
 			if input.KeyCode == Enum.KeyCode.E then
-				InventoryClient.ToggleVisibility()
+				InventoryUI.ToggleVisibility()
 			end
 		end
 		return
 	end
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if hoveredSlot then
-			InventoryClient.SlotPressed(hoveredSlot:GetAttribute("SlotIndex"))
+			InventorySlots.SlotPressed(hoveredSlot:GetAttribute("SlotIndex"))
 			ToolService.MouseDown = false
 		else
-			local _, currentItem = InventoryClient.GetItem()
+			local _, currentItem = InventorySlots.GetItem()
 			if currentItem then
 				local id = currentItem.itemInfo.id
 				if id then
@@ -66,25 +68,25 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 	end
 	if input.UserInputType == Enum.UserInputType.Keyboard then
 		if input.KeyCode == Enum.KeyCode.One then
-			InventoryClient.SlotPressed(1)
+			InventorySlots.SlotPressed(1)
 		elseif input.KeyCode == Enum.KeyCode.Two then
-			InventoryClient.SlotPressed(2)
+			InventorySlots.SlotPressed(2)
 		elseif input.KeyCode == Enum.KeyCode.Three then
-			InventoryClient.SlotPressed(3)
+			InventorySlots.SlotPressed(3)
 		elseif input.KeyCode == Enum.KeyCode.Four then
-			InventoryClient.SlotPressed(4)
+			InventorySlots.SlotPressed(4)
 		elseif input.KeyCode == Enum.KeyCode.Five then
-			InventoryClient.SlotPressed(5)
+			InventorySlots.SlotPressed(5)
 		elseif input.KeyCode == Enum.KeyCode.Six then
-			InventoryClient.SlotPressed(6)
+			InventorySlots.SlotPressed(6)
 		elseif input.KeyCode == Enum.KeyCode.Seven then
-			InventoryClient.SlotPressed(7)
+			InventorySlots.SlotPressed(7)
 		elseif input.KeyCode == Enum.KeyCode.Eight then
-			InventoryClient.SlotPressed(8)
+			InventorySlots.SlotPressed(8)
 		elseif input.KeyCode == Enum.KeyCode.Nine then
-			InventoryClient.SlotPressed(9)
+			InventorySlots.SlotPressed(9)
 		elseif input.KeyCode == Enum.KeyCode.E then
-			InventoryClient.ToggleVisibility()
+			InventoryUI.ToggleVisibility()
 		end
 	end
 end)
