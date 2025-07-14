@@ -80,7 +80,7 @@ local function InventoryFrame(scope: typeof(Fusion.scoped(Fusion)))
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(83, 83, 83),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0.6, 0, 0.7, 0),
+		Size = UDim2.new(0.9, 0, 0.9, 0),
 		Visible = false,
 		[Children] = {
 			scope:New("UIAspectRatioConstraint")({

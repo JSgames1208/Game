@@ -4,6 +4,7 @@ local AutoScaledFrame = require(script.Components.AutoScaledFrame)
 local Hotbar = require(script.Frames.Hotbar)
 local InventoryFrame = require(script.Frames.InventoryFrame)
 local QuestMenu = require(script.Frames.QuestMenu)
+local UIDivision = require(script.UIDivision)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 
@@ -17,6 +18,7 @@ local scope = scoped(Fusion, {
 	InventoryFrame = InventoryFrame,
 	QuestMenu = QuestMenu,
 	AutoScaledFrame = AutoScaledFrame,
+	UIDivision = UIDivision,
 })
 
 --[[local colorSequence: ColorSequence = ColorSequence.new({

@@ -5,6 +5,7 @@ local TextLabel = require(StarterGui.UI.Components.TextLabel)
 local ImageIds = require(StarterGui.UI.ImageIds)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
+local OnEvent = Fusion.OnEvent
 
 local function QuestMenu(scope: typeof(Fusion.scoped(Fusion)))
 	--[[local s = scope:innerScope({
@@ -53,9 +54,20 @@ local function QuestMenu(scope: typeof(Fusion.scoped(Fusion)))
 		TextLabel = TextLabel,
 	})
 
+	local isOpen = scope:Value(true)
+
+	local pos = scope:Computed(function(use)
+		return use(isOpen) and UDim2.new(0, 24, 0, 24) or UDim2.new(0, 0, 0, 24)
+	end)
+
+	local anchorPoint = scope:Computed(function(use)
+		return use(isOpen) and Vector2.new(0, 0) or Vector2.new(1, 0)
+	end)
+
 	local frame = s:AutoScaledFrame({
-		Size = UDim2.fromOffset(720, 1763),
-		Position = UDim2.fromOffset(24, 24),
+		AnchorPoint = anchorPoint,
+		Size = UDim2.fromOffset(720, 2040),
+		Position = pos,
 	})
 
 	local Image = scope:New("ImageLabel")({
@@ -65,6 +77,21 @@ local function QuestMenu(scope: typeof(Fusion.scoped(Fusion)))
 	})
 
 	Image.Parent = frame
+
+	local OpenButton = scope:New("ImageButton")({
+		Name = "MenuToggle",
+		AnchorPoint = Vector2.new(0, 0.5),
+		Size = UDim2.fromScale(0.0686, 0.0838),
+		Position = UDim2.fromScale(1.0493, 0.5),
+		Image = ImageIds["QuestOpen"],
+		BackgroundTransparency = 1,
+		[OnEvent("MouseButton1Click")] = function()
+			isOpen:set(not scope.peek(isOpen))
+			print(scope.peek(isOpen))
+		end,
+	})
+
+	OpenButton.Parent = frame
 
 	local QuestLabel = s:TextLabel({
 		Name = "QuestLabel",
