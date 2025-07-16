@@ -66,7 +66,7 @@ end
 
 function IslandService.LoadIsland(player: Player)
 	local plotIndex, plotPos = IslandService.AssignPlotToPlayer(player)
-	local islandData = DataStore.LoadPlayerData(player.UserId) or {}
+	local islandData = DataStore.profiles[player.UserId].Data
 
 	local islandModel = IslandRenderer.RenderIsland(islandData, plotPos)
 	islandModel.Name = player.UserId .. "_Island"

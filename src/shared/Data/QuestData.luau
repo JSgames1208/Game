@@ -4,7 +4,7 @@ local Types = require(ReplicatedStorage.Shared.Types)
 local QuestData: { [string]: Types.QuestDef } = {
 	quest1 = {
 		id = "quest1",
-		name = "Gather Materials",
+		name = "Gather Materials 1",
 		startDialogue = "Bring back 10 grass please.",
 		progressDialogue = "Still waiting on my materials",
 		completeDialogue = "Good boyyyy!",
@@ -18,7 +18,7 @@ local QuestData: { [string]: Types.QuestDef } = {
 	},
 	quest2 = {
 		id = "quest2",
-		name = "Gather Materials",
+		name = "Gather Materials 2",
 		startDialogue = "Bring back 20 grass please.",
 		progressDialogue = "Still waiting on my materials",
 		completeDialogue = "Good boyyyyyyyyyyyy!",
@@ -32,7 +32,7 @@ local QuestData: { [string]: Types.QuestDef } = {
 	},
 	quest3 = {
 		id = "quest2",
-		name = "Gather Materials",
+		name = "Gather Materials 3",
 		startDialogue = "Bring back 20 grass please.",
 		progressDialogue = "Still waiting on my materials",
 		completeDialogue = "Good boyyyyyyyyyyyy!",

@@ -1,26 +1,21 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
-local HotbarSlot = require(StarterGui.UI.Components.HotbarSlot)
-local InventorySlot = require(StarterGui.UI.Components.InventorySlot)
+local HotbarSlot = require(StarterGui.UI.Features.Inventory.HotbarSlot)
+local InventorySlot = require(StarterGui.UI.Features.Inventory.InventorySlot)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 
 local function InventoryFrame(scope: typeof(Fusion.scoped(Fusion)))
-	local s = scope:innerScope({
-		HotbarSlot = HotbarSlot,
-		InventorySlot = InventorySlot,
-	})
-
 	local hotbarChildren = {}
 	for i = 1, 9 do
-		local hotbarSlot = s:HotbarSlot(i)
+		local hotbarSlot = HotbarSlot(scope, i)
 		hotbarSlot:SetAttribute("SlotIndex", i)
 		table.insert(hotbarChildren, hotbarSlot)
 	end
 
 	local rowChildren = {}
 	for i = 1, 9 do
-		local inventorySlot = s:InventorySlot()
+		local inventorySlot = InventorySlot(scope)
 		inventorySlot:SetAttribute("SlotIndex", i)
 		table.insert(rowChildren, inventorySlot)
 	end
@@ -80,14 +75,10 @@ local function InventoryFrame(scope: typeof(Fusion.scoped(Fusion)))
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(83, 83, 83),
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Size = UDim2.new(0.9, 0, 0.9, 0),
+		Size = UDim2.new(0.55, 0, 0.324, 0),
+		SizeConstraint = Enum.SizeConstraint.RelativeXX,
 		Visible = false,
 		[Children] = {
-			scope:New("UIAspectRatioConstraint")({
-				AspectRatio = 1.7,
-				AspectType = Enum.AspectType.FitWithinMaxSize,
-				DominantAxis = Enum.DominantAxis.Width,
-			}),
 			scope:New("Frame")({
 				Name = "Hotbar",
 				AnchorPoint = Vector2.new(0.5, 1),

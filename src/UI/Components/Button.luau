@@ -1,112 +1,98 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UIStroke = require(script.Parent.UIStroke)
-local UICorner = require(script.Parent.UICorner)
-local UIGradient = require(script.Parent.UIGradient)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local OnEvent = Fusion.OnEvent
-local Children = Fusion.Children
-
-local SIZE_HOVER = 1.15
-local SIZE_HELD = 0.85
 
 export type ButtonProps = {
-	Name: string?,
-	Size: UDim2?,
-	Position: UDim2?,
 	AnchorPoint: Vector2?,
-	BackgroundTransparency: number?,
 	BackgroundColor3: Color3?,
-	ImageId: string?,
+	BackgroundTransparency: number?,
+	Name: string?,
+	Position: UDim2?,
+	Rotation: number?,
+	Size: UDim2?,
+	SizeConstraint: Enum.SizeConstraint?,
+	Visible: boolean?,
 	ZIndex: number?,
-	CornerRadius: UDim?,
-	Stroke: { Thickness: number?, Color: Color3? | ColorSequence?, ColorRotation: number?, Transparency: number? }?,
-
+	ClipsDescendants: boolean?,
+	HoverImage: string?,
+	Image: string?,
+	ImageColor3: Color3?,
+	ImageTransparency: number?,
+	PressedImage: string?,
+	ScaleType: Enum.ScaleType?,
 	OnClick: (() -> ())?,
+	Children: typeof(Fusion.Children),
 }
 
 local function Button(scope: typeof(Fusion.scoped(Fusion)), props: ButtonProps)
-	local s = scope:innerScope({
-		UIStroke = UIStroke,
-		UICorner = UICorner,
-		UIGradient = UIGradient,
-	})
-
-	local isHovering = scope:Value(false)
-	local isHeldDown = scope:Value(false)
-
-	props.Name = props.Name or "Button"
-	props.BackgroundTransparency = props.BackgroundTransparency or 1
+	props.AnchorPoint = props.AnchorPoint or Vector2.new(0, 0)
 	props.BackgroundColor3 = props.BackgroundColor3 or Color3.fromRGB(255, 255, 255)
+	props.BackgroundTransparency = props.BackgroundTransparency or 0
+	props.Name = props.Name or "Button"
+	props.Position = props.Position or UDim2.new(0, 0, 0, 0)
+	props.Rotation = props.Rotation or 0
+	props.Size = props.Size or UDim2.new(0, 100, 0, 100)
+	props.SizeConstraint = props.SizeConstraint or Enum.SizeConstraint.RelativeXY
+	props.Visible = props.Visible ~= nil and props.Visible or true
 	props.ZIndex = props.ZIndex or 1
-	props.AnchorPoint = props.AnchorPoint or Vector2.new(0.5, 0.5)
-	props.ImageId = props.ImageId or ""
-	props.Size = props.Size or UDim2.new(0.1, 0, 0.1, 0)
+	props.ClipsDescendants = props.ClipsDescendants or false
+	props.HoverImage = props.HoverImage or ""
+	props.Image = props.Image or ""
+	props.ImageColor3 = props.ImageColor3 or Color3.fromRGB(255, 255, 255)
+	props.ImageTransparency = props.ImageTransparency or 0
+	props.PressedImage = props.PressedImage or ""
+	props.ScaleType = props.ScaleType or Enum.ScaleType.Stretch
 
-	local Stroke
-	if props.Stroke then
-		props.Stroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-		Stroke = s:UIStroke(props.Stroke)
+	props.OnClick = props.OnClick or function()
+		return
 	end
 
-	local Corner
-	if props.CornerRadius then
-		Corner = s:UICorner({ props.CornerRadius })
+	local targetScale = scope:Value(1)
+	local animatedScale = scope:Spring(targetScale, 25, 1)
+
+	local function onEnter()
+		targetScale:set(1.1)
+	end
+	local function onLeave()
+		targetScale:set(1)
+	end
+	local function onDown()
+		targetScale:set(0.9)
+	end
+	local function onUp()
+		targetScale:set(1.1)
 	end
 
 	local size: UDim2 = props.Size :: UDim2
 
-	local originalSize = UDim2.fromScale(size.X.Scale, size.Y.Scale)
-
 	return scope:New("ImageButton")({
+		AnchorPoint = props.AnchorPoint,
+		BackgroundColor3 = props.BackgroundColor3,
+		BackgroundTransparency = props.BackgroundTransparency,
 		Name = props.Name,
 		Position = props.Position,
-		BackgroundColor3 = props.BackgroundColor3,
-		BackgroundTransparency = 1,
+		Rotation = props.Rotation,
+		Size = scope:Computed(function(use)
+			return UDim2.new(size.X.Scale * use(animatedScale), 0, size.Y.Scale * use(animatedScale), 0)
+		end),
+		SizeConstraint = props.SizeConstraint,
+		Visible = props.Visible,
 		ZIndex = props.ZIndex,
-		Image = props.ImageId,
+		ClipsDescendants = props.ClipsDescendants,
+		HoverImage = props.HoverImage,
+		Image = props.Image,
+		ImageColor3 = props.ImageColor3,
+		ImageTransparency = props.ImageTransparency,
+		PressedImage = props.PressedImage,
+		ScaleType = props.ScaleType,
 
-		AnchorPoint = props.AnchorPoint,
+		[Fusion.Children] = props.Children,
 
-		Size = scope:Spring(
-			scope:Computed(function(use)
-				return if use(isHeldDown)
-					then UDim2.fromScale(originalSize.X.Scale * SIZE_HELD, originalSize.Y.Scale * SIZE_HELD)
-					elseif use(isHovering) then UDim2.fromScale(
-						originalSize.X.Scale * SIZE_HOVER,
-						originalSize.Y.Scale * SIZE_HOVER
-					)
-					else originalSize
-			end),
-			40
-		),
-
-		[OnEvent("Activated")] = function()
-			if props.OnClick ~= nil then
-				props.OnClick()
-			end
-		end,
-
-		[OnEvent("MouseButton1Down")] = function()
-			isHeldDown:set(true)
-		end,
-
-		[OnEvent("MouseButton1Up")] = function()
-			isHeldDown:set(false)
-		end,
-
-		[OnEvent("MouseEnter")] = function()
-			isHovering:set(true)
-		end,
-
-		[OnEvent("MouseLeave")] = function()
-			isHeldDown:set(false)
-			isHovering:set(false)
-		end,
-
-		[Children] = {
-			Stroke,
-			Corner,
-		},
+		[OnEvent("MouseEnter")] = onEnter,
+		[OnEvent("MouseLeave")] = onLeave,
+		[OnEvent("MouseButton1Down")] = onDown,
+		[OnEvent("MouseButton1Up")] = onUp,
+		[OnEvent("MouseButton1Click")] = props.OnClick,
 	})
 end
 

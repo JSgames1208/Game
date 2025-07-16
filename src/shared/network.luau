@@ -96,6 +96,20 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		InitQuests = ByteNet.definePacket({
+			value = ByteNet.map(
+				ByteNet.string,
+				ByteNet.struct({
+					progress = ByteNet.struct({
+						collect = ByteNet.optional(ByteNet.map(ByteNet.string, ByteNet.int32)),
+					}),
+					state = ByteNet.string,
+				})
+			),
+		}),
+		CompleteQuest = ByteNet.definePacket({
+			value = ByteNet.string,
+		}),
 	}
 end)
 

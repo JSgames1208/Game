@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CurrencyService = require(script.Parent.CurrencyService)
 local DataStore = require(script.Parent.DataStore)
@@ -5,6 +6,7 @@ local InventoryServer = require(script.Parent.InventoryServer)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local Types = require(ReplicatedStorage.Shared.Types)
+local packets = require(ReplicatedStorage.Shared.network)
 local QuestService = {}
 
 --private functions
@@ -17,10 +19,16 @@ end
 local function setQuestState(player: Player, questId: string, newState: Types.QuestState): ()
 	local profile = DataStore.profiles[player.UserId]
 	local qi = profile.Data.QuestInfo[questId]
-	print(qi)
 	if not qi then
 		qi = { state = newState, progress = {} }
-		print(qi)
+		if QuestData[questId].requirements.collect then
+			if not qi.progress.collect then
+				qi.progress.collect = {}
+			end
+			for item, amount in QuestData[questId].requirements.collect :: { [string]: number } do
+				qi.progress.collect[item] = 0
+			end
+		end
 		profile.Data.QuestInfo[questId] = qi
 	else
 		qi.state = newState
@@ -33,11 +41,19 @@ local function updateQuestProgress(player: Player, questId: string, itemId: stri
 	if not qi then
 		return
 	end
-	if qi.progress[itemId] then
-		qi.progress[itemId] += amount
-	else
-		qi.progress[itemId] = amount
+	if not qi.progress.collect then
+		qi.progress.collect = {}
 	end
+	if qi.progress.collect[itemId] then
+		qi.progress.collect[itemId] += amount
+	else
+		qi.progress.collect[itemId] = amount
+	end
+
+	packets.UpdateQuest.sendTo({
+		questId = questId,
+		progress = qi.progress,
+	}, player)
 end
 
 --public functions
@@ -52,6 +68,10 @@ function QuestService.StartNextQuest(player: Player, npcId: string): string?
 		local state = qi and qi.state or "not_started"
 		if not qi then
 			setQuestState(player, questId, "not_started")
+			packets.UpdateQuest.sendTo({
+				questId = questId,
+				progress = profile.Data.QuestInfo[questId].progress,
+			}, player)
 			return questId
 		elseif state == "not_started" then
 			setQuestState(player, questId, "in_progress")
@@ -78,7 +98,7 @@ function QuestService.OnItemCollected(player: Player, itemId: string, amount: nu
 
 				local done = true
 				for reqItem, reqAmt in pairs(def.requirements.collect) do
-					if (qi.progress[reqItem] or 0) < reqAmt then
+					if (qi.progress.collect[reqItem] or 0) < reqAmt then
 						done = false
 						break
 					end
@@ -109,6 +129,19 @@ function QuestService.CompleteQuest(player: Player, questId: string): ()
 		for _, item in pairs(def.rewards.items) do
 			InventoryServer.GiveItem(player, item.id, item.amount)
 		end
+	end
+
+	packets.CompleteQuest.sendTo(questId, player)
+end
+
+function QuestService.PlayerJoined(player: Player)
+	local profile = DataStore.profiles[player.UserId]
+	local qi = profile.Data.QuestInfo
+
+	print(qi)
+
+	if qi then
+		packets.InitQuests.sendTo(qi, player)
 	end
 end
 

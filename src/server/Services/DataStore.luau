@@ -32,7 +32,7 @@ end
 local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
 	Blocks = {},
 	Inventory = GetBaseInventory(),
-	QuestInfo = {},
+	QuestInfo = {}, -- {questId: string, progress: {collect: {itemId: string = amount: number}?}}
 	Currency = 0,
 })
 
@@ -40,7 +40,9 @@ local DataStore = {}
 
 DataStore.profiles = {} -- [userId] = profile
 
-function DataStore.LoadPlayerData(userId)
+function DataStore.LoadPlayerData(player: Player)
+	local userId = player.UserId
+
 	local success, profile = pcall(function()
 		return profileStore:LoadProfileAsync("Player_" .. userId)
 	end)

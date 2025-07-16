@@ -7,10 +7,10 @@ local RenderBlockToViewport = require(StarterPlayer.StarterPlayerScripts.Client.
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
 
-local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
-local Hotbar: Frame = InventoryGui:WaitForChild("Hotbar") :: Frame
+local MainGui = PlayerGui:WaitForChild("MainGui")
+local Hotbar: Frame = MainGui:WaitForChild("Hotbar") :: Frame
 
-local InventoryFrame: Frame = InventoryGui:WaitForChild("Inventory") :: Frame
+local InventoryFrame: Frame = MainGui:WaitForChild("Inventory") :: Frame
 local OpenHotbar: Frame = InventoryFrame:WaitForChild("Hotbar") :: Frame
 local MainInventory: Frame = InventoryFrame:WaitForChild("MainInventory") :: Frame
 

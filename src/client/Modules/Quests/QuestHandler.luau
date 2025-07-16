@@ -31,13 +31,15 @@ function QuestHandler.UpdateQuest(questId, progress: { collect: { [string]: numb
 
 	if progress.collect and reqs.collect then
 		for itemName, count in progress.collect do
-			if count > reqs.collect[itemName] then
-				questProgress[questId].collect[itemName] = "complete"
+			if count >= reqs.collect[itemName] then
+				continue
 			else
 				questComplete = false
 				continue
 			end
 		end
+
+		QuestUI.UpdateQuest(questId, progress)
 	end
 end
 
@@ -47,6 +49,21 @@ function QuestHandler.Init()
 		if questId and progress then
 			QuestHandler.UpdateQuest(questId, progress)
 		end
+	end)
+
+	packets.InitQuests.listen(function(data)
+		for questId, quest in data do
+			print("HEre")
+			if quest.state ~= "completed" then
+				print("Not here")
+				QuestHandler.UpdateQuest(questId, quest.progress)
+			end
+		end
+	end)
+
+	packets.CompleteQuest.listen(function(questId)
+		questProgress[questId] = nil
+		QuestUI.CompleteQuest(questId)
 	end)
 end
 

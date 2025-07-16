@@ -1,142 +1,106 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UIStroke = require(script.Parent.UIStroke)
-local UICorner = require(script.Parent.UICorner)
-local UIGradient = require(script.Parent.UIGradient)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 
-local Children = Fusion.Children
+type UsedAs<T> = Fusion.UsedAs<T>
 
 export type TextLabelProps = {
-	Name: string?,
-	Text: string,
-	Size: UDim2?,
-	Position: UDim2?,
 	AnchorPoint: Vector2?,
+	BackgroundColor3: Color3?,
 	BackgroundTransparency: number?,
-	BackgroundColor3: Color3? | ColorSequence?,
-	TextColor3: Color3? | ColorSequence?,
-	TextTransparency: number?,
-	TextXAlignment: Enum.TextXAlignment?,
-	TextYAlignment: Enum.TextYAlignment?,
-	BackgroundColorRotation: number?,
-	TextColorRotation: number?,
+	Name: string?,
+	Position: UDim2?,
+	Rotation: number?,
+	Size: UDim2?,
+	SizeConstraint: Enum.SizeConstraint?,
+	Visible: boolean?,
+	ZIndex: number?,
+	ClipsDescendants: boolean?,
 	FontFace: Font?,
+	Text: UsedAs<string>?,
+	TextColor3: Color3?,
 	TextScaled: boolean?,
 	TextSize: number?,
-	ZIndex: number?,
-	CornerRadius: UDim?,
-	Stroke: { Thickness: number?, Color: Color3? | ColorSequence?, ColorRotation: number?, Transparency: number? }?,
-	TextStroke: { Thickness: number?, Color: Color3? | ColorSequence?, ColorRotation: number?, Transparency: number? }?,
+	TextTransparency: UsedAs<number>?,
+	TextWrapped: boolean?,
+	TextXAlignment: Enum.TextXAlignment?,
+	TextYAlignment: Enum.TextYAlignment?,
+
+	BobOnTextChange: boolean?,
+
+	Children: typeof(Fusion.Children),
 }
 
 local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelProps)
-	local s = scope:innerScope({
-		UIStroke = UIStroke,
-		UICorner = UICorner,
-		UIGradient = UIGradient,
-	})
-
-	props.Name = props.Name or "TextLabel"
-	props.BackgroundTransparency = props.BackgroundTransparency or 1
-	props.TextColor3 = props.TextColor3 or Color3.fromRGB(255, 255, 255)
+	props.AnchorPoint = props.AnchorPoint or Vector2.new(0, 0)
 	props.BackgroundColor3 = props.BackgroundColor3 or Color3.fromRGB(255, 255, 255)
-	props.TextScaled = if props.TextScaled == nil and props.TextSize == nil then true else props.TextScaled
-	props.TextSize = if props.TextScaled == nil then props.TextSize else nil
+	props.BackgroundTransparency = props.BackgroundTransparency or 0
+	props.Name = props.Name or "TextLabel"
+	props.Position = props.Position or UDim2.new(0, 0, 0, 0)
+	props.Rotation = props.Rotation or 0
+	props.Size = props.Size or UDim2.new(0, 100, 0, 50)
+	props.SizeConstraint = props.SizeConstraint or Enum.SizeConstraint.RelativeXY
+	props.Visible = props.Visible ~= nil and props.Visible or true
 	props.ZIndex = props.ZIndex or 1
-	props.AnchorPoint = props.AnchorPoint or Vector2.new(0.5, 0.5)
+	props.ClipsDescendants = props.ClipsDescendants or false
+	props.FontFace = props.FontFace or Font.new("rbxasset://fonts/families/ComicNeueAngular.json", Enum.FontWeight.Bold)
+	props.Text = props.Text or ""
+	props.TextColor3 = props.TextColor3 or Color3.fromRGB(0, 0, 0)
+	props.TextScaled = props.TextScaled ~= nil and props.TextScaled or false
+	props.TextSize = props.TextSize or 14
 	props.TextTransparency = props.TextTransparency or 0
+	props.TextWrapped = props.TextWrapped ~= nil and props.TextWrapped or false
 	props.TextXAlignment = props.TextXAlignment or Enum.TextXAlignment.Center
 	props.TextYAlignment = props.TextYAlignment or Enum.TextYAlignment.Center
 
-	props.FontFace = props.FontFace or Font.fromEnum(Enum.Font.FredokaOne)
+	props.BobOnTextChange = props.BobOnTextChange ~= nil and props.BobOnTextChange or false
 
-	local Gradient
-	if typeof(props.TextColor3) == "ColorSequence" then
-		Gradient =
-			s:UIGradient({ Color = props.TextColor3, Rotation = props.TextColorRotation } :: UIGradient.UIGradientProps)
-		props.TextColor3 = Color3.fromRGB(255, 255, 255)
-		props.BackgroundTransparency = 1
+	local targetScale = scope:Value(1)
+	local animatedScale = scope:Tween(
+		scope:Computed(function(use)
+			return use(targetScale)
+		end),
+		TweenInfo.new(0.05, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+	)
+
+	if props.BobOnTextChange and typeof(props.Text) ~= "string" then
+		local observer = scope:Observer(props.Text)
+		observer:onChange(function()
+			targetScale:set(1.2)
+			task.delay(0.05, function()
+				targetScale:set(1)
+			end)
+		end)
 	end
 
-	local Frame
-	local BackgroundGradient
-
-	Frame = scope:New("Frame")({
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundColor3 = props.BackgroundColor3,
-		BackgroundTransparency = props.BackgroundTransparency,
-		ZIndex = props.ZIndex :: number - 2,
-	})
-	if typeof(props.BackgroundColor3) == "ColorSequence" then
-		BackgroundGradient = s:UIGradient(
-			{ Color = props.BackgroundColor3, Rotation = props.BackgroundColorRotation } :: UIGradient.UIGradientProps
-		)
-		BackgroundGradient.Parent = Frame
-		props.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		props.BackgroundTransparency = 1
-	end
-
-	local Stroke
-	if props.Stroke then
-		props.Stroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
-		props.Stroke["Enabled"] = true
-		Stroke = s:UIStroke(props.Stroke)
-	end
-
-	local t
-	local TextStroke
-	t = scope:New("TextLabel")({
-		Text = props.Text,
-		Size = UDim2.new(1, 0, 1, 0),
-		Position = UDim2.new(0, 0, 0, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BackgroundTransparency = 1,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		FontFace = props.FontFace,
-		TextScaled = props.TextScaled,
-		ZIndex = props.ZIndex :: number - 1,
-		TextSize = props.TextSize or 1,
-
-		AnchorPoint = Vector2.new(0, 0),
-	})
-	if props.TextStroke then
-		props.TextStroke["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Contextual
-		props.TextStroke["Enabled"] = true
-		TextStroke = s:UIStroke(props.TextStroke)
-		TextStroke.Parent = t
-	end
-
-	local Corner
-	if props.CornerRadius then
-		Corner = s:UICorner({ props.CornerRadius })
-	end
+	local size: UDim2 = props.Size :: UDim2
 
 	return scope:New("TextLabel")({
-		Text = props.Text,
-		Size = props.Size,
+		AnchorPoint = props.AnchorPoint,
+		BackgroundColor3 = props.BackgroundColor3,
+		BackgroundTransparency = props.BackgroundTransparency,
+		Name = props.Name,
 		Position = props.Position,
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-		BackgroundTransparency = 1,
-		TextColor3 = props.TextColor3,
-		FontFace = props.FontFace,
-		TextScaled = props.TextScaled,
+		Rotation = props.Rotation,
+		Size = if not props.BobOnTextChange
+			then props.Size
+			else scope:Computed(function(use)
+				return UDim2.new(size.X.Scale * use(animatedScale), 0, size.Y.Scale * use(animatedScale))
+			end),
+		SizeConstraint = props.SizeConstraint,
+		Visible = props.Visible,
 		ZIndex = props.ZIndex,
-		TextSize = props.TextSize or 1,
+		ClipsDescendants = props.ClipsDescendants,
+		FontFace = props.FontFace,
+		Text = props.Text,
+		TextColor3 = props.TextColor3,
+		TextScaled = props.TextScaled,
+		TextSize = props.TextSize,
 		TextTransparency = props.TextTransparency,
-
+		TextWrapped = props.TextWrapped,
 		TextXAlignment = props.TextXAlignment,
 		TextYAlignment = props.TextYAlignment,
 
-		AnchorPoint = props.AnchorPoint,
-
-		[Children] = {
-			Gradient,
-			Frame,
-			Stroke,
-			t,
-			Corner,
-		},
+		[Fusion.Children] = props.Children,
 	})
 end
 

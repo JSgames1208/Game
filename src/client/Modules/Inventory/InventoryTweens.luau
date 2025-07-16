@@ -6,10 +6,10 @@ local PlayerGui = player.PlayerGui
 local slotSizeTweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 local slotColorTweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
-local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
-local Hotbar: Frame = InventoryGui:WaitForChild("Hotbar") :: Frame
+local MainGui = PlayerGui:WaitForChild("MainGui")
+local Hotbar: Frame = MainGui:WaitForChild("Hotbar") :: Frame
 
-local InventoryFrame: Frame = InventoryGui:WaitForChild("Inventory") :: Frame
+local InventoryFrame: Frame = MainGui:WaitForChild("Inventory") :: Frame
 local OpenHotbar: Frame = InventoryFrame:WaitForChild("Hotbar") :: Frame
 local MainInventory: Frame = InventoryFrame:WaitForChild("MainInventory") :: Frame
 

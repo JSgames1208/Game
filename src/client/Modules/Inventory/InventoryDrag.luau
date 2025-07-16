@@ -8,9 +8,9 @@ local InventoryHandler = require(script.Parent.InventoryHandler)
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
 
-local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
+local MainGui = PlayerGui:WaitForChild("MainGui")
 
-local InventoryFrame: Frame = InventoryGui:WaitForChild("Inventory") :: Frame
+local InventoryFrame: Frame = MainGui:WaitForChild("Inventory") :: Frame
 local OpenHotbar: Frame = InventoryFrame:WaitForChild("Hotbar") :: Frame
 local MainInventory: Frame = InventoryFrame:WaitForChild("MainInventory") :: Frame
 
@@ -43,7 +43,7 @@ local function processInputs()
 			dragClone.AnchorPoint = Vector2.new(0, 0)
 			dragClone.Size = UDim2.new(0, originalSlot.AbsoluteSize.X, 0, originalSlot.AbsoluteSize.Y)
 			dragClone.Position = UDim2.new(0, originalSlot.AbsolutePosition.X, 0, originalSlot.AbsolutePosition.Y)
-			dragClone.Parent = InventoryGui
+			dragClone.Parent = MainGui
 			dragClone.ZIndex = 1000
 			dragClone.BackgroundTransparency = 0.7
 

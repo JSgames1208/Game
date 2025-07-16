@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TextLabel = require(script.Parent.TextLabel)
-local UIStroke = require(script.Parent.UIStroke)
+local StarterGui = game:GetService("StarterGui")
+local TextLabel = require(StarterGui.UI.Components.TextLabel)
+local UIStroke = require(StarterGui.UI.Components.UIStroke)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 

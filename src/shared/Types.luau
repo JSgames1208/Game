@@ -5,6 +5,7 @@ export type QuestState = "not_started" | "in_progress" | "ready_to_turn_in" | "c
 
 export type QuestDef = {
 	id: string,
+	name: string,
 	startDialogue: string,
 	progressDialogue: string,
 	completeDialogue: string,
@@ -19,7 +20,7 @@ export type QuestDef = {
 
 export type QuestInfo = {
 	state: QuestState,
-	progress: { [string]: number }, -- itemId -> collected count
+	progress: { collect: { [string]: number }? }, -- itemId -> collected count
 }
 
 export type NPCConfig = {

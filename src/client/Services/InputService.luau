@@ -10,8 +10,8 @@ local ToolService = require(StarterPlayer.StarterPlayerScripts.Client.Services.T
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
 
-local InventoryGui = PlayerGui:WaitForChild("InventoryGui")
-local Hotbar = InventoryGui:WaitForChild("Hotbar")
+local MainGui = PlayerGui:WaitForChild("MainGui")
+local Hotbar = MainGui:WaitForChild("Hotbar")
 
 local InputService = {}
 
