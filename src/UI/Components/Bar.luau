@@ -9,6 +9,7 @@ export type BarProps = {
 	Name: string?,
 	PreText: string?,
 	currentValue: UsedAs<number>,
+	questComplete: UsedAs<boolean>,
 	maxValue: number,
 	BackgroundColor: Color3,
 	BarColor: Color3,
@@ -27,6 +28,7 @@ local function Bar(scope: typeof(Fusion.scoped(Fusion)), props: BarProps)
 
 	local currentValue = props.currentValue
 	local maxValue = props.maxValue
+	local questComplete = props.questComplete
 
 	return scope:New("Frame")({
 		Name = props.Name,
@@ -61,18 +63,26 @@ local function Bar(scope: typeof(Fusion.scoped(Fusion)), props: BarProps)
 				{
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					Position = UDim2.new(0.5, 0, 0.5, 0),
-					Size = UDim2.new(0.4, 0, 1.1, 0),
+					Size = UDim2.new(1, 0, 1, 0),
 					BackgroundTransparency = 1,
-					BobOnTextChange = true,
+					BobOnTextChange = false,
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					Text = scope:Computed(function(use)
-						return props.PreText :: string .. tostring(use(currentValue)) .. "/" .. (tostring(maxValue))
+						local text = ""
+						if use(questComplete) then
+							text = "Completed! Return to the quest giver!"
+						elseif use(currentValue) >= maxValue then
+							text = "Completed!"
+						else
+							text = tostring(use(currentValue)) .. "/" .. (tostring(maxValue))
+						end
+						return props.PreText :: string .. text
 					end),
 					TextScaled = true,
 					ZIndex = 2,
 					Children = {
 						scope:New("UIStroke")({
-							Thickness = 5,
+							Thickness = 3,
 							Color = Color3.fromRGB(0, 0, 0),
 						}),
 					},

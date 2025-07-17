@@ -12,16 +12,6 @@ function PlacementCalculator.CalculatePlacePosition(
 	end
 
 	local basePos = if plotPosition then worldPosition - plotPosition else worldPosition
-	print(plotPosition)
-	print(basePos)
-
-	print(
-		Vector3.new(
-			math.floor(basePos.X / 4 + 0.5) + normal.X,
-			math.floor(basePos.Y / 4 + 0.5) + normal.Y,
-			math.floor(basePos.Z / 4 + 0.5) + normal.Z
-		)
-	)
 
 	return Vector3.new(
 		math.floor(basePos.X / 4 + 0.5) + normal.X,

@@ -19,6 +19,21 @@ local currentSlot = nil
 local plotPosition = nil
 
 function BlockPlacerService.Start()
+	print("Start")
+	packets.AssignPlot.listen(function(pos)
+		print(pos)
+		plotPosition = pos
+	end)
+
+	packets.InventorySync.listen(function(data)
+		if not currentSlot then
+			return
+		end
+		if data and data[currentSlot] and data[currentSlot].count <= 0 then
+			BlockPlacerService.SelectBlock("nothing", currentSlot)
+		end
+	end)
+
 	RunService.RenderStepped:Connect(function()
 		if currentBlock then
 			ItemEquip.Equip(currentBlock)
@@ -68,18 +83,5 @@ function BlockPlacerService.Place()
 
 	BlockRequestHandler.PlaceBlock(placePos, currentBlock, currentSlot)
 end
-
-packets.InventorySync.listen(function(data)
-	if not currentSlot then
-		return
-	end
-	if data and data[currentSlot] and data[currentSlot].count <= 0 then
-		BlockPlacerService.SelectBlock("nothing", currentSlot)
-	end
-end)
-
-packets.AssignPlot.listen(function(pos)
-	plotPosition = pos
-end)
 
 return BlockPlacerService

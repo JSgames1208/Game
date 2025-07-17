@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local QuestUI = require(script.Parent.QuestUI)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
+local Types = require(ReplicatedStorage.Shared.Types)
 local packets = require(ReplicatedStorage.Shared.network)
 
 local questProgress = {}
@@ -14,7 +15,11 @@ QuestHandler.luau:
 
 local QuestHandler = {}
 
-function QuestHandler.UpdateQuest(questId, progress: { collect: { [string]: number }? })
+function QuestHandler.UpdateQuest(
+	questId,
+	state: Types.QuestState,
+	progress: { collect: { [string]: number }?, mine: { [string]: number } }
+)
 	local quest = QuestData[questId]
 	if not quest then
 		return
@@ -29,9 +34,28 @@ function QuestHandler.UpdateQuest(questId, progress: { collect: { [string]: numb
 
 	questProgress[questId] = progress
 
+	if state == "ready_to_turn_in" then
+		QuestUI.UpdateQuest(questId, progress)
+		QuestUI.Ready(questId)
+		return
+	end
+
 	if progress.collect and reqs.collect then
 		for itemName, count in progress.collect do
 			if count >= reqs.collect[itemName] then
+				continue
+			else
+				questComplete = false
+				continue
+			end
+		end
+
+		QuestUI.UpdateQuest(questId, progress)
+	end
+
+	if progress.mine and reqs.mine then
+		for itemName, count in progress.mine do
+			if count >= reqs.mine[itemName] then
 				continue
 			else
 				questComplete = false
@@ -45,18 +69,16 @@ end
 
 function QuestHandler.Init()
 	packets.UpdateQuest.listen(function(data)
-		local questId, progress = data.questId, data.progress
+		local questId, state, progress = data.questId, data.state, data.progress
 		if questId and progress then
-			QuestHandler.UpdateQuest(questId, progress)
+			QuestHandler.UpdateQuest(questId, state, progress)
 		end
 	end)
 
 	packets.InitQuests.listen(function(data)
 		for questId, quest in data do
-			print("HEre")
 			if quest.state ~= "completed" then
-				print("Not here")
-				QuestHandler.UpdateQuest(questId, quest.progress)
+				QuestHandler.UpdateQuest(questId, quest.state, quest.progress)
 			end
 		end
 	end)

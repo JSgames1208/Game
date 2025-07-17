@@ -11,6 +11,7 @@ export type QuestDef = {
 	completeDialogue: string,
 	requirements: {
 		collect: { [string]: number }?, -- itemId -> amount
+		mine: { [string]: number }?,
 	},
 	rewards: {
 		currency: number?,

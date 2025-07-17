@@ -22,13 +22,11 @@ function QuestUI.Init() end
 
 function QuestUI.StartQuest() end
 
-function QuestUI.UpdateQuest(questId: string, progress: { collect: { [string]: number }? })
-	print(questId, progress)
+function QuestUI.UpdateQuest(questId: string, progress: { collect: { [string]: number }?, mine: { [string]: number }? })
 	if questProgress[questId] and questProgress[questId].collect and progress.collect then
 		for itemId, amount in questProgress[questId].collect do
 			if scope.peek(questProgress[questId].collect[itemId]) ~= progress.collect[itemId] then
 				questProgress[questId].collect[itemId]:set(progress.collect[itemId])
-				print(scope.peek(questProgress[questId].collect[itemId]))
 			end
 		end
 	else
@@ -41,15 +39,33 @@ function QuestUI.UpdateQuest(questId: string, progress: { collect: { [string]: n
 				if not questProgress[questId].collect then
 					questProgress[questId].collect = {}
 				end
-
+				questProgress[questId].complete = scope:Value(false)
 				questProgress[questId].collect[itemId] = scope:Value(progress.collect[itemId])
 			end
 		end
 
-		local quest = Quest(scope, questProgress[questId], questId)
+		if QuestData[questId].requirements.mine ~= nil and progress.mine then
+			for itemId, count in QuestData[questId].requirements.mine :: { [string]: number } do
+				if not questProgress[questId] then
+					questProgress[questId] = {}
+				end
+				if not questProgress[questId].mine then
+					questProgress[questId].mine = {}
+				end
+				questProgress[questId].complete = scope:Value(false)
+				questProgress[questId].mine[itemId] = scope:Value(progress.mine[itemId])
+			end
+		end
+
+		local quest = Quest(scope, questProgress[questId], questProgress[questId].complete, questId)
 		quest.Parent = ScrollingFrame
 		quests[questId] = quest
 	end
+end
+
+function QuestUI.Ready(questId)
+	print("Quest is ready!")
+	questProgress[questId].complete:set(true)
 end
 
 function QuestUI.Update() end

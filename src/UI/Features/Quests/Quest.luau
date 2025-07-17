@@ -10,20 +10,27 @@ type UsedAs<T> = Fusion.UsedAs<T>
 
 local function Quest(
 	scope: typeof(Fusion.scoped(Fusion)),
-	progress: { collect: { [string]: UsedAs<number> }? },
+	progress: { collect: { [string]: UsedAs<number> }?, mine: { [string]: UsedAs<number> }? },
+	questComplete: UsedAs<boolean>,
 	questId
 )
 	local quest = QuestData[questId]
 
 	local collectCount = 0
-	print(progress)
 	if progress.collect then
 		for _, _ in progress.collect do
 			collectCount += 1
 		end
 	end
 
-	local barCount = collectCount
+	local mineCount = 0
+	if progress.mine then
+		for _, _ in progress.mine do
+			mineCount += 1
+		end
+	end
+
+	local barCount = collectCount + mineCount
 
 	local bars = {}
 
@@ -36,6 +43,28 @@ local function Quest(
 					PreText = "Collect " .. tostring(amount) .. " " .. item .. ": ",
 					currentValue = progress.collect[item],
 					maxValue = amount,
+					questComplete = questComplete,
+					BackgroundColor = Color3.fromRGB(60, 60, 60),
+					BarColor = Color3.fromRGB(130, 130, 130),
+					Size = UDim2.new(1, 0, 1 / 4, 0),
+					SizeConstraint = Enum.SizeConstraint.RelativeXX,
+					Children = {},
+				} :: Bar.BarProps
+			)
+			table.insert(bars, bar)
+		end
+	end
+
+	for item, amount in quest.requirements.mine do
+		if progress.mine then
+			local bar = Bar(
+				scope,
+				{
+					Name = questId .. "/" .. item,
+					PreText = "Break " .. tostring(amount) .. " " .. item .. ": ",
+					currentValue = progress.mine[item],
+					maxValue = amount,
+					questComplete = questComplete,
 					BackgroundColor = Color3.fromRGB(60, 60, 60),
 					BarColor = Color3.fromRGB(130, 130, 130),
 					Size = UDim2.new(1, 0, 1 / 4, 0),

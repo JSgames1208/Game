@@ -90,6 +90,7 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 		UpdateQuest = ByteNet.definePacket({
 			value = ByteNet.struct({
 				questId = ByteNet.string,
+				state = ByteNet.string,
 				progress = ByteNet.struct({
 					collect = ByteNet.optional(ByteNet.map(ByteNet.string, ByteNet.int32)),
 				}),

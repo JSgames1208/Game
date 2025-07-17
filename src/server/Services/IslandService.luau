@@ -91,6 +91,8 @@ function IslandService.LoadIsland(player: Player)
 		end
 	end
 
+	print(plotPos)
+
 	packets.AssignPlot.sendTo(plotPos, player)
 	--return islandModel
 end
@@ -142,7 +144,6 @@ local function CheckGrass(player: Player, pos: Vector3)
 end
 
 function IslandService.PlaceFallingBlock(player: Player, gridPos: Vector3, blockId: string)
-	--print("PLACE FALLING BLOCK!")
 	EntityService.SpawnFallingBlock(
 		player,
 		PlayerIslands[player.UserId].PlotPosition + gridPos * 4,
@@ -278,9 +279,11 @@ local function CheckBlockAbove(player: Player, pos: string)
 				QuestService.OnItemCollected(player, drop, amount)
 			end
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
-			for _, posStr in blocks[checkPosStr].blocked do
-				if blocks[posStr].parent == checkPosStr then
-					blocks[posStr] = nil
+			if blocks[checkPosStr].blocked then
+				for _, posStr in blocks[checkPosStr].blocked do
+					if blocks[posStr].parent == checkPosStr then
+						blocks[posStr] = nil
+					end
 				end
 			end
 			blocks[checkPosStr] = nil
@@ -322,6 +325,7 @@ function IslandService.MineBlock(player: Player, pos: string)
 					QuestService.OnItemCollected(player, itemId, amount)
 				end
 				--InventoryServer.GiveItem(player, block.id, ItemLibrary.itemDefinitions[block.id].dropAmount)
+				QuestService.OnBlockMined(player, block.id)
 
 				CheckBlockAbove(player, pos)
 

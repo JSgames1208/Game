@@ -20,10 +20,7 @@ local function GetBaseInventory()
 	inventory[2] = { itemInfo = { id = "golden pickaxe" }, count = 1 }
 	inventory[3] = { itemInfo = { id = "diamond pickaxe" }, count = 1 }
 	inventory[4] = { itemInfo = { id = "obsidian pickaxe" }, count = 1 }
-	for i = 5, 9 do
-		inventory[i] = { itemInfo = { id = "dirt" }, count = 1 }
-	end
-	for i = 10, 45 do
+	for i = 5, 45 do
 		inventory[i] = { itemInfo = { id = "nothing" }, count = 0 }
 	end
 	return inventory
@@ -36,12 +33,29 @@ local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
 	Currency = 0,
 })
 
+local TEST_MODE = true
+
 local DataStore = {}
 
 DataStore.profiles = {} -- [userId] = profile
 
 function DataStore.LoadPlayerData(player: Player)
 	local userId = player.UserId
+
+	if TEST_MODE then
+		warn("[TEST_MODE] Skipping data load for userId:", userId)
+		local mockProfile = {
+			Data = {
+				Blocks = table.clone(defaultBlocks),
+				Inventory = GetBaseInventory(),
+				QuestInfo = {},
+				Currency = 0,
+			},
+			Release = function() end,
+		}
+		DataStore.profiles[userId] = mockProfile
+		return mockProfile.Data
+	end
 
 	local success, profile = pcall(function()
 		return profileStore:LoadProfileAsync("Player_" .. userId)
@@ -89,6 +103,11 @@ function DataStore.LoadPlayerData(player: Player)
 end
 
 function DataStore.SavePlayerData(userId)
+	if TEST_MODE then
+		warn("[TEST_MODE] Skipping save for userId:", userId)
+		return
+	end
+
 	local profile = DataStore.profiles[userId]
 	if profile then
 		local success, err = pcall(function()
@@ -103,8 +122,12 @@ end
 function DataStore.ReleasePlayerData(userId)
 	local profile = DataStore.profiles[userId]
 	if profile then
+		if TEST_MODE then
+			warn("[TEST_MODE] Skipping profile release for userId:", userId)
+			DataStore.profiles[userId] = nil
+			return
+		end
 		profile:Release()
-		--profileStore:WipeProfileAsync("Player_" .. userId, false)
 	end
 end
 
