@@ -24,6 +24,8 @@ function DialogueService.StartDialogue(player: Player, npcId: string)
 
 	print(npc, nextQuestId, state)
 
+	print(nextQuestId, state)
+
 	if nextQuestId then
 		if state == "in_progress" then
 			packets.ShowDialogue.sendTo({

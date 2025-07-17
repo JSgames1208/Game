@@ -1,4 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
+local NotificationService = require(StarterPlayer.StarterPlayerScripts.Client.Services.NotificationService)
 local QuestUI = require(script.Parent.QuestUI)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local Types = require(ReplicatedStorage.Shared.Types)
@@ -15,55 +17,43 @@ QuestHandler.luau:
 
 local QuestHandler = {}
 
-function QuestHandler.UpdateQuest(
-	questId,
-	state: Types.QuestState,
-	progress: { collect: { [string]: number }?, mine: { [string]: number } }
-)
+function QuestHandler.UpdateQuest(questId, state: Types.QuestState, progress: { { amount: number } })
+	if state == "completed" or (questProgress[questId] and questProgress[questId].state == "ready_to_turn_in") then
+		return
+	end
+
 	local quest = QuestData[questId]
 	if not quest then
 		return
 	end
 
-	local reqs = quest.requirements
-	if not reqs then
+	local objectives = quest.objectives
+	if not objectives then
 		return
 	end
 
 	local questComplete = true
 
-	questProgress[questId] = progress
+	if not questProgress[questId] then
+		questProgress[questId] = {}
+	end
+	questProgress[questId].progress = progress
+	questProgress[questId].state = state
 
-	if state == "ready_to_turn_in" then
-		QuestUI.UpdateQuest(questId, progress)
+	for i, objective in ipairs(objectives) do
+		local progressEntry = progress[i]
+		if not progressEntry or progressEntry.amount < objective.amount then
+			questComplete = false
+			break
+		end
+	end
+
+	QuestUI.UpdateQuest(questId, state, progress)
+
+	if questComplete then
+		questProgress[questId].state = "ready_to_turn_in"
 		QuestUI.Ready(questId)
-		return
-	end
-
-	if progress.collect and reqs.collect then
-		for itemName, count in progress.collect do
-			if count >= reqs.collect[itemName] then
-				continue
-			else
-				questComplete = false
-				continue
-			end
-		end
-
-		QuestUI.UpdateQuest(questId, progress)
-	end
-
-	if progress.mine and reqs.mine then
-		for itemName, count in progress.mine do
-			if count >= reqs.mine[itemName] then
-				continue
-			else
-				questComplete = false
-				continue
-			end
-		end
-
-		QuestUI.UpdateQuest(questId, progress)
+		NotificationService.AddNotification(`Quest complete: {QuestData[questId].name}`)
 	end
 end
 

@@ -3,16 +3,33 @@
 
 export type QuestState = "not_started" | "in_progress" | "ready_to_turn_in" | "completed"
 
+export type QuestObjective = {
+	type: "collect",
+	id: string,
+	amount: number,
+} | {
+	type: "mine",
+	id: string,
+	amount: number,
+} | {
+	type: "defeat",
+	id: string,
+	amount: number,
+} | {
+	type: "place",
+	id: string,
+	amount: number,
+}
+
 export type QuestDef = {
 	id: string,
 	name: string,
 	startDialogue: string,
 	progressDialogue: string,
 	completeDialogue: string,
-	requirements: {
-		collect: { [string]: number }?, -- itemId -> amount
-		mine: { [string]: number }?,
-	},
+
+	objectives: { QuestObjective }, -- new unified objective system
+
 	rewards: {
 		currency: number?,
 		items: { { id: string, amount: number } }?,

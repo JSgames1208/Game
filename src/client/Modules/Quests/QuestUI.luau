@@ -22,62 +22,43 @@ function QuestUI.Init() end
 
 function QuestUI.StartQuest() end
 
-function QuestUI.UpdateQuest(questId: string, progress: { collect: { [string]: number }?, mine: { [string]: number }? })
-	if questProgress[questId] and questProgress[questId].collect and progress.collect then
-		for itemId, amount in questProgress[questId].collect do
-			if scope.peek(questProgress[questId].collect[itemId]) ~= progress.collect[itemId] then
-				questProgress[questId].collect[itemId]:set(progress.collect[itemId])
+function QuestUI.UpdateQuest(questId: string, state: string, progress: { { amount: number } })
+	if questProgress[questId] then
+		for i, progressObj in ipairs(progress) do
+			if scope.peek(questProgress[questId][i]) ~= progressObj.amount then
+				questProgress[questId][i]:set(progressObj.amount)
 			end
 		end
 	else
-		--Make quest
-		if QuestData[questId].requirements.collect ~= nil and progress.collect then
-			for itemId, count in QuestData[questId].requirements.collect :: { [string]: number } do
-				if not questProgress[questId] then
-					questProgress[questId] = {}
-				end
-				if not questProgress[questId].collect then
-					questProgress[questId].collect = {}
-				end
-				questProgress[questId].complete = scope:Value(false)
-				questProgress[questId].collect[itemId] = scope:Value(progress.collect[itemId])
-			end
+		questProgress[questId] = {}
+
+		for i, progressObj in ipairs(progress) do
+			questProgress[questId][i] = scope:Value(progressObj.amount)
 		end
 
-		if QuestData[questId].requirements.mine ~= nil and progress.mine then
-			for itemId, count in QuestData[questId].requirements.mine :: { [string]: number } do
-				if not questProgress[questId] then
-					questProgress[questId] = {}
-				end
-				if not questProgress[questId].mine then
-					questProgress[questId].mine = {}
-				end
-				questProgress[questId].complete = scope:Value(false)
-				questProgress[questId].mine[itemId] = scope:Value(progress.mine[itemId])
-			end
-		end
+		local completeSignal = scope:Value(state == "ready_to_turn_in")
+		local questUI = Quest(scope, questProgress[questId], completeSignal, questId)
 
-		local quest = Quest(scope, questProgress[questId], questProgress[questId].complete, questId)
-		quest.Parent = ScrollingFrame
-		quests[questId] = quest
+		questUI.Parent = ScrollingFrame
+		quests[questId] = {
+			instance = questUI,
+			complete = completeSignal,
+		}
 	end
 end
 
 function QuestUI.Ready(questId)
-	print("Quest is ready!")
-	questProgress[questId].complete:set(true)
+	if quests[questId] then
+		quests[questId].complete:set(true)
+	end
 end
 
-function QuestUI.Update() end
-
 function QuestUI.CompleteQuest(questId: string)
-	--Remove quest
-
 	questProgress[questId] = nil
 	if quests[questId] then
-		quests[questId]:Destroy()
+		quests[questId].instance:Destroy()
+		quests[questId] = nil
 	end
-	quests[questId] = nil
 end
 
 return QuestUI

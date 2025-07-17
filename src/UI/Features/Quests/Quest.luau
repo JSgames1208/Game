@@ -8,77 +8,49 @@ local Children = Fusion.Children
 
 type UsedAs<T> = Fusion.UsedAs<T>
 
+local typeLabels = {
+	collect = "Collect",
+	mine = "Mine",
+	place = "Place",
+	defeat = "Defeat",
+}
+
 local function Quest(
 	scope: typeof(Fusion.scoped(Fusion)),
-	progress: { collect: { [string]: UsedAs<number> }?, mine: { [string]: UsedAs<number> }? },
+	progress: { UsedAs<number> },
 	questComplete: UsedAs<boolean>,
 	questId
 )
 	local quest = QuestData[questId]
-
-	local collectCount = 0
-	if progress.collect then
-		for _, _ in progress.collect do
-			collectCount += 1
-		end
-	end
-
-	local mineCount = 0
-	if progress.mine then
-		for _, _ in progress.mine do
-			mineCount += 1
-		end
-	end
-
-	local barCount = collectCount + mineCount
-
+	local objectives = quest.objectives
 	local bars = {}
 
-	for item, amount in quest.requirements.collect do
-		if progress.collect then
-			local bar = Bar(
-				scope,
-				{
-					Name = questId .. "/" .. item,
-					PreText = "Collect " .. tostring(amount) .. " " .. item .. ": ",
-					currentValue = progress.collect[item],
-					maxValue = amount,
-					questComplete = questComplete,
-					BackgroundColor = Color3.fromRGB(60, 60, 60),
-					BarColor = Color3.fromRGB(130, 130, 130),
-					Size = UDim2.new(1, 0, 1 / 4, 0),
-					SizeConstraint = Enum.SizeConstraint.RelativeXX,
-					Children = {},
-				} :: Bar.BarProps
-			)
-			table.insert(bars, bar)
-		end
+	for i, objective in ipairs(objectives) do
+		local labelPrefix = typeLabels[objective.type] or objective.type
+
+		local bar = Bar(
+			scope,
+			{
+				Name = `{questId}/{objective.type}/{objective.id}`,
+				PreText = `{labelPrefix} {objective.amount} {objective.id}: `,
+				currentValue = progress[i],
+				maxValue = objective.amount,
+				BackgroundColor = Color3.fromRGB(60, 60, 60),
+				BarColor = Color3.fromRGB(130, 130, 130),
+				Size = UDim2.new(1, 0, 1 / 4, 0),
+				SizeConstraint = Enum.SizeConstraint.RelativeXX,
+				Children = {},
+			} :: Bar.BarProps
+		)
+
+		table.insert(bars, bar)
 	end
 
-	for item, amount in quest.requirements.mine do
-		if progress.mine then
-			local bar = Bar(
-				scope,
-				{
-					Name = questId .. "/" .. item,
-					PreText = "Break " .. tostring(amount) .. " " .. item .. ": ",
-					currentValue = progress.mine[item],
-					maxValue = amount,
-					questComplete = questComplete,
-					BackgroundColor = Color3.fromRGB(60, 60, 60),
-					BarColor = Color3.fromRGB(130, 130, 130),
-					Size = UDim2.new(1, 0, 1 / 4, 0),
-					SizeConstraint = Enum.SizeConstraint.RelativeXX,
-					Children = {},
-				} :: Bar.BarProps
-			)
-			table.insert(bars, bar)
-		end
-	end
+	local totalBars = #bars
 
 	return scope:New("Frame")({
 		Name = "TestFrame",
-		Size = UDim2.new(0.9, 0, 0.9 * (barCount + 1) / 4, 0),
+		Size = UDim2.new(0.9, 0, 0.9 * (totalBars + 1) / 4, 0),
 		SizeConstraint = Enum.SizeConstraint.RelativeXX,
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0, 0),
@@ -104,15 +76,15 @@ local function Quest(
 						}),
 					},
 					SizeConstraint = Enum.SizeConstraint.RelativeXY,
-					Size = UDim2.new(1, 0, 1 / (barCount + 1), 0),
+					Size = UDim2.new(1, 0, 1 / (totalBars + 1), 0),
 				} :: TextLabel.TextLabelProps
 			),
 			scope:New("Frame")({
 				BackgroundTransparency = 1,
 				BackgroundColor3 = Color3.fromRGB(60, 60, 60),
 				AnchorPoint = Vector2.new(0, 0),
-				Position = UDim2.new(0, 0, 1 / (barCount + 1), 0),
-				Size = UDim2.new(1, 0, 1 - 1 / (barCount + 1), 0),
+				Position = UDim2.new(0, 0, 1 / (totalBars + 1), 0),
+				Size = UDim2.new(1, 0, 1 - 1 / (totalBars + 1), 0),
 				[Children] = {
 					scope:New("UIListLayout")({
 						HorizontalAlignment = Enum.HorizontalAlignment.Center,

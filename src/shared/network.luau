@@ -91,9 +91,9 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			value = ByteNet.struct({
 				questId = ByteNet.string,
 				state = ByteNet.string,
-				progress = ByteNet.struct({
-					collect = ByteNet.optional(ByteNet.map(ByteNet.string, ByteNet.int32)),
-				}),
+				progress = ByteNet.array(ByteNet.struct({
+					amount = ByteNet.int32,
+				})),
 			}),
 			reliabilityType = "reliable",
 		}),
@@ -101,10 +101,10 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			value = ByteNet.map(
 				ByteNet.string,
 				ByteNet.struct({
-					progress = ByteNet.struct({
-						collect = ByteNet.optional(ByteNet.map(ByteNet.string, ByteNet.int32)),
-					}),
 					state = ByteNet.string,
+					progress = ByteNet.array(ByteNet.struct({
+						amount = ByteNet.int32,
+					})),
 				})
 			),
 		}),

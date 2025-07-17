@@ -90,6 +90,14 @@ local function TestFrame(scope: typeof(Fusion.scoped(Fusion)))
 					print(use(screenSize))
 					return UDim2.new(0, 0, 0, use(screenSize).X / 25)
 				end),
+				[Children] = {
+					scope:New("UIListLayout")({
+						SortOrder = Enum.SortOrder.LayoutOrder,
+						Padding = UDim.new(0, 10),
+						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+						VerticalAlignment = Enum.VerticalAlignment.Top,
+					}),
+				},
 			}),
 		},
 	})

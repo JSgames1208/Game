@@ -188,6 +188,11 @@ function IslandService.PlaceBlock(player: Player, pos, blockId)
 			)
 			if not (result and result.Instance and result.Instance.Anchored) then
 				IslandService.PlaceFallingBlock(player, gridPos, blockId)
+				QuestService.HandleEvent(player, {
+					type = "place",
+					id = blockId,
+					amount = 1,
+				})
 				return true
 			end
 		end
@@ -220,6 +225,11 @@ function IslandService.PlaceBlock(player: Player, pos, blockId)
 		CheckGrass(player, gridPos)
 	end
 
+	QuestService.HandleEvent(player, {
+		type = "place",
+		id = blockId,
+		amount = 1,
+	})
 	return true
 end
 
@@ -243,6 +253,12 @@ function IslandService.PlaceModel(player: Player, pos: Vector3, modelId: string)
 
 	local block = IslandRenderer.SetBlock(island.IslandModel, gridPos + island.PlotPosition / 4, modelId)
 	block.Name = BlockCoord.GetName(gridPos)
+
+	QuestService.HandleEvent(player, {
+		type = "place",
+		id = modelId,
+		amount = 1,
+	})
 	return true
 end
 
@@ -276,7 +292,11 @@ local function CheckBlockAbove(player: Player, pos: string)
 		if type == "tree" or type == "sapling" then
 			for drop, amount in itemDef.drops do
 				InventoryServer.GiveItem(player, drop, amount)
-				QuestService.OnItemCollected(player, drop, amount)
+				QuestService.HandleEvent(player, {
+					type = "collect",
+					id = drop,
+					amount = amount,
+				})
 			end
 			IslandRenderer.RemoveBlock(island.IslandModel, checkPosStr)
 			if blocks[checkPosStr].blocked then
@@ -322,10 +342,18 @@ function IslandService.MineBlock(player: Player, pos: string)
 
 				for itemId, amount in ItemLibrary.itemDefinitions[block.id].drops do
 					InventoryServer.GiveItem(player, itemId, amount)
-					QuestService.OnItemCollected(player, itemId, amount)
+					QuestService.HandleEvent(player, {
+						type = "collect",
+						id = itemId,
+						amount = amount,
+					})
 				end
 				--InventoryServer.GiveItem(player, block.id, ItemLibrary.itemDefinitions[block.id].dropAmount)
-				QuestService.OnBlockMined(player, block.id)
+				QuestService.HandleEvent(player, {
+					type = "mine",
+					id = block.id,
+					amount = 1,
+				})
 
 				CheckBlockAbove(player, pos)
 

@@ -16,11 +16,8 @@ defaultBlocks["-1,3,-1"] = { parent = "-1,2,-1" }
 
 local function GetBaseInventory()
 	local inventory = {}
-	inventory[1] = { itemInfo = { id = "wooden pickaxe" }, count = 1 }
-	inventory[2] = { itemInfo = { id = "golden pickaxe" }, count = 1 }
-	inventory[3] = { itemInfo = { id = "diamond pickaxe" }, count = 1 }
-	inventory[4] = { itemInfo = { id = "obsidian pickaxe" }, count = 1 }
-	for i = 5, 45 do
+	inventory[1] = { itemInfo = { id = "obsidian pickaxe" }, count = 1 }
+	for i = 2, 45 do
 		inventory[i] = { itemInfo = { id = "nothing" }, count = 0 }
 	end
 	return inventory
@@ -82,21 +79,6 @@ function DataStore.LoadPlayerData(player: Player)
 		profile:ListenToRelease(function()
 			DataStore.profiles[userId] = nil
 		end)
-		--[[else
-		-- Always reconcile after load to fill missing fields
-		profile.Data = {
-			Blocks = defaultBlocks,
-			Progress = {},
-			Inventory = GetBaseInventory(),
-		}
-		profile:Reconcile()
-
-		DataStore.profiles[userId] = profile
-
-		-- Listen to release to cleanup cache
-		profile:ListenToRelease(function()
-			DataStore.profiles[userId] = nil
-		end)]]
 	end
 
 	return profile.Data
