@@ -29,12 +29,12 @@ function DialogueService.StartDialogue(player: Player, npcId: string)
 	if nextQuestId then
 		if state == "in_progress" then
 			packets.ShowDialogue.sendTo({
-				text = QuestData[nextQuestId].progressDialogue,
+				text = npc.questLine[nextQuestId].in_progress,
 				options = getOptions(npcId),
 			}, player)
 		elseif state == "ready_to_turn_in" then
 			packets.ShowDialogue.sendTo({
-				text = QuestData[nextQuestId].completeDialogue,
+				text = npc.questLine[nextQuestId].ready_to_turn_in,
 			}, player)
 
 			QuestService.CompleteQuest(player, nextQuestId)
@@ -44,14 +44,15 @@ function DialogueService.StartDialogue(player: Player, npcId: string)
 				options = getOptions(npcId),
 			}, player)
 		elseif nextQuestId and state == "not_started" then
+			print({ text = npc.questLine[nextQuestId].not_started })
 			packets.ShowDialogue.sendTo({
-				text = QuestData[nextQuestId].startDialogue,
+				text = npc.questLine[nextQuestId].not_started,
 			}, player)
 
 			QuestService.StartNextQuest(player, npcId)
 
 			packets.ShowDialogue.sendTo({
-				text = "",
+				text = { { text = "" } },
 				options = getOptions(npcId),
 			}, player)
 		else

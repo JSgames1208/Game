@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
+local DialogueUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Dialogue.DialogueUI)
 local InventorySlots = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Inventory.InventorySlots)
 local InventoryUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Inventory.InventoryUI)
 local BlockPlacerService = require(StarterPlayer.StarterPlayerScripts.Client.Services.BlockPlacerService)
@@ -12,6 +13,9 @@ local PlayerGui = player.PlayerGui
 
 local MainGui = PlayerGui:WaitForChild("MainGui")
 local Hotbar = MainGui:WaitForChild("Hotbar")
+
+local DialogueGui = PlayerGui:WaitForChild("DialogueGui")
+local DialogueFrame = DialogueGui:WaitForChild("DialogueFrame")
 
 local InputService = {}
 
@@ -36,6 +40,10 @@ end
 
 UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: boolean)
 	if gameProcessed then
+		return
+	end
+	if DialogueFrame.Visible then
+		DialogueUI.MouseButton1Click()
 		return
 	end
 	if InventoryUI.IsInventoryOpen() then

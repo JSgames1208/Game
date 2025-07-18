@@ -11,8 +11,6 @@ local function Hotbar(scope: typeof(Fusion.scoped(Fusion)))
 		children[i]:SetAttribute("SlotIndex", i)
 	end
 
-	print(children, #children)
-
 	return scope:New("Frame")({
 		Name = "Hotbar",
 		Size = UDim2.new(0.5, 0, 0.05, 0),

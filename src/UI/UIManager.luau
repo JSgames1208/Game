@@ -26,6 +26,12 @@ function UIManager.Init(scope)
 		},
 		Parent = Players.LocalPlayer.PlayerGui,
 	})
+	scope:New("ScreenGui")({
+		Name = "DialogueGui",
+		IgnoreGuiInset = false,
+		ResetOnSpawn = false,
+		Parent = Players.LocalPlayer.PlayerGui,
+	})
 end
 
 return UIManager

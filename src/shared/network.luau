@@ -50,7 +50,9 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 		}),
 		ShowDialogue = ByteNet.definePacket({
 			value = ByteNet.struct({
-				text = ByteNet.string,
+				text = ByteNet.array(ByteNet.struct({
+					text = ByteNet.string,
+				})),
 				options = ByteNet.optional(ByteNet.array(ByteNet.struct({
 					text = ByteNet.string,
 					callback = ByteNet.string,

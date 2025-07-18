@@ -5,22 +5,83 @@ local NPCData: { [string]: Types.NPCConfig } = {
 		name = "Builder",
 		id = "Builder",
 		questLine = {
-			"builder_1",
-			"builder_2",
-			"builder_3",
+			["builder_1"] = {
+				not_started = {
+					{ text = "Yo, I've got a quest for you!" },
+				},
+				in_progress = {
+					{ text = "How's the quest going?" },
+				},
+				ready_to_turn_in = {
+					{ text = "Congrats on finishing my quest!" },
+				},
+			},
+			["builder_2"] = {
+				not_started = {
+					{ text = "Yo, I've got a quest for you!" },
+				},
+				in_progress = {
+					{ text = "How's the quest going?" },
+				},
+				ready_to_turn_in = {
+					{ text = "Congrats on finishing my quest!" },
+				},
+			},
+			["builder_3"] = {
+				not_started = {
+					{ text = "Yo, I've got a quest for you!" },
+				},
+				in_progress = {
+					{ text = "How's the quest going?" },
+				},
+				ready_to_turn_in = {
+					{ text = "Congrats on finishing my quest!" },
+				},
+			},
 		},
-		idleDialogue = "Hi there!",
+		idleDialogue = { { text = "Hi there!" } },
 		shopId = "Shop",
 	},
 	Farmer = {
 		name = "Farmer",
 		id = "Farmer",
 		questLine = {
-			"farmer_1",
-			"farmer_2",
-			"farmer_3",
+			["farmer_1"] = {
+				not_started = {
+					{ text = "Yo, I've got a quest for you!" },
+				},
+				in_progress = {
+					{ text = "How's the quest going?" },
+				},
+				ready_to_turn_in = {
+					{ text = "Congrats on finishing my quest!" },
+				},
+			},
+			["farmer_2"] = {
+				not_started = {
+					{ text = "Yo, I've got a quest for you!" },
+				},
+				in_progress = {
+					{ text = "How's the quest going?" },
+				},
+				ready_to_turn_in = {
+					{ text = "Congrats on finishing my quest!" },
+				},
+			},
+			["farmer_3"] = {
+				not_started = {
+					{ text = "Yo, I've got a quest for you!" },
+				},
+				in_progress = {
+					{ text = "How's the quest going?" },
+				},
+				ready_to_turn_in = {
+					{ text = "Congrats on finishing my quest!" },
+				},
+			},
 		},
-		idleDialogue = "Hi there!",
+		idleDialogue = { { text = "Hi there!" } },
+		optionDialogue = { { text = "What brings you here today?" } },
 	},
 }
 

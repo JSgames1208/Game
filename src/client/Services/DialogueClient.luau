@@ -1,4 +1,11 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local StarterPlayer = game:GetService("StarterPlayer")
+local DialogueFrame = require(StarterGui.UI.Frames.DialogueFrame)
+local DialogueHandler = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Dialogue.DialogueHandler)
+local DialogueUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Dialogue.DialogueUI)
+local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local packets = require(ReplicatedStorage.Shared.network)
 
 local DialogueClient = {}
@@ -12,16 +19,10 @@ function DialogueClient.Start()
 			end)
 		end
 	end
-end
 
-packets.ShowDialogue.listen(function(data)
-	print(data.text)
-	if data.options then
-		for _, option in data.options do
-			print(option.text)
-		end
-	end
-end)
+	DialogueUI.Init()
+	DialogueHandler.Init()
+end
 
 packets.CloseDialogue.listen(function(data)
 	print("Close Dialogue")

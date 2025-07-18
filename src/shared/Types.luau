@@ -44,9 +44,15 @@ export type QuestInfo = {
 export type NPCConfig = {
 	id: string,
 	name: string,
-	idleDialogue: string,
+	idleDialogue: { { text: string } },
 	shopId: string?,
-	questLine: { string },
+	questLine: {
+		[string]: {
+			not_started: { { text: string } },
+			in_progress: { { text: string } },
+			ready_to_turn_in: { { text: string } },
+		},
+	},
 }
 
 export type ItemSlot = {
