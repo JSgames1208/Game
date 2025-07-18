@@ -111,6 +111,12 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 		CompleteQuest = ByteNet.definePacket({
 			value = ByteNet.string,
 		}),
+		UpdateQuestMarker = ByteNet.definePacket({
+			value = ByteNet.struct({
+				npcName = ByteNet.string,
+				show = ByteNet.bool,
+			}),
+		}),
 	}
 end)
 

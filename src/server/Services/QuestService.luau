@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ObjectiveHandler = require(ServerScriptService.Server.Modules.Quests.ObjectiveHandler)
+local QuestMarkerServer = require(ServerScriptService.Server.Modules.Quests.QuestMarkerServer)
 local QuestNetworker = require(ServerScriptService.Server.Modules.Quests.QuestNetworker)
 local CurrencyService = require(script.Parent.CurrencyService)
 local DataStore = require(script.Parent.DataStore)
@@ -74,6 +75,7 @@ function QuestService.StartNextQuest(player: Player, npcId: string): string?
 			return questId
 		elseif state == "not_started" then
 			setQuestState(player, questId, "in_progress")
+			QuestMarkerServer.Update(player, profile.Data.QuestInfo, questId)
 			return questId
 		elseif state == "in_progress" or state == "ready_to_turn_in" then
 			return questId
@@ -95,7 +97,6 @@ function QuestService.IsQuestComplete(questDef, progress)
 end
 
 function QuestService.HandleEvent(player: Player, event: Types.QuestObjective)
-	print(player, event)
 	local profile = DataStore.profiles[player.UserId]
 	local questInfo = profile.Data.QuestInfo
 
@@ -106,25 +107,22 @@ function QuestService.HandleEvent(player: Player, event: Types.QuestObjective)
 		local def = QuestData[questId]
 
 		for i, objective in ipairs(def.objectives or {}) do
-			print(i, objective)
 			local progress = qi.progress[i] or { amount = 0 }
 			qi.progress[i] = progress
 
-			print(objective.type)
 			local handler = ObjectiveHandler[objective.type]
-			if handler then
-				print(handler(objective, event))
-			end
 			if handler and handler(objective, event) then
 				progress.amount = math.min(progress.amount + (event.amount or 1), objective.amount)
 			end
 		end
 
 		QuestNetworker.UpdateQuest(player, questId, qi.state, qi.progress)
+		QuestMarkerServer.Update(player, questInfo, questId)
 
 		if QuestService.IsQuestComplete(def, qi.progress) then
 			setQuestState(player, questId, "ready_to_turn_in")
 			QuestNetworker.UpdateQuest(player, questId, "ready_to_turn_in", qi.progress)
+			QuestMarkerServer.Ready(player, questId)
 		end
 	end
 end
@@ -132,7 +130,6 @@ end
 function QuestService.CompleteQuest(player: Player, questId: string): ()
 	local profile = DataStore.profiles[player.UserId]
 	local qi = profile.Data.QuestInfo[questId]
-	print(qi)
 	if not (qi and qi.state == "ready_to_turn_in") then
 		return
 	end
@@ -151,6 +148,7 @@ function QuestService.CompleteQuest(player: Player, questId: string): ()
 	end
 
 	QuestNetworker.CompleteQuest(player, questId)
+	QuestMarkerServer.Update(player, profile.Data.QuestInfo, questId)
 end
 
 function QuestService.PlayerJoined(player: Player)
@@ -159,6 +157,7 @@ function QuestService.PlayerJoined(player: Player)
 
 	if qi then
 		QuestNetworker.InitPlayer(player, qi)
+		QuestMarkerServer.PlayerJoined(player, qi)
 	end
 end
 

@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
+local QuestMarker = require(script.Parent.QuestMarker)
 local NotificationService = require(StarterPlayer.StarterPlayerScripts.Client.Services.NotificationService)
 local QuestUI = require(script.Parent.QuestUI)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)

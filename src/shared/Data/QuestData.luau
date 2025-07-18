@@ -33,16 +33,16 @@ local QuestData: { [string]: Types.QuestDef } = {
 	farmer_3 = {
 		id = "farmer_3",
 		name = "Farmer: Quest 3",
-		startDialogue = "Plant and mine 20 pine trees!",
+		startDialogue = "Plant and mine 5 pine trees!",
 		progressDialogue = "Still waiting...",
 		completeDialogue = "Quest complete!",
 		objectives = {
-			{ type = "place", id = "pine tree sapling", amount = 20 },
-			{ type = "mine", id = "pine tree", amount = 20 },
+			{ type = "place", id = "pine tree sapling", amount = 5 },
+			{ type = "mine", id = "pine tree", amount = 5 },
 		},
 		rewards = {
 			currency = 200,
-			items = { { id = "log", amount = 64 }, { id = "diamond_pickaxe", amount = 1 } },
+			items = { { id = "log", amount = 64 }, { id = "diamond pickaxe", amount = 1 } },
 		},
 	},
 	builder_1 = {
@@ -62,7 +62,7 @@ local QuestData: { [string]: Types.QuestDef } = {
 	builder_2 = {
 		id = "builder_2",
 		name = "Builder: Quest 2",
-		startDialogue = "Place 20 stone!",
+		startDialogue = "Place 5 stone!",
 		progressDialogue = "Still waiting...",
 		completeDialogue = "Quest complete!",
 		objectives = {
@@ -76,12 +76,12 @@ local QuestData: { [string]: Types.QuestDef } = {
 	builder_3 = {
 		id = "builder_3",
 		name = "Builder: Quest 3",
-		startDialogue = "Place 20 sand and plant 8 pine saplings!",
+		startDialogue = "Place 5 sand and plant 5 pine saplings!",
 		progressDialogue = "Still waiting...",
 		completeDialogue = "Quest complete!",
 		objectives = {
-			{ type = "place", id = "sand", amount = 20 },
-			{ type = "place", id = "pine tree sapling", amount = 8 },
+			{ type = "place", id = "sand", amount = 5 },
+			{ type = "place", id = "pine tree sapling", amount = 5 },
 		},
 		rewards = {
 			currency = 200,

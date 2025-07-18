@@ -188,11 +188,6 @@ function IslandService.PlaceBlock(player: Player, pos, blockId)
 			)
 			if not (result and result.Instance and result.Instance.Anchored) then
 				IslandService.PlaceFallingBlock(player, gridPos, blockId)
-				QuestService.HandleEvent(player, {
-					type = "place",
-					id = blockId,
-					amount = 1,
-				})
 				return true
 			end
 		end

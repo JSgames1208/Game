@@ -18,6 +18,7 @@ export type TextLabelProps = {
 	FontFace: Font?,
 	Text: UsedAs<string>?,
 	TextColor3: Color3?,
+	RichText: boolean?,
 	TextScaled: boolean?,
 	TextSize: number?,
 	TextTransparency: UsedAs<number>?,
@@ -45,6 +46,7 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 	props.FontFace = props.FontFace or Font.new("rbxasset://fonts/families/ComicNeueAngular.json", Enum.FontWeight.Bold)
 	props.Text = props.Text or ""
 	props.TextColor3 = props.TextColor3 or Color3.fromRGB(0, 0, 0)
+	props.RichText = props.RichText or false
 	props.TextScaled = props.TextScaled ~= nil and props.TextScaled or false
 	props.TextSize = props.TextSize or 14
 	props.TextTransparency = props.TextTransparency or 0
@@ -93,6 +95,7 @@ local function TextLabel(scope: typeof(Fusion.scoped(Fusion)), props: TextLabelP
 		FontFace = props.FontFace,
 		Text = props.Text,
 		TextColor3 = props.TextColor3,
+		RichText = props.RichText,
 		TextScaled = props.TextScaled,
 		TextSize = props.TextSize,
 		TextTransparency = props.TextTransparency,
