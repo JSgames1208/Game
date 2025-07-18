@@ -19,7 +19,6 @@ local currentSlot = nil
 local plotPosition = nil
 
 function BlockPlacerService.Start()
-	print("Start")
 	packets.AssignPlot.listen(function(pos)
 		print(pos)
 		plotPosition = pos

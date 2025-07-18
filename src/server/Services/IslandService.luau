@@ -19,7 +19,7 @@ local IslandService = {}
 
 local PlotSlots = {
 	Vector3.new(0, 0, 0),
-	Vector3.new(300, 0, 0),
+	Vector3.new(100, 0, 0),
 	Vector3.new(-300, 0, 0),
 	Vector3.new(0, 0, 300),
 	Vector3.new(0, 0, -300),
@@ -93,7 +93,9 @@ function IslandService.LoadIsland(player: Player)
 
 	print(plotPos)
 
-	packets.AssignPlot.sendTo(plotPos, player)
+	task.delay(1, function()
+		packets.AssignPlot.sendTo(plotPos, player)
+	end)
 	--return islandModel
 end
 
