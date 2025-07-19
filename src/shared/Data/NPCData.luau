@@ -49,6 +49,7 @@ local NPCData: { [string]: Types.NPCConfig } = {
 			["farmer_1"] = {
 				not_started = {
 					{ text = "Yo, I've got a quest for you!" },
+					{ text = "Yo, imagine this works first try hahaa" },
 				},
 				in_progress = {
 					{ text = "How's the quest going?" },

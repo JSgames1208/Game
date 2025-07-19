@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
+local Button = require(StarterGui.UI.Components.Button)
 local TextLabel = require(StarterGui.UI.Components.TextLabel)
 local UIStroke = require(StarterGui.UI.Components.UIStroke)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
@@ -106,19 +107,60 @@ local function DialogueFrame(
 
 			scope:New("Frame")({
 				Name = "OptionsContainer",
-				Size = UDim2.new(0.88, 0, 0.6, 0),
+				Size = UDim2.new(0.80, 0, 0.6, 0),
 				AnchorPoint = Vector2.new(0.5, 1),
 				Position = UDim2.new(0.5, 0, 0.92, 0),
 				BackgroundTransparency = 1,
 				[Children] = {
-					scope:New("UIListLayout")({}),
+					scope:New("UIListLayout")({
+						Padding = UDim.new(0, 10),
+						ItemLineAlignment = Enum.ItemLineAlignment.Center,
+						HorizontalAlignment = Enum.HorizontalAlignment.Center,
+						VerticalAlignment = Enum.VerticalAlignment.Top,
+					}),
 
 					scope:ForValues(
 						scope:Computed(function(use)
 							return use(props.options) or {}
 						end),
 						function(use, scope, optionData)
-							return scope:New("TextButton")({
+							return Button(
+								scope,
+								{
+									Name = "OptionButton",
+									Size = UDim2.new(1, 0, 0.08, 0),
+									SizeConstraint = Enum.SizeConstraint.RelativeXX,
+									AnchorPoint = Vector2.new(0.5, 0.5),
+									Position = UDim2.new(0.5, 0, 0.5, 0),
+									BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+									OnClick = function()
+										local cb = scope.peek(optionCallback)
+										cb(optionData)
+									end,
+									Children = {
+										TextLabel(
+											scope,
+											{
+												Text = optionData.text,
+												Size = UDim2.new(1, 0, 1, 0),
+												Position = UDim2.new(0, 0, 0, 0),
+												BackgroundTransparency = 1,
+												TextColor3 = Color3.fromRGB(255, 255, 255),
+												TextScaled = true,
+												Children = {
+													scope:New("UIStroke")({
+														ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+														Thickness = 2,
+														Color = Color3.fromRGB(0, 0, 0),
+													}),
+												},
+											} :: TextLabel.TextLabelProps
+										),
+									},
+								} :: Button.ButtonProps
+							)
+
+							--[[scope:New("TextButton")({
 								Name = "OptionButton",
 								Text = optionData.text,
 								Size = UDim2.new(1, 0, 0.1, 0),
@@ -139,7 +181,7 @@ local function DialogueFrame(
 										Color = Color3.fromRGB(255, 255, 255),
 									}),
 								},
-							})
+							})]]
 						end
 					),
 				},

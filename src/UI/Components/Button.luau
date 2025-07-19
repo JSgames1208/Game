@@ -48,19 +48,19 @@ local function Button(scope: typeof(Fusion.scoped(Fusion)), props: ButtonProps)
 	end
 
 	local targetScale = scope:Value(1)
-	local animatedScale = scope:Spring(targetScale, 25, 1)
+	local animatedScale = scope:Spring(targetScale, 35, 1)
 
 	local function onEnter()
-		targetScale:set(1.1)
+		targetScale:set(1.075)
 	end
 	local function onLeave()
 		targetScale:set(1)
 	end
 	local function onDown()
-		targetScale:set(0.9)
+		targetScale:set(0.9275)
 	end
 	local function onUp()
-		targetScale:set(1.1)
+		targetScale:set(1.075)
 	end
 
 	local size: UDim2 = props.Size :: UDim2
