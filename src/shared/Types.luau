@@ -24,15 +24,18 @@ export type QuestObjective = {
 export type QuestDef = {
 	id: string,
 	name: string,
-	startDialogue: string,
-	progressDialogue: string,
-	completeDialogue: string,
+	npc: string,
 
 	objectives: { QuestObjective }, -- new unified objective system
 
 	rewards: {
 		currency: number?,
 		items: { { id: string, amount: number } }?,
+	},
+	dialogue: {
+		not_started: { { text: string } },
+		in_progress: { { text: string } },
+		ready_to_turn_in: { { text: string } },
 	},
 }
 

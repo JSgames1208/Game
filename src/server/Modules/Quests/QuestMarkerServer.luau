@@ -1,9 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local StarterPlayer = game:GetService("StarterPlayer")
+local QuestChainHelper = require(script.Parent.QuestChainHelper)
 local NPCFromQuest = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Quests.NPCFromQuest)
 local QuestNetworker = require(script.Parent.QuestNetworker)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
+local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 
 --[[
 QuestMarkerServer.luau:
@@ -13,73 +15,53 @@ QuestMarkerServer.luau:
 
 local QuestMarkerServer = {}
 
-local function CheckShow(NPC, questInfo)
-	print(questInfo)
-	if not NPC.questLine then
-		return false
-	end
+local function CheckShow(player: Player, npcId: string)
+	local availableQuests = QuestChainHelper.GetAvailableQuests(player, npcId)
 
-	local playerQuestStates = {}
-	for questId, qi in pairs(questInfo) do
-		playerQuestStates[questId] = qi.state
-	end
-
-	for _, questId in pairs(NPC.questLine) do
-		local state = playerQuestStates[questId]
-
-		print(questId, state)
-
-		if state == "completed" then
-			continue -- quest is done, move to next in line
-		elseif state == "ready_to_turn_in" then
-			return true -- ready to turn in, show marker
-		elseif state == "in_progress" then
-			return false -- already working on it, don’t show marker
-		else
-			-- Quest not started yet, so it's the next one
+	for _, quest in availableQuests do
+		if quest.state ~= "in_progress" then
 			return true
 		end
 	end
 
-	-- All quests completed, no marker needed
 	return false
 end
 
 function QuestMarkerServer.PlayerJoined(player: Player, questInfo)
-	for _, NPC in NPCData do
-		local show = CheckShow(NPC, questInfo)
-		QuestNetworker.UpdateQuestMarker(player, NPC.name, show)
+	for _, npcConfig in pairs(NPCData) do
+		local show = CheckShow(player, npcConfig.id)
+		QuestNetworker.UpdateQuestMarker(player, npcConfig.name, show)
 	end
 end
 
 function QuestMarkerServer.Ready(player: Player, questId: string)
-	local NPC = NPCFromQuest(questId)
+	local npcName = QuestData[questId] and QuestData[questId].npc
 
-	if not NPC then
-		warn(`NPC not found: {NPC}`)
+	if not npcName then
+		warn(`Quest {questId} has no NPC assigned.`)
 		return
 	end
 
-	QuestNetworker.UpdateQuestMarker(player, NPC, true)
+	QuestNetworker.UpdateQuestMarker(player, npcName, true)
 end
 
 function QuestMarkerServer.Update(player: Player, questInfo, questId: string)
-	local NPC = NPCFromQuest(questId)
-
-	if not NPC then
-		warn(`NPC not found: {NPC}`)
+	local quest = QuestData[questId]
+	if not quest then
+		warn(`Quest not found: {questId}`)
 		return
 	end
 
-	local NPCData = NPCData[NPC]
-	if not NPCData then
-		warn(`NPCData not found for NPC: {NPC}`)
+	local npcName = quest.npc
+	local npcConfig = NPCData[npcName]
+	if not npcConfig then
+		warn(`NPCData not found for NPC: {npcName}`)
 		return
 	end
 
-	local show = CheckShow(NPCData, questInfo)
+	local show = CheckShow(player, npcName)
 
-	QuestNetworker.UpdateQuestMarker(player, NPC, show)
+	QuestNetworker.UpdateQuestMarker(player, npcName, show)
 end
 
 return QuestMarkerServer

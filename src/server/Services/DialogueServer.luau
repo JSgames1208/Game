@@ -1,8 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local OptionHandler = require(ServerScriptService.Server.Modules.Dialogue.OptionHandler)
+local QuestChainHelper = require(ServerScriptService.Server.Modules.Quests.QuestChainHelper)
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
+local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local Types = require(ReplicatedStorage.Shared.Types)
 local packets = require(ReplicatedStorage.Shared.network)
 local DialogueService = {}
@@ -29,46 +31,35 @@ end
 
 function DialogueService.StartDialogue(player: Player, npcId: string)
 	local npc: Types.NPCConfig = NPCData[npcId]
-	local nextQuestId: string? = QuestService.StartNextQuest(player, npcId)
-	local state = nextQuestId and QuestService.GetPlayerQuestState(player, nextQuestId) or nil
+	print(player, npcId)
+	local availableQuests = QuestChainHelper.GetAvailableQuests(player, npcId)
+	local quest = availableQuests[1]
 
-	if nextQuestId then
-		if state == "in_progress" then
-			packets.ShowDialogue.sendTo({
-				text = npc.questDialogue[nextQuestId].in_progress,
-				npcId = npc.id,
-				options = getOptions(npcId),
-			}, player)
-		elseif state == "ready_to_turn_in" then
-			packets.ShowDialogue.sendTo({
-				text = npc.questDialogue[nextQuestId].ready_to_turn_in,
-				npcId = npc.id,
-				options = getOptions(npcId),
-			}, player)
+	print(availableQuests, quest)
 
-			QuestService.CompleteQuest(player, nextQuestId)
-		elseif nextQuestId and state == "not_started" then
-			packets.ShowDialogue.sendTo({
-				text = npc.questDialogue[nextQuestId].not_started,
-				npcId = npc.id,
-				options = getOptions(npcId),
-			}, player)
-
-			QuestService.StartNextQuest(player, npcId)
-		else
-			packets.ShowDialogue.sendTo({
-				text = npc.idleDialogue,
-				npcId = npc.id,
-				options = getOptions(npcId),
-			}, player)
-		end
-	else
+	if not quest then
 		packets.ShowDialogue.sendTo({
 			text = npc.idleDialogue,
 			npcId = npc.id,
 			options = getOptions(npcId),
 		}, player)
+		return
 	end
+
+	local questId, state = quest.questId, quest.state
+	local dialogueLines = QuestData[questId].dialogue[state] or { { text = "..." } }
+
+	if state == "ready_to_turn_in" then
+		QuestService.CompleteQuest(player, questId)
+	elseif state == "not_started" then
+		QuestService.SetQuestState(player, questId, "in_progress")
+	end
+
+	packets.ShowDialogue.sendTo({
+		text = dialogueLines,
+		npcId = npc.id,
+		options = getOptions(npcId),
+	}, player)
 end
 
 return DialogueService

@@ -43,7 +43,9 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 		return
 	end
 	if DialogueFrame.Visible then
-		DialogueUI.MouseButton1Click()
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			DialogueUI.MouseButton1Click()
+		end
 		return
 	end
 	if InventoryUI.IsInventoryOpen() then

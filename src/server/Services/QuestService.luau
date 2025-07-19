@@ -19,7 +19,7 @@ local function getQuestInfo(player: Player, questId: string): { any }
 	return profile.Data.QuestInfo[questId]
 end
 
-local function setQuestState(player: Player, questId: string, newState: Types.QuestState): ()
+function QuestService.SetQuestState(player: Player, questId: string, newState: Types.QuestState): ()
 	local profile = DataStore.profiles[player.UserId]
 	local qi = profile.Data.QuestInfo[questId]
 
@@ -38,55 +38,9 @@ local function setQuestState(player: Player, questId: string, newState: Types.Qu
 	else
 		qi.state = newState
 	end
-end
-
-local function updateQuestProgress(player: Player, questId: string, itemId: string, amount: number): ()
-	local profile = DataStore.profiles[player.UserId]
-	local qi = profile.Data.QuestInfo[questId]
-	if not qi then
-		return
-	end
-	if not qi.progress.collect then
-		qi.progress.collect = {}
-	end
-	if qi.progress.collect[itemId] then
-		qi.progress.collect[itemId] += amount
-	else
-		qi.progress.collect[itemId] = amount
-	end
 
 	QuestNetworker.UpdateQuest(player, questId, qi.state, qi.progress)
-end
-
---public functions
-
-function QuestService.StartNextQuest(player: Player, npcId: string): string?
-	local npcConfig = NPCData[npcId]
-	local profile = DataStore.profiles[player.UserId]
-	local qiTable = profile.Data.QuestInfo
-
-	print(qiTable)
-
-	for _, questId in pairs(npcConfig.questLine) do
-		local qi = qiTable[questId]
-		local state = qi and qi.state or "not_started"
-		if not qi then
-			setQuestState(player, questId, "not_started")
-
-			QuestNetworker.UpdateQuest(player, questId, "not_started", profile.Data.QuestInfo[questId].progress)
-			return questId
-		elseif state == "not_started" then
-			setQuestState(player, questId, "in_progress")
-			QuestMarkerServer.Update(player, profile.Data.QuestInfo, questId)
-			return questId
-		elseif state == "in_progress" or state == "ready_to_turn_in" then
-			return questId
-		elseif state == "completed" then
-			continue
-		end
-	end
-
-	return nil
+	QuestMarkerServer.Update(player, qi, questId)
 end
 
 function QuestService.IsQuestComplete(questDef, progress)
@@ -122,7 +76,7 @@ function QuestService.HandleEvent(player: Player, event: Types.QuestObjective)
 		QuestMarkerServer.Update(player, questInfo, questId)
 
 		if QuestService.IsQuestComplete(def, qi.progress) then
-			setQuestState(player, questId, "ready_to_turn_in")
+			QuestService.SetQuestState(player, questId, "ready_to_turn_in")
 			QuestNetworker.UpdateQuest(player, questId, "ready_to_turn_in", qi.progress)
 			QuestMarkerServer.Ready(player, questId)
 		end

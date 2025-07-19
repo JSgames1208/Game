@@ -1,0 +1,3 @@
+local QuestStateManager = {}
+
+return QuestStateManager
