@@ -53,6 +53,7 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 				text = ByteNet.array(ByteNet.struct({
 					text = ByteNet.string,
 				})),
+				npcId = ByteNet.string,
 				options = ByteNet.optional(ByteNet.array(ByteNet.struct({
 					text = ByteNet.string,
 					callback = ByteNet.string,

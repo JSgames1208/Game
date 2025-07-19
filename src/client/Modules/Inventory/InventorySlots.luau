@@ -21,6 +21,9 @@ local inventory = {}
 local InventorySlots = {}
 
 function InventorySlots.SlotPressed(slotIndex: number)
+	if not inventory[slotIndex] then
+		return
+	end
 	local slot = nil
 	for _, s in Hotbar:GetChildren() do
 		if s:GetAttribute("SlotIndex") == slotIndex then

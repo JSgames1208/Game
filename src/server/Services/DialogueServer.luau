@@ -2,7 +2,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
-local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local Types = require(ReplicatedStorage.Shared.Types)
 local packets = require(ReplicatedStorage.Shared.network)
 local DialogueService = {}
@@ -30,40 +29,37 @@ function DialogueService.StartDialogue(player: Player, npcId: string)
 		if state == "in_progress" then
 			packets.ShowDialogue.sendTo({
 				text = npc.questLine[nextQuestId].in_progress,
+				npcId = npc.id,
 				options = getOptions(npcId),
 			}, player)
 		elseif state == "ready_to_turn_in" then
 			packets.ShowDialogue.sendTo({
 				text = npc.questLine[nextQuestId].ready_to_turn_in,
+				npcId = npc.id,
+				options = getOptions(npcId),
 			}, player)
 
 			QuestService.CompleteQuest(player, nextQuestId)
-
-			packets.ShowDialogue.sendTo({
-				text = "",
-				options = getOptions(npcId),
-			}, player)
 		elseif nextQuestId and state == "not_started" then
 			print({ text = npc.questLine[nextQuestId].not_started })
 			packets.ShowDialogue.sendTo({
 				text = npc.questLine[nextQuestId].not_started,
+				npcId = npc.id,
+				options = getOptions(npcId),
 			}, player)
 
 			QuestService.StartNextQuest(player, npcId)
-
-			packets.ShowDialogue.sendTo({
-				text = { { text = "" } },
-				options = getOptions(npcId),
-			}, player)
 		else
 			packets.ShowDialogue.sendTo({
 				text = npc.idleDialogue,
+				npcId = npc.id,
 				options = getOptions(npcId),
 			}, player)
 		end
 	else
 		packets.ShowDialogue.sendTo({
 			text = npc.idleDialogue,
+			npcId = npc.id,
 			options = getOptions(npcId),
 		}, player)
 	end
