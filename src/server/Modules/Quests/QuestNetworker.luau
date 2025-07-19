@@ -4,7 +4,6 @@ local packets = require(ReplicatedStorage.Shared.network)
 local QuestNetworker = {}
 
 function QuestNetworker.UpdateQuest(player: Player, questId: string, state, progress)
-	print(questId, state, progress)
 	packets.UpdateQuest.sendTo({
 		questId = questId,
 		state = state,
@@ -21,7 +20,6 @@ function QuestNetworker.CompleteQuest(player: Player, questId: string)
 end
 
 function QuestNetworker.UpdateQuestMarker(player: Player, npcName: string, show: boolean)
-	print(npcName, show)
 	packets.UpdateQuestMarker.sendTo({ npcName = npcName, show = show }, player)
 end
 

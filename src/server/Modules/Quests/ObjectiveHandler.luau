@@ -1,7 +1,6 @@
 local ObjectiveHandler = {}
 
 ObjectiveHandler["collect"] = function(objective, event)
-	print(objective, event)
 	return event.type == "collect" and event.id == objective.id
 end
 

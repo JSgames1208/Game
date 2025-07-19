@@ -5,6 +5,11 @@ local NPCData: { [string]: Types.NPCConfig } = {
 		name = "Builder",
 		id = "Builder",
 		questLine = {
+			"builder_1",
+			"builder_2",
+			"builder_3",
+		},
+		questDialogue = {
 			["builder_1"] = {
 				not_started = {
 					{ text = "Yo, I've got a quest for you!" },
@@ -46,7 +51,13 @@ local NPCData: { [string]: Types.NPCConfig } = {
 		name = "Farmer",
 		id = "Farmer",
 		questLine = {
+			"farmer_1",
+			"farmer_2",
+			"farmer_3",
+		},
+		questDialogue = {
 			["farmer_1"] = {
+				id = "farmer_1",
 				not_started = {
 					{ text = "Yo, I've got a quest for you!" },
 					{ text = "Yo, imagine this works first try hahaa" },

@@ -32,11 +32,14 @@ function DialogueHandler.ProcessClick()
 	if currentStep <= #currentDialogue.text then
 		DialogueUI.SetText(currentDialogue.text[currentStep].text)
 	else
-		print(currentDialogue)
 		if currentDialogue.options then
 			DialogueUI.SetText("")
 			DialogueUI.ShowOptions(currentDialogue.options, function(selectedOption)
-				DialogueUI.SetVisible(false)
+				packets.ChooseDialogueOption.send({
+					callback = selectedOption.callback,
+					text = selectedOption.text,
+					shopId = selectedOption.shopId or nil,
+				})
 			end)
 		else
 			DialogueUI.SetVisible(false)
@@ -64,6 +67,10 @@ end
 
 packets.ShowDialogue.listen(function(data)
 	DialogueHandler.PlayDialogue(data)
+end)
+
+packets.CloseDialogue.listen(function(data)
+	DialogueUI.SetVisible(false)
 end)
 
 return DialogueHandler

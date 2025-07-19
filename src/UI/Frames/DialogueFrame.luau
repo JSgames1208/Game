@@ -128,7 +128,7 @@ local function DialogueFrame(
 								scope,
 								{
 									Name = "OptionButton",
-									Size = UDim2.new(1, 0, 0.08, 0),
+									Size = UDim2.new(1, 0, 0.06, 0),
 									SizeConstraint = Enum.SizeConstraint.RelativeXX,
 									AnchorPoint = Vector2.new(0.5, 0.5),
 									Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -159,33 +159,28 @@ local function DialogueFrame(
 									},
 								} :: Button.ButtonProps
 							)
-
-							--[[scope:New("TextButton")({
-								Name = "OptionButton",
-								Text = optionData.text,
-								Size = UDim2.new(1, 0, 0.1, 0),
-								SizeConstraint = Enum.SizeConstraint.RelativeXX,
-								Position = UDim2.new(0, 0, 0, 0),
-								BackgroundColor3 = Color3.fromRGB(50, 50, 50),
-								TextColor3 = Color3.new(1, 1, 1),
-								TextScaled = true,
-								AutoButtonColor = true,
-								[OnEvent("MouseButton1Click")] = function()
-									local cb = scope.peek(optionCallback)
-									cb(optionData)
-								end,
-								[Children] = {
-									scope:New("UIStroke")({
-										ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-										Thickness = 1,
-										Color = Color3.fromRGB(255, 255, 255),
-									}),
-								},
-							})]]
 						end
 					),
 				},
 			}),
+
+			TextLabel(
+				scope,
+				{
+					Text = "Click to continue!",
+					Size = UDim2.new(0.3, 0, 0.05, 0),
+					AnchorPoint = Vector2.new(1, 1),
+					Position = UDim2.new(0.99, 0, 1, 0),
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+					TextScaled = true,
+					BackgroundTransparency = 1,
+					TextXAlignment = Enum.TextXAlignment.Right,
+					Children = {},
+					Visible = scope:Computed(function(use)
+						return #use(props.options) == 0
+					end),
+				} :: TextLabel.TextLabelProps
+			),
 		},
 
 		[OnEvent("MouseEnter")] = MouseEnter,

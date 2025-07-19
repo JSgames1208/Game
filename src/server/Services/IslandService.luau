@@ -91,8 +91,6 @@ function IslandService.LoadIsland(player: Player)
 		end
 	end
 
-	print(plotPos)
-
 	task.delay(1, function()
 		packets.AssignPlot.sendTo(plotPos, player)
 	end)

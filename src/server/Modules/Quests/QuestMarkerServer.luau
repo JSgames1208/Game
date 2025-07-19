@@ -24,7 +24,7 @@ local function CheckShow(NPC, questInfo)
 		playerQuestStates[questId] = qi.state
 	end
 
-	for questId, dialogue in pairs(NPC.questLine) do
+	for _, questId in pairs(NPC.questLine) do
 		local state = playerQuestStates[questId]
 
 		print(questId, state)

@@ -65,7 +65,9 @@ function QuestService.StartNextQuest(player: Player, npcId: string): string?
 	local profile = DataStore.profiles[player.UserId]
 	local qiTable = profile.Data.QuestInfo
 
-	for questId, dialogue in pairs(npcConfig.questLine) do
+	print(qiTable)
+
+	for _, questId in pairs(npcConfig.questLine) do
 		local qi = qiTable[questId]
 		local state = qi and qi.state or "not_started"
 		if not qi then

@@ -24,10 +24,6 @@ function DialogueClient.Start()
 	DialogueHandler.Init()
 end
 
-packets.CloseDialogue.listen(function(data)
-	print("Close Dialogue")
-end)
-
 packets.OpenShop.listen(function(data)
 	print("Open Shop")
 end)

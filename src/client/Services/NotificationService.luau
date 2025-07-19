@@ -13,7 +13,6 @@ function NotificationService.Init(s: typeof(Fusion.scoped(Fusion)), notification
 end
 
 function NotificationService.AddNotification(text: string)
-	print(text)
 	if scope and Notifications then
 		local current = scope.peek(Notifications) or {}
 

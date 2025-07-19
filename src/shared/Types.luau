@@ -46,7 +46,8 @@ export type NPCConfig = {
 	name: string,
 	idleDialogue: { { text: string } },
 	shopId: string?,
-	questLine: {
+	questLine: { string },
+	questDialogue: {
 		[string]: {
 			not_started: { { text: string } },
 			in_progress: { { text: string } },

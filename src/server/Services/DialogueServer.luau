@@ -1,10 +1,21 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local OptionHandler = require(ServerScriptService.Server.Modules.Dialogue.OptionHandler)
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
 local Types = require(ReplicatedStorage.Shared.Types)
 local packets = require(ReplicatedStorage.Shared.network)
 local DialogueService = {}
+
+function DialogueService.Init()
+	packets.StartDialogue.listen(function(data, player)
+		if data.npcId then
+			DialogueService.StartDialogue(player, data.npcId)
+		end
+	end)
+
+	OptionHandler.Init()
+end
 
 local function getOptions(npcId)
 	local opts = {}
@@ -21,29 +32,24 @@ function DialogueService.StartDialogue(player: Player, npcId: string)
 	local nextQuestId: string? = QuestService.StartNextQuest(player, npcId)
 	local state = nextQuestId and QuestService.GetPlayerQuestState(player, nextQuestId) or nil
 
-	print(npc, nextQuestId, state)
-
-	print(nextQuestId, state)
-
 	if nextQuestId then
 		if state == "in_progress" then
 			packets.ShowDialogue.sendTo({
-				text = npc.questLine[nextQuestId].in_progress,
+				text = npc.questDialogue[nextQuestId].in_progress,
 				npcId = npc.id,
 				options = getOptions(npcId),
 			}, player)
 		elseif state == "ready_to_turn_in" then
 			packets.ShowDialogue.sendTo({
-				text = npc.questLine[nextQuestId].ready_to_turn_in,
+				text = npc.questDialogue[nextQuestId].ready_to_turn_in,
 				npcId = npc.id,
 				options = getOptions(npcId),
 			}, player)
 
 			QuestService.CompleteQuest(player, nextQuestId)
 		elseif nextQuestId and state == "not_started" then
-			print({ text = npc.questLine[nextQuestId].not_started })
 			packets.ShowDialogue.sendTo({
-				text = npc.questLine[nextQuestId].not_started,
+				text = npc.questDialogue[nextQuestId].not_started,
 				npcId = npc.id,
 				options = getOptions(npcId),
 			}, player)
@@ -64,19 +70,5 @@ function DialogueService.StartDialogue(player: Player, npcId: string)
 		}, player)
 	end
 end
-
-packets.ChooseDialogueOption.listen(function(data, player)
-	if data.callback == "openShop" then
-		packets.OpenShop:sendTo({ shopId = data.shopId }, player)
-	elseif data.callback == "endDialogue" then
-		packets.CloseDialogue:sendTo(nil, player)
-	end
-end)
-
-packets.StartDialogue.listen(function(data, player)
-	if data.npcId then
-		DialogueService.StartDialogue(player, data.npcId)
-	end
-end)
 
 return DialogueService

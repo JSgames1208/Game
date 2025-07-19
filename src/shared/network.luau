@@ -65,7 +65,8 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 		ChooseDialogueOption = ByteNet.definePacket({
 			value = ByteNet.struct({
 				callback = ByteNet.string,
-				shopId = ByteNet.string,
+				text = ByteNet.string,
+				shopId = ByteNet.optional(ByteNet.string),
 			}),
 			reliabilityType = "reliable",
 		}),
@@ -110,15 +111,18 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 					})),
 				})
 			),
+			reliabilityType = "reliable",
 		}),
 		CompleteQuest = ByteNet.definePacket({
 			value = ByteNet.string,
+			reliabilityType = "reliable",
 		}),
 		UpdateQuestMarker = ByteNet.definePacket({
 			value = ByteNet.struct({
 				npcName = ByteNet.string,
 				show = ByteNet.bool,
 			}),
+			reliabilityType = "reliable",
 		}),
 	}
 end)

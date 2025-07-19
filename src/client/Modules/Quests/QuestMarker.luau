@@ -35,7 +35,6 @@ function QuestMarker.Init()
 end
 
 function QuestMarker.Update(npcName: string, show: boolean)
-	print(npcName, show)
 	local NPC = NPCFolder:FindFirstChild(npcName)
 
 	if not NPC then
