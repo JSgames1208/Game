@@ -37,6 +37,8 @@ export type QuestDef = {
 		in_progress: { { text: string } },
 		ready_to_turn_in: { { text: string } },
 	},
+
+	nextQuest: string?,
 }
 
 export type QuestInfo = {
