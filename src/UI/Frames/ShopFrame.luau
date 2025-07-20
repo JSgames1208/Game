@@ -10,13 +10,12 @@ local Children = Fusion.Children
 
 local PlayerGui = Players.LocalPlayer.PlayerGui
 local MainGui = PlayerGui:WaitForChild("MainGui")
-local DialogueGui = PlayerGui:WaitForChild("DialogueGui")
 
 type UsedAs<T> = Fusion.UsedAs<T>
 
 export type ShopFrameProps = {
 	shopData: UsedAs<ShopData.ShopData>?,
-	shopStock: UsedAs<{ [string]: { stock: number, lastRestock: number } }>?,
+	shopStock: UsedAs<{ [string]: { stock: number, lastRestock: number, id: string } }>?,
 	visible: UsedAs<boolean>?,
 }
 
@@ -58,11 +57,11 @@ local function ShopFrame(scope: typeof(Fusion.scoped(Fusion)), props: ShopFrameP
 						ItemLineAlignment = Enum.ItemLineAlignment.Center,
 					}),
 
-					scope:ForPairs(props.shopStock, function(use, scope, itemId, item)
+					scope:ForValues(props.shopStock, function(use, scope, item)
 						print(props.shopStock)
 
-						return itemId, ShopOption(scope, {
-							itemId = itemId,
+						return ShopOption(scope, {
+							itemId = item.id,
 							itemInfo = item,
 						})
 					end),

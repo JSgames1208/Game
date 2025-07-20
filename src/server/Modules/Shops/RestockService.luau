@@ -31,13 +31,13 @@ function RestockService.Restock(shopId: string)
 		local total = 100000
 		if chance then
 			if not Chance(chance, total) then
-				StockState.Set(shopId, item.id, { stock = 0, lastRestock = os.time() })
+				StockState.Set(shopId, { id = item.id, stock = 0, lastRestock = os.time() })
 				continue
 			end
 		end
 
 		local amount = math.random(1, item.maxStock)
-		StockState.Set(shopId, item.id, { stock = amount, lastRestock = os.time() })
+		StockState.Set(shopId, { id = item.id, stock = amount, lastRestock = os.time() })
 	end
 
 	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId))

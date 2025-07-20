@@ -5,11 +5,10 @@ local StockState = {}
 type ItemStock = {
 	stock: number,
 	lastRestock: number,
+	id: string,
 }
 
-export type ShopStock = {
-	[string]: ItemStock,
-}
+export type ShopStock = { ItemStock }
 
 export type ShopStateType = {
 	[string]: ShopStock,
@@ -22,7 +21,7 @@ function StockState.Init()
 		if shop.stock then
 			state[shop.id] = {}
 			for _, item in shop.stock do
-				state[shop.id][item.id] = { stock = 0, lastRestock = 0 }
+				table.insert(state[shop.id], { id = item.id, stock = 0, lastRestock = 0 })
 			end
 		end
 	end
@@ -34,20 +33,29 @@ function StockState.Get(shopId: string?, itemId: string?)
 	end
 
 	if itemId then
-		return state[shopId] and state[shopId][itemId]
+		for _, itemStock in state[shopId] do
+			if itemStock.id == itemId then
+				return itemStock
+			end
+		end
 	end
 
 	return state[shopId]
 end
 
-function StockState.Set(shopId: string, itemId: string, data: ItemStock)
+function StockState.Set(shopId: string, data: ItemStock)
 	if not state[shopId] then
 		state[shopId] = {}
 	end
 
-	print(shopId, itemId, data)
+	for i, itemStock in state[shopId] do
+		if itemStock.id == data.id then
+			state[shopId][i] = data
+			return
+		end
+	end
 
-	state[shopId][itemId] = data
+	table.insert(state[shopId], data)
 end
 
 return StockState

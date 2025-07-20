@@ -9,7 +9,7 @@ function ShopNetworker.OpenShop(player: Player, shopId: string)
 end
 
 function ShopNetworker.UpdateShop(shopId: string, shopStock: StockState.ShopStock, player: Player?)
-	print(shopId, shopStock)
+	print({ shopId = shopId, shopStock = shopStock })
 
 	if player then
 		packets.UpdateShop.sendTo({ shopId = shopId, shopStock = shopStock }, player)
