@@ -18,6 +18,10 @@ function ShopClient.Start()
 	packets.OpenShop.listen(function(data)
 		ShopUI.SetVisible(true)
 	end)
+
+	packets.UpdateCurrency.listen(function(amount: number)
+		ShopUI.SetCurrency(amount)
+	end)
 end
 
 return ShopClient

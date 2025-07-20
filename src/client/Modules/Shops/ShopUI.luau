@@ -15,10 +15,13 @@ local ShopUI = {}
 local shopData = scope:Value({})
 local shopStock = scope:Value({})
 local visible = scope:Value(false)
+local currency = scope:Value(0)
 
 function ShopUI.Init()
-	local ShopFrame =
-		ShopFrame(scope, { shopData = shopData, shopStock = shopStock, visible = visible } :: ShopFrame.ShopFrameProps)
+	local ShopFrame = ShopFrame(
+		scope,
+		{ shopData = shopData, shopStock = shopStock, visible = visible, currency = currency } :: ShopFrame.ShopFrameProps
+	)
 	ShopFrame.Parent = ShopGui
 end
 
@@ -34,6 +37,10 @@ end
 
 function ShopUI.SetVisible(boolean: boolean)
 	visible:set(boolean)
+end
+
+function ShopUI.SetCurrency(amount: number)
+	currency:set(amount)
 end
 
 return ShopUI

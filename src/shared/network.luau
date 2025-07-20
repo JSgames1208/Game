@@ -135,6 +135,11 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		--Server->Client
+		UpdateCurrency = ByteNet.definePacket({
+			value = ByteNet.int32,
+			reliabilityType = "reliable",
+		}),
 	}
 end)
 

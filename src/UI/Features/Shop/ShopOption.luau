@@ -1,6 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
+local StarterPlayer = game:GetService("StarterPlayer")
+local Button = require(StarterGui.UI.Components.Button)
 local TextLabel = require(StarterGui.UI.Components.TextLabel)
+local RenderItemIcon = require(StarterPlayer.StarterPlayerScripts.Client.Modules.RenderItemIcon)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 
@@ -12,14 +15,32 @@ export type ShopOptionProps = {
 	shopStock: { [string]: { stock: number, lastRestock: number } }?,
 	itemId: string,
 	itemInfo: { stock: number, lastRestock: number },
+	currency: UsedAs<number>,
 }
 
 local function ShopOption(scope: typeof(Fusion.scoped(Fusion)), props: ShopOptionProps)
-	print("Flipping option broooo", props.itemId, props.itemInfo)
+	local viewport = scope:New("ViewportFrame")({
+		Name = "IconViewport",
+		Size = UDim2.new(0.9, 0, 0.9, 0),
+		SizeConstraint = Enum.SizeConstraint.RelativeYY,
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(0.95, 0, 0.5, 0),
+		BackgroundColor3 = Color3.fromRGB(83, 83, 83),
+	})
+
+	RenderItemIcon(viewport, props.itemId)
+
+	scope:New("UIStroke")({
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		Thickness = 3,
+		Color = Color3.fromRGB(60, 60, 60),
+		Enabled = true,
+		Parent = viewport,
+	})
 
 	return scope:New("Frame")({
 		Name = "ShopOption",
-		Size = UDim2.new(1, 0, 0.5, 0),
+		Size = UDim2.new(0.98, 0, 0.5, 0),
 		SizeConstraint = Enum.SizeConstraint.RelativeXX,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0, 0, 0, 0),
@@ -75,6 +96,48 @@ local function ShopOption(scope: typeof(Fusion.scoped(Fusion)), props: ShopOptio
 						}),
 					},
 				} :: TextLabel.TextLabelProps
+			),
+
+			viewport,
+
+			Button(
+				scope,
+				{
+					Name = "Button",
+					Size = UDim2.new(0.4, 0, 0.2, 0),
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.new(0.25, 0, 0.85, 0),
+					BackgroundColor3 = Color3.fromRGB(0, 243, 4),
+					Children = {
+						TextLabel(
+							scope,
+							{
+								Text = "Buy",
+								TextColor3 = Color3.fromRGB(255, 255, 255),
+								BackgroundTransparency = 1,
+								Size = UDim2.new(1, 0, 1, 0),
+								TextXAlignment = Enum.TextXAlignment.Center,
+								TextYAlignment = Enum.TextYAlignment.Center,
+								TextScaled = true,
+								Children = {
+									scope:New("UIStroke")({
+										ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+										Thickness = 3,
+										Color = Color3.fromRGB(210, 210, 210),
+										Enabled = true,
+									}),
+								},
+							} :: TextLabel.TextLabelProps
+						),
+
+						scope:New("UIStroke")({
+							ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+							Thickness = 3,
+							Color = Color3.fromRGB(11, 210, 14),
+							Enabled = true,
+						}),
+					},
+				} :: Button.ButtonProps
 			),
 		},
 	})
