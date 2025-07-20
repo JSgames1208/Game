@@ -15,8 +15,6 @@ local function TestFrame(scope: typeof(Fusion.scoped(Fusion)))
 		screenSize:set(workspace.CurrentCamera.ViewportSize)
 	end)
 
-	print(scope.peek(screenSize))
-
 	return scope:New("Frame")({
 		Name = "QuestFrame",
 		Size = UDim2.new(0.2, 0, 1, 0),
@@ -87,7 +85,6 @@ local function TestFrame(scope: typeof(Fusion.scoped(Fusion)))
 				SizeConstraint = Enum.SizeConstraint.RelativeXY,
 				AnchorPoint = Vector2.new(0, 0),
 				Position = scope:Computed(function(use)
-					print(use(screenSize))
 					return UDim2.new(0, 0, 0, use(screenSize).X / 25)
 				end),
 				[Children] = {

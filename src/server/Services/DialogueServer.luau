@@ -31,11 +31,8 @@ end
 
 function DialogueService.StartDialogue(player: Player, npcId: string)
 	local npc: Types.NPCConfig = NPCData[npcId]
-	print(player, npcId)
 	local availableQuests = QuestChainHelper.GetAvailableQuests(player, npcId)
 	local quest = availableQuests[1]
-
-	print(availableQuests, quest)
 
 	if not quest then
 		packets.ShowDialogue.sendTo({

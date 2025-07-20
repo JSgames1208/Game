@@ -40,7 +40,7 @@ function RestockService.Restock(shopId: string)
 		StockState.Set(shopId, { id = item.id, stock = amount, lastRestock = os.time() })
 	end
 
-	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId))
+	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId), true)
 end
 
 function RestockService.RestockAll()

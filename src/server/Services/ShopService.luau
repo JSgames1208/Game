@@ -9,8 +9,7 @@ function ShopService.Init()
 end
 
 function ShopService.InitShop(player: Player, shopId: string)
-	print(`init shop: {shopId} for player: {player.Name}`)
-	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId), player)
+	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId), false, player)
 	ShopNetworker.OpenShop(player, shopId)
 end
 

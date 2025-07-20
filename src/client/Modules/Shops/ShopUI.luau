@@ -16,22 +16,27 @@ local shopData = scope:Value({})
 local shopStock = scope:Value({})
 local visible = scope:Value(false)
 local currency = scope:Value(0)
+local timeTillRestock = scope:Value(0)
 
 function ShopUI.Init()
 	local ShopFrame = ShopFrame(
 		scope,
-		{ shopData = shopData, shopStock = shopStock, visible = visible, currency = currency } :: ShopFrame.ShopFrameProps
+		{
+			shopData = shopData,
+			shopStock = shopStock,
+			visible = visible,
+			currency = currency,
+			timeTillRestock = timeTillRestock,
+		} :: ShopFrame.ShopFrameProps
 	)
 	ShopFrame.Parent = ShopGui
 end
 
 function ShopUI.SetShopStock(stock)
-	print(stock)
 	shopStock:set(stock)
 end
 
 function ShopUI.SetShopData(shop: ShopData.Shop)
-	print(shop)
 	shopData:set(shop)
 end
 
@@ -41,6 +46,10 @@ end
 
 function ShopUI.SetCurrency(amount: number)
 	currency:set(amount)
+end
+
+function ShopUI.SetTimeLeft(time: number)
+	timeTillRestock:set(time)
 end
 
 return ShopUI

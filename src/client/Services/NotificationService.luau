@@ -2,8 +2,8 @@ local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 
-local scope
-local Notifications
+local scope = nil
+local Notifications = nil
 
 local NotificationService = {}
 
