@@ -14,12 +14,14 @@ local BlockPlacerService = require(StarterPlayer.StarterPlayerScripts.Client.Ser
 local DialogueClient = require(script.Services.DialogueClient)
 local QuestClient = require(script.Services.QuestClient)
 local ToolService = require(StarterPlayer.StarterPlayerScripts.Client.Services.ToolService)
+local ShopClient = require(script.Services.ShopClient)
 
 BlockPlacerService.Start()
 ToolService.Start()
 ItemEquip.Start()
 DialogueClient.Start()
 QuestClient.Start()
+ShopClient.Start()
 
 local InputService = require(script.Services.InputService)
 InputService.Start()

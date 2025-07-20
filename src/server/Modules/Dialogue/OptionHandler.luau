@@ -16,9 +16,9 @@ function OptionHandler.Init()
 end
 
 function OptionHandler.ProcessOption(player: Player, data: option)
-	if data.callback == "endDialogue" then
-		packets.CloseDialogue.sendTo(nil, player)
-	elseif data.callback == "openShop" then
+	packets.CloseDialogue.sendTo(nil, player)
+
+	if data.callback == "openShop" then
 		if data.shopId then
 			ShopService.InitShop(player, data.shopId)
 		else

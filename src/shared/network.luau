@@ -76,6 +76,19 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		UpdateShop = ByteNet.definePacket({
+			value = ByteNet.struct({
+				shopId = ByteNet.string,
+				shopStock = ByteNet.map(
+					ByteNet.string,
+					ByteNet.struct({
+						stock = ByteNet.int32,
+						lastRestock = ByteNet.int32,
+					})
+				),
+			}),
+			reliabilityType = "reliable",
+		}),
 		CloseDialogue = ByteNet.definePacket({
 			value = ByteNet.struct({}),
 			reliabilityType = "reliable",

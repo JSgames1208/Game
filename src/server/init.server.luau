@@ -22,6 +22,7 @@ Players.PlayerAdded:Connect(function(player: Player)
 	EntityService.Start()
 	QuestService.PlayerJoined(player)
 	DialogueServer.Init()
+	ShopService.Init()
 end)
 
 Players.PlayerRemoving:Connect(function(player: Player)

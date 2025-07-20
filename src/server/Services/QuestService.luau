@@ -1,4 +1,3 @@
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ObjectiveHandler = require(ServerScriptService.Server.Modules.Quests.ObjectiveHandler)
@@ -7,7 +6,6 @@ local QuestNetworker = require(ServerScriptService.Server.Modules.Quests.QuestNe
 local CurrencyService = require(script.Parent.CurrencyService)
 local DataStore = require(script.Parent.DataStore)
 local InventoryServer = require(script.Parent.InventoryServer)
-local NPCData = require(ReplicatedStorage.Shared.Data.NPCData)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local Types = require(ReplicatedStorage.Shared.Types)
 local QuestService = {}

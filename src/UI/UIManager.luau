@@ -32,6 +32,12 @@ function UIManager.Init(scope)
 		ResetOnSpawn = false,
 		Parent = Players.LocalPlayer.PlayerGui,
 	})
+	scope:New("ScreenGui")({
+		Name = "ShopGui",
+		IgnoreGuiInset = false,
+		ResetOnSpawn = false,
+		Parent = Players.LocalPlayer.PlayerGui,
+	})
 end
 
 return UIManager

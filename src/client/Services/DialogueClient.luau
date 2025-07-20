@@ -24,8 +24,4 @@ function DialogueClient.Start()
 	DialogueHandler.Init()
 end
 
-packets.OpenShop.listen(function(data)
-	print("Open Shop")
-end)
-
 return DialogueClient
