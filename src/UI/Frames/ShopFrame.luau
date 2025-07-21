@@ -20,6 +20,7 @@ export type ShopFrameProps = {
 	visible: UsedAs<boolean>?,
 	currency: UsedAs<number>?,
 	timeTillRestock: UsedAs<number>?,
+	buttonCallback: (string, string, string) -> ()?,
 }
 
 local function ShopFrame(scope: typeof(Fusion.scoped(Fusion)), props: ShopFrameProps)
@@ -64,7 +65,9 @@ local function ShopFrame(scope: typeof(Fusion.scoped(Fusion)), props: ShopFrameP
 						return ShopOption(scope, {
 							itemId = item.id,
 							itemInfo = item,
+							shopId = scope.peek(props.shopData).id,
 							currency = props.currency,
+							callback = props.buttonCallback,
 						})
 					end),
 				},

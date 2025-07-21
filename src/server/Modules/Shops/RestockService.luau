@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ShopNetworker = require(script.Parent.ShopNetworker)
 local StockState = require(script.Parent.StockState)
@@ -7,7 +8,6 @@ local Time = require(ReplicatedStorage.Shared.Utils.Math.Time)
 local RestockService = {}
 
 function RestockService.Init()
-	StockState.Init()
 	RestockService.RestockAll()
 
 	task.delay(Time.GetTimeUntilNext5MinMark(), function()
@@ -40,7 +40,14 @@ function RestockService.Restock(shopId: string)
 		StockState.Set(shopId, { id = item.id, stock = amount, lastRestock = os.time() })
 	end
 
-	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId), true)
+	for _, player in Players:GetPlayers() do
+		ShopNetworker.UpdateShop(shopId, StockState.Get(shopId, nil, player), true, player)
+	end
+end
+
+function RestockService.SetItemStock(player: Player, shopId: string, itemId: string, amount: number)
+	StockState.Set(shopId, { id = itemId, stock = amount }, player)
+	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId, nil, player), true, player)
 end
 
 function RestockService.RestockAll()

@@ -9,6 +9,7 @@ local ShopUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Shops.S
 local ShopClient = {}
 
 function ShopClient.Start()
+	ShopUI.SetButtonCallback(ShopClient.ButtonClicked)
 	ShopUI.Init()
 
 	packets.UpdateShop.listen(function(data)
@@ -38,6 +39,14 @@ function ShopClient.Start()
 			ShopUI.SetTimeLeft(Time.GetTimeUntilNext5MinMark())
 		end
 	end)
+end
+
+function ShopClient.ButtonClicked(mode: string, shopId: string, itemId: string)
+	if mode == "buy" then
+		packets.QueryPurchase.send({ shopId = shopId, itemId = itemId })
+	else
+		return
+	end
 end
 
 return ShopClient

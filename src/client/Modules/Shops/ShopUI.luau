@@ -17,6 +17,7 @@ local shopStock = scope:Value({})
 local visible = scope:Value(false)
 local currency = scope:Value(0)
 local timeTillRestock = scope:Value(0)
+local buttonCallback = nil
 
 function ShopUI.Init()
 	local ShopFrame = ShopFrame(
@@ -27,6 +28,7 @@ function ShopUI.Init()
 			visible = visible,
 			currency = currency,
 			timeTillRestock = timeTillRestock,
+			buttonCallback = buttonCallback,
 		} :: ShopFrame.ShopFrameProps
 	)
 	ShopFrame.Parent = ShopGui
@@ -50,6 +52,10 @@ end
 
 function ShopUI.SetTimeLeft(time: number)
 	timeTillRestock:set(time)
+end
+
+function ShopUI.SetButtonCallback(callback)
+	buttonCallback = callback
 end
 
 return ShopUI

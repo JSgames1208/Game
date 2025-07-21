@@ -11,11 +11,12 @@ type UsedAs<T> = Fusion.UsedAs<T>
 
 export type ShopOptionProps = {
 	mode: "buy" | "sell"?,
-	shopId: string?,
+	shopId: string,
 	shopStock: { [string]: { stock: number, lastRestock: number } }?,
 	itemId: string,
 	itemInfo: { stock: number, lastRestock: number },
 	currency: UsedAs<number>,
+	callback: (string, string, string) -> (),
 }
 
 local function ShopOption(scope: typeof(Fusion.scoped(Fusion)), props: ShopOptionProps)
@@ -108,6 +109,9 @@ local function ShopOption(scope: typeof(Fusion.scoped(Fusion)), props: ShopOptio
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					Position = UDim2.new(0.25, 0, 0.85, 0),
 					BackgroundColor3 = Color3.fromRGB(0, 243, 4),
+					OnClick = function()
+						props.callback("buy", props.shopId, props.itemId)
+					end,
 					Children = {
 						TextLabel(
 							scope,

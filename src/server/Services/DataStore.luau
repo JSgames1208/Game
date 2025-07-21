@@ -110,6 +110,7 @@ function DataStore.ReleasePlayerData(userId)
 			return
 		end
 		profile:Release()
+		--profileStore:WipeProfileAsync("Player_" .. userId)
 	end
 end
 
