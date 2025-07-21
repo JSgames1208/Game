@@ -16,4 +16,8 @@ function ShopNetworker.UpdateShop(shopId: string, shopStock: StockState.ShopStoc
 	end
 end
 
+function ShopNetworker.UpdateItem(player: Player, shopId: string, itemId: string, stock: number)
+	packets.SetShopItem.sendTo({ itemId = itemId, shopId = shopId, stock = stock }, player)
+end
+
 return ShopNetworker

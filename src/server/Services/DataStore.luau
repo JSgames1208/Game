@@ -30,7 +30,7 @@ local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
 	Currency = 0,
 })
 
-local TEST_MODE = true
+local TEST_MODE = false
 
 local DataStore = {}
 

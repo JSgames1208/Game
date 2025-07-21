@@ -14,7 +14,7 @@ export type ShopOptionProps = {
 	shopId: string,
 	shopStock: { [string]: { stock: number, lastRestock: number } }?,
 	itemId: string,
-	itemInfo: { stock: number, lastRestock: number },
+	itemInfo: UsedAs<{ stock: UsedAs<number>, lastRestock: number }>,
 	currency: UsedAs<number>,
 	callback: (string, string, string) -> (),
 }
@@ -79,7 +79,10 @@ local function ShopOption(scope: typeof(Fusion.scoped(Fusion)), props: ShopOptio
 			TextLabel(
 				scope,
 				{
-					Text = "In stock: " .. tostring(props.itemInfo.stock),
+					Text = scope:Computed(function(use)
+						print(use(props.itemInfo))
+						return `In stock: {use(scope.peek(props.itemInfo).stock)}`
+					end),
 					TextScaled = true,
 					TextColor3 = Color3.fromRGB(210, 210, 210),
 					BackgroundTransparency = 1,

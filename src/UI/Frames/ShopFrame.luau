@@ -16,7 +16,7 @@ type UsedAs<T> = Fusion.UsedAs<T>
 
 export type ShopFrameProps = {
 	shopData: UsedAs<ShopData.ShopData>?,
-	shopStock: UsedAs<{ [string]: { stock: number, lastRestock: number, id: string } }>?,
+	shopStock: UsedAs<{ [string]: { stock: UsedAs<number>, lastRestock: number, id: string } }>?,
 	visible: UsedAs<boolean>?,
 	currency: UsedAs<number>?,
 	timeTillRestock: UsedAs<number>?,
@@ -62,6 +62,8 @@ local function ShopFrame(scope: typeof(Fusion.scoped(Fusion)), props: ShopFrameP
 					}),
 
 					scope:ForValues(props.shopStock, function(use, scope, item)
+						print(item)
+
 						return ShopOption(scope, {
 							itemId = item.id,
 							itemInfo = item,

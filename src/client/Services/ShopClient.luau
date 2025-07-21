@@ -22,6 +22,12 @@ function ShopClient.Start()
 		end
 	end)
 
+	packets.SetShopItem.listen(function(data)
+		if data.itemId and data.shopId and data.stock then
+			ShopUI.UpdateItem(data.itemId, data.stock)
+		end
+	end)
+
 	packets.OpenShop.listen(function(data)
 		ShopUI.SetVisible(true)
 	end)

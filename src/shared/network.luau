@@ -148,6 +148,14 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			value = ByteNet.int32,
 			reliabilityType = "reliable",
 		}),
+		SetShopItem = ByteNet.definePacket({
+			value = ByteNet.struct({
+				shopId = ByteNet.string,
+				itemId = ByteNet.string,
+				stock = ByteNet.int32,
+			}),
+			reliabilityType = "reliable",
+		}),
 	}
 end)
 

@@ -34,8 +34,21 @@ function ShopUI.Init()
 	ShopFrame.Parent = ShopGui
 end
 
-function ShopUI.SetShopStock(stock)
+function ShopUI.SetShopStock(s)
+	local stock = {}
+	for _, item in s do
+		table.insert(stock, { id = item.id, stock = scope:Value(item.stock), lastRestock = item.lastRestock })
+	end
+
 	shopStock:set(stock)
+end
+
+function ShopUI.UpdateItem(itemId: string, stock: number)
+	for _, item in scope.peek(shopStock) do
+		if item.id == itemId then
+			item.stock:set(stock)
+		end
+	end
 end
 
 function ShopUI.SetShopData(shop: ShopData.Shop)

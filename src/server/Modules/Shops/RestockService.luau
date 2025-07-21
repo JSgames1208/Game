@@ -47,7 +47,8 @@ end
 
 function RestockService.SetItemStock(player: Player, shopId: string, itemId: string, amount: number)
 	StockState.Set(shopId, { id = itemId, stock = amount }, player)
-	ShopNetworker.UpdateShop(shopId, StockState.Get(shopId, nil, player), true, player)
+
+	ShopNetworker.UpdateItem(player, shopId, itemId, amount)
 end
 
 function RestockService.RestockAll()
