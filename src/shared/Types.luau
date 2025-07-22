@@ -43,7 +43,7 @@ export type QuestDef = {
 
 export type QuestInfo = {
 	state: QuestState,
-	progress: { collect: { [string]: number }? }, -- itemId -> collected count
+	progress: { { [string]: number } }, -- itemId -> collected count
 }
 
 export type NPCConfig = {

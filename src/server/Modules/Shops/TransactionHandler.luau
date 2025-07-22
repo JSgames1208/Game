@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local ShopData = require(ReplicatedStorage.Shared.Data.ShopData)
 local RestockService = require(script.Parent.RestockService)
 local ShopHelpers = require(script.Parent.ShopHelpers)
 local CurrencyService = require(ServerScriptService.Server.Services.CurrencyService)
