@@ -45,6 +45,9 @@ function TreeService.PlayerJoined(player: Player)
 	saplings[player.UserId] = {}
 
 	local profile = DataStore.profiles[player.UserId]
+	if not profile then
+		return
+	end
 	for posStr, block in profile.Data.Blocks do
 		if not block or not block.id then
 			continue

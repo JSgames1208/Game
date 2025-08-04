@@ -95,6 +95,16 @@ local NPCData: { [string]: Types.NPCConfig } = {
 		idleDialogue = { { text = "Hi there!" } },
 		optionDialogue = { { text = "What brings you here today?" } },
 	},
+
+	TestShopNPC = {
+		name = "TestShopNPC",
+		id = "TestShopNPC",
+		questLine = {},
+		questDialogue = {},
+		idleDialogue = { { text = "Hi there!" } },
+		optionDialogue = { { text = "What brings you here today?" } },
+		shopId = "TestShop",
+	},
 }
 
 return NPCData

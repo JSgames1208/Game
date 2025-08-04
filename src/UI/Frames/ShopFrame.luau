@@ -49,6 +49,9 @@ local function ShopFrame(scope: typeof(Fusion.scoped(Fusion)), props: ShopFrameP
 			scope:New("ScrollingFrame")({
 				Name = "ScrollingFrame",
 				Size = UDim2.new(1, 0, 0.96, 0),
+				CanvasSize = scope:Computed(function(use)
+					return UDim2.new(0, 0, #use(props.shopStock) / 2.0, (#use(props.shopStock) - 1) * 10)
+				end),
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 				BackgroundTransparency = 1,

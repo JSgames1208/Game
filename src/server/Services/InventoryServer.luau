@@ -13,7 +13,11 @@ function InventoryService.Get(player: Player)
 end
 
 function InventoryService.GetSelected(player: Player)
-	return InventoryService.Get(player)[SelectedSlots[player.UserId]].itemInfo.id
+	if InventoryService.Get(player)[SelectedSlots[player.UserId]] then
+		return InventoryService.Get(player)[SelectedSlots[player.UserId]].itemInfo.id
+	else
+		return nil
+	end
 end
 
 function InventoryService.SendToClient(player: Player)

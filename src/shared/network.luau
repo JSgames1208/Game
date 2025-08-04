@@ -156,6 +156,11 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+		Die = ByteNet.definePacket({
+			value = ByteNet.struct({
+				reason = ByteNet.optional(ByteNet.string),
+			}),
+		}),
 	}
 end)
 

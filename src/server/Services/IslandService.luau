@@ -1,6 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local EntityService = require(ReplicatedStorage.Shared.Entity.EntityService)
 local IslandData = require(ServerScriptService.Server.Modules.Island.IslandData)
 local IslandInitializer = require(ServerScriptService.Server.Modules.Island.IslandInitializer)
 local IslandPlacer = require(ServerScriptService.Server.Modules.Island.IslandPlacer)

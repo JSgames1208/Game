@@ -19,6 +19,7 @@ function RestockService.Init()
 end
 
 function RestockService.Restock(shopId: string)
+	print(shopId)
 	local shopConfig = ShopData[shopId]
 
 	if not shopConfig then
@@ -36,7 +37,7 @@ function RestockService.Restock(shopId: string)
 			end
 		end
 
-		local amount = math.random(1, item.maxStock)
+		local amount = math.random(item.minStock or 0, item.maxStock)
 		StockState.Set(shopId, { id = item.id, stock = amount, lastRestock = os.time() })
 	end
 

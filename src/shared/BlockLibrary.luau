@@ -11,6 +11,12 @@ BlockLibrary.blockDefinitions = {
 	bedrock = { transparent = false },
 	["pine tree sapling"] = { transparent = false },
 	["pine tree"] = { transparent = false },
+	bricks = { transparent = false },
+	["snow block"] = { transparent = false },
+	obsidian = { transparent = false },
+	cobblestone = { transparent = false },
+	ice = { transparent = false },
+	gravel = { transparent = false },
 }
 
 function BlockLibrary.CreateBlockPart(blockId: string)

@@ -41,7 +41,7 @@ local function ShopOption(scope: typeof(Fusion.scoped(Fusion)), props: ShopOptio
 
 	return scope:New("Frame")({
 		Name = "ShopOption",
-		Size = UDim2.new(0.98, 0, 0.5, 0),
+		Size = UDim2.new(0.98, 0, 0.49, 0),
 		SizeConstraint = Enum.SizeConstraint.RelativeXX,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.new(0, 0, 0, 0),

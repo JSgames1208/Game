@@ -17,6 +17,10 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 	local block = blocks[pos]
 	if block then
 		local toolId = InventoryServer.GetSelected(player)
+
+		if not toolId then
+			return
+		end
 		if ItemLibrary.itemDefinitions[toolId].type == "tool" then
 			island.IslandModel:FindFirstChild(pos):SetAttribute(
 				"hp",
