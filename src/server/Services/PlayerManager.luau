@@ -1,5 +1,6 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local Player = require(ServerScriptService.Server.Classes.Player)
+local PassiveHeal = require(ServerScriptService.Server.Modules.Player.PassiveHeal)
 local PlayerManager = {}
 
 local PlayerList = {} --{userId: Player Object}
@@ -19,9 +20,7 @@ function PlayerManager.PlayerJoined(player: Player)
 	local PlayerObj = Player.new(player)
 	PlayerList[player.UserId] = PlayerObj
 
-	task.delay(5, function()
-		PlayerList[player.UserId]:removeHealth(100)
-	end)
+	PassiveHeal.Start(PlayerObj)
 end
 
 function PlayerManager.PlayerLeaving(player: Player)

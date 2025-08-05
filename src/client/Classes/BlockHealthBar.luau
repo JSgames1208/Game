@@ -1,6 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
-local HealthBar = require(StarterGui.UI.Frames.HealthBar)
+local BillboardHealthBar = require(StarterGui.UI.Frames.HealthBars.BillboardHealthBar)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 
 local BlockHealthBar = {}
@@ -15,14 +15,18 @@ function BlockHealthBar.new(block: Model | Part | MeshPart)
 	self.currentHP = self.scope:Value(block:GetAttribute("hp"))
 	self.maxHP = self.scope:Value(block:GetAttribute("maxhp"))
 
-	self.gui = HealthBar(
+	print("HERE")
+
+	self.gui = BillboardHealthBar(
 		self.scope,
 		{
 			currentHP = self.currentHP,
 			maxHP = self.maxHP,
-			adornee = self.block,
-		} :: HealthBar.HealthBarProps
+			Adornee = self.block,
+		} :: BillboardHealthBar.BillboardHealthBarProps
 	)
+
+	print(self.gui)
 
 	return self
 end

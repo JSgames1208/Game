@@ -87,4 +87,16 @@ function ItemEquip.UnEquip()
 	equippedItem = nil
 end
 
+player.CharacterAdded:Connect(function(newCharacter)
+	character = newCharacter
+	humanoid = newCharacter:WaitForChild("Humanoid")
+
+	if equippedItem then
+		itemTool.Parent = character
+		local equipped = equippedItem
+		ItemEquip.UnEquip()
+		ItemEquip.Equip(equipped)
+	end
+end)
+
 return ItemEquip

@@ -156,10 +156,21 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+
+		--SERVER -> CLIENT
 		Die = ByteNet.definePacket({
 			value = ByteNet.struct({
 				reason = ByteNet.optional(ByteNet.string),
 			}),
+			reliabilityType = "reliable",
+		}),
+		--SERVER -> CLIENT
+		SetHealth = ByteNet.definePacket({
+			value = ByteNet.struct({
+				currentHP = ByteNet.optional(ByteNet.int16),
+				maxHP = ByteNet.optional(ByteNet.int16),
+			}),
+			reliabilityType = "reliable",
 		}),
 	}
 end)

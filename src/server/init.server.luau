@@ -16,6 +16,8 @@ local ShopService = require(script.Services.ShopService)
 local TreeService = require(script.Services.TreeService)
 
 Players.PlayerAdded:Connect(function(player: Player)
+	player:LoadCharacter()
+
 	local character = player.Character or player.CharacterAdded:Wait()
 	character:WaitForChild("HumanoidRootPart"):PivotTo(CFrame.new(Vector3.new(100, 0, 0)))
 	task.wait(0.2)

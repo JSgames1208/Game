@@ -1,4 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local PassiveHeal = require(ServerScriptService.Server.Modules.Player.PassiveHeal)
 local packets = require(ReplicatedStorage.Shared.network)
 local Player = {}
 Player.__index = Player
@@ -15,14 +17,20 @@ function Player.new(player: Player)
 end
 
 function Player:addHealth(amount: number)
-	self.health = math.max(self.health + amount, self.maxHealth)
+	self.health = math.min(self.health + amount, self.maxHealth)
+
+	packets.SetHealth.sendTo({ currentHP = self.health, maxHP = self.maxHealth }, self.player)
 end
 
 function Player:removeHealth(amount: number)
-	self.health = math.min(self.health + amount, 0)
+	self.health = math.max(self.health - amount, 0)
 	if self.health <= 0 then
 		self:die()
 	end
+
+	PassiveHeal.Interrupt(self.player)
+
+	packets.SetHealth.sendTo({ currentHP = self.health, maxHP = self.maxHealth }, self.player)
 end
 
 function Player:die()

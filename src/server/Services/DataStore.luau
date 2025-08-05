@@ -28,6 +28,10 @@ local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
 	Inventory = GetBaseInventory(),
 	QuestInfo = {}, -- {questId: string, progress: {collect: {itemId: string = amount: number}?}}
 	Currency = 0,
+	PlayerInfo = {
+		currentHP = 100,
+		maxHP = 100,
+	},
 })
 
 local TEST_MODE = false

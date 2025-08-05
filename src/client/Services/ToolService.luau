@@ -155,4 +155,23 @@ packets.AssignPlot.listen(function(vec3)
 	--plotPosition = vec3
 end)
 
+player.CharacterAdded:Connect(function(newCharacter)
+	character = newCharacter
+	humanoid = newCharacter:WaitForChild("Humanoid")
+	animator = humanoid:WaitForChild("Animator") :: Animator
+
+	local newAnim = Instance.new("Animation")
+	newAnim.AnimationId = "rbxassetid://103813252472730"
+	newAnim.Parent = animator
+	miningAnimation = animator:LoadAnimation(newAnim)
+	miningAnimation.Looped = true
+
+	StopAnimation("miningAnimation")
+	ToolService.MouseDown = false
+end)
+
+humanoid.Died:Connect(function()
+	StopAnimation("miningAnimation")
+end)
+
 return ToolService
