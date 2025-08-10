@@ -1,10 +1,17 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
+local GetPlayerDevice = require(StarterPlayer.StarterPlayerScripts.Client.Modules.GetPlayerDevice)
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local PlacementPreview = {}
 
 local blockPreview = nil
 
+local isOnMobile = GetPlayerDevice() == "mobile"
+
 function PlacementPreview.RenderPreview(blockId: string, position: Vector3): ()
+	if isOnMobile then
+		return
+	end
 	if not blockPreview then
 		blockPreview = BlockLibrary.CreateBlockPart(blockId)
 		for _, child in blockPreview:GetDescendants() do
@@ -35,6 +42,9 @@ function PlacementPreview.RenderPreview(blockId: string, position: Vector3): ()
 end
 
 function PlacementPreview.RemovePreview(): ()
+	if isOnMobile then
+		return
+	end
 	if blockPreview then
 		blockPreview:Destroy()
 		blockPreview = nil

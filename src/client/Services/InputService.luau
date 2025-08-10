@@ -1,8 +1,11 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
+local GetSlotAtPosition = require(StarterGui.UI.Modules.GetSlotAtPosition)
 local DialogueUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Dialogue.DialogueUI)
+local GetPlayerDevice = require(StarterPlayer.StarterPlayerScripts.Client.Modules.GetPlayerDevice)
 local InventorySlots = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Inventory.InventorySlots)
 local InventoryUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Inventory.InventoryUI)
 local BlockPlacerService = require(StarterPlayer.StarterPlayerScripts.Client.Services.BlockPlacerService)
@@ -11,18 +14,22 @@ local ToolService = require(StarterPlayer.StarterPlayerScripts.Client.Services.T
 local player = Players.LocalPlayer
 local PlayerGui = player.PlayerGui
 
+local mouse = player:GetMouse()
+
 local MainGui = PlayerGui:WaitForChild("MainGui")
 local Hotbar = MainGui:WaitForChild("Hotbar")
+
+local isOnMobile = GetPlayerDevice() == "mobile"
 
 local DialogueGui = PlayerGui:WaitForChild("DialogueGui")
 local DialogueFrame = DialogueGui:WaitForChild("DialogueFrame")
 
 local InputService = {}
 
-local hoveredSlot = nil
+--local hoveredSlot = nil
 
 function InputService.Start()
-	for _, slot in Hotbar:GetChildren() do
+	--[[for _, slot in Hotbar:GetChildren() do
 		if slot:IsA("Frame") then
 			slot.MouseEnter:Connect(function()
 				hoveredSlot = slot
@@ -31,19 +38,22 @@ function InputService.Start()
 				hoveredSlot = nil
 			end)
 		end
-	end
+	end]]
 end
 
-function InputService.IsOnSlot()
+--[[function InputService.IsOnSlot()
 	return hoveredSlot and true or false
-end
+end]]
 
 UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: boolean)
 	if gameProcessed then
 		return
 	end
 	if DialogueFrame.Visible then
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if
+			input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch
+		then
 			DialogueUI.MouseButton1Click()
 		end
 		return
@@ -56,9 +66,13 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 		end
 		return
 	end
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		if hoveredSlot then
-			InventorySlots.SlotPressed(hoveredSlot:GetAttribute("SlotIndex"))
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		local slot = GetSlotAtPosition(input.Position.X, input.Position.Y)
+		if slot then
+			if slot:GetAttribute("SlotIndex") == 420 then
+				InventoryUI.ToggleVisibility()
+			end
+			InventorySlots.SlotPressed(slot:GetAttribute("SlotIndex"))
 			ToolService.MouseDown = false
 		else
 			local _, currentItem = InventorySlots.GetItem()
@@ -67,7 +81,9 @@ UserInputService.InputBegan:Connect(function(input: InputObject, gameProcessed: 
 				if id then
 					local type = ItemLibrary.itemDefinitions[id].type
 					if type == "block" or type == "sapling" then
-						BlockPlacerService.Place()
+						if not isOnMobile then
+							BlockPlacerService.Place()
+						end
 					elseif type == "tool" then
 						ToolService.MouseDown = true
 					end
@@ -103,6 +119,28 @@ end)
 UserInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then
 		ToolService.MouseDown = false
+	end
+	if isOnMobile then
+		local slot = GetSlotAtPosition(input.Position.X, input.Position.Y)
+		if slot then
+			return
+		end
+		if
+			input.UserInputType == Enum.UserInputType.Touch
+			or input.UserInputType == Enum.UserInputType.MouseButton1
+		then
+			local _, currentItem = InventorySlots.GetItem()
+			if currentItem then
+				local id = currentItem.itemInfo.id
+				if id then
+					local type = ItemLibrary.itemDefinitions[id].type
+					if type == "block" or type == "sapling" then
+						BlockPlacerService.Place()
+					end
+				end
+			end
+			ToolService.MouseDown = false
+		end
 	end
 end)
 

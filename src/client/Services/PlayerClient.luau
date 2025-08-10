@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
-local PlayerHealthBar = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Player.PlayerHealthBar)
+local HealthBarManager = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Player.HealthBarManager)
 local NotificationService = require(StarterPlayer.StarterPlayerScripts.Client.Services.NotificationService)
 local packets = require(ReplicatedStorage.Shared.network)
 
@@ -11,7 +11,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local PlayerClient = {}
 
 function PlayerClient.Start()
-	PlayerHealthBar.Init(100, 100)
+	HealthBarManager.Init(100, 100)
 
 	packets.Die.listen(function(data)
 		PlayerClient.Die(data.reason)
@@ -21,11 +21,11 @@ function PlayerClient.Start()
 		local c = data.currentHP
 		local m = data.maxHP
 		if c then
-			PlayerHealthBar.SetCurrentHP(c)
+			HealthBarManager.SetCurrentHP(c)
 		end
 
 		if m then
-			PlayerHealthBar.SetMaxHP(m)
+			HealthBarManager.SetMaxHP(m)
 		end
 	end)
 end
@@ -35,7 +35,7 @@ function PlayerClient.Die(reason: string?)
 		NotificationService.AddNotification(`You died: {reason}`)
 	end
 
-	PlayerHealthBar.SetCurrentHP(0)
+	HealthBarManager.SetCurrentHP(0)
 
 	if character then
 		character.Humanoid:ChangeState(Enum.HumanoidStateType.FallingDown)
@@ -44,7 +44,7 @@ function PlayerClient.Die(reason: string?)
 		task.wait(4.5)
 		character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
 
-		PlayerHealthBar.SetCurrentHP("max")
+		HealthBarManager.SetCurrentHP("max")
 	end
 end
 

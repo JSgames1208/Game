@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local HotbarSlot = require(StarterGui.UI.Features.Inventory.HotbarSlot)
+local InventorySlot = require(StarterGui.UI.Features.Inventory.InventorySlot)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 
@@ -10,6 +11,9 @@ local function Hotbar(scope: typeof(Fusion.scoped(Fusion)))
 		children[i] = HotbarSlot(scope, i)
 		children[i]:SetAttribute("SlotIndex", i)
 	end
+
+	children[10] = InventorySlot(scope)
+	children[10]:SetAttribute("SlotIndex", 420)
 
 	return scope:New("Frame")({
 		Name = "Hotbar",

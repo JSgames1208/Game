@@ -7,6 +7,7 @@ local MainGui = PlayerGui:WaitForChild("MainGui")
 local Hotbar: Frame = MainGui:WaitForChild("Hotbar") :: Frame
 
 local InventoryFrame: Frame = MainGui:WaitForChild("Inventory") :: Frame
+local CloseButton: TextButton = InventoryFrame:WaitForChild("CloseButton") :: TextButton
 
 local visible = false
 
@@ -15,6 +16,9 @@ local InventoryUI = {}
 function InventoryUI.OpenInventory()
 	if Hotbar.Visible then
 		Hotbar.Visible = false
+		if MainGui:FindFirstChild("HealthBar") then
+			MainGui:FindFirstChild("HealthBar").Visible = false
+		end
 		InventoryFrame.Visible = true
 	end
 end
@@ -22,6 +26,9 @@ end
 function InventoryUI.CloseInventory()
 	if InventoryFrame.Visible then
 		InventoryFrame.Visible = false
+		if MainGui:FindFirstChild("HealthBar") then
+			MainGui:FindFirstChild("HealthBar").Visible = true
+		end
 		Hotbar.Visible = true
 	end
 end
@@ -52,5 +59,9 @@ function InventoryUI.IsInventoryOpen()
 end
 
 function InventoryUI.Init() end
+
+CloseButton.MouseButton1Click:Connect(function()
+	InventoryUI.ToggleVisibility()
+end)
 
 return InventoryUI

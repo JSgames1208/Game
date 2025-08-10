@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
+local CloseButton = require(StarterGui.UI.Components.CloseButton)
 local HotbarSlot = require(StarterGui.UI.Features.Inventory.HotbarSlot)
 local InventorySlot = require(StarterGui.UI.Features.Inventory.InventorySlot)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
@@ -79,6 +80,10 @@ local function InventoryFrame(scope: typeof(Fusion.scoped(Fusion)))
 		SizeConstraint = Enum.SizeConstraint.RelativeXX,
 		Visible = false,
 		[Children] = {
+			CloseButton(scope, 0.5, function()
+				return
+			end),
+
 			scope:New("Frame")({
 				Name = "Hotbar",
 				AnchorPoint = Vector2.new(0.5, 1),

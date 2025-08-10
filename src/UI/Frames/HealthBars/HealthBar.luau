@@ -7,6 +7,8 @@ local Children = Fusion.Children
 type UsedAs<T> = Fusion.UsedAs<T>
 
 export type HealthBarProps = {
+	Name: string?,
+
 	currentHP: UsedAs<number>,
 	maxHP: UsedAs<number>,
 
@@ -22,6 +24,7 @@ local function HealthBar(scope: typeof(Fusion), props: HealthBarProps)
 	local currentHP = props.currentHP
 	local maxHP = props.maxHP
 
+	props.Name = props.Name or "HealthBar"
 	props.Size = props.Size or UDim2.new(1, 0, 1, 0)
 	props.SizeConstraint = props.SizeConstraint or Enum.SizeConstraint.RelativeXY
 	props.AnchorPoint = props.AnchorPoint or Vector2.new(0, 0)
@@ -58,6 +61,8 @@ local function HealthBar(scope: typeof(Fusion), props: HealthBarProps)
 	end
 
 	return scope:New("Frame")({
+		Name = props.Name,
+
 		AnchorPoint = props.AnchorPoint,
 		Size = props.Size,
 		SizeConstraint = props.SizeConstraint,

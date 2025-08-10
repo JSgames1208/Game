@@ -27,6 +27,8 @@ function HealthBarManager.Init(_currentHP, _maxHP)
 	local HealthBar = HealthBar(
 		scope,
 		{
+			Name = "HealthBar",
+
 			currentHP = currentHP,
 			maxHP = maxHP,
 
@@ -34,7 +36,8 @@ function HealthBarManager.Init(_currentHP, _maxHP)
 			Size = UDim2.new(0.5, 0, 0.01, 0),
 			SizeConstraint = Enum.SizeConstraint.RelativeXX,
 			Position = scope:Computed(function(use)
-				return UDim2.new(0.5, 0, -0.0125, use(screenSize).Y - use(screenSize).X / 10.0)
+				print(use(screenSize))
+				return UDim2.new(0.5, 0, 0.965, -use(screenSize).X / 20.0)
 			end),
 
 			AddText = true,
