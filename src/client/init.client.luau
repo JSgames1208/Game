@@ -5,6 +5,13 @@ require(ReplicatedStorage.Shared.network)
 
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 
+local AdminClient = require(script.Admin.AdminClient)
+local packets = require(ReplicatedStorage.Shared.network)
+
+packets.InitAdmin.listen(function(data)
+	AdminClient.Init()
+end)
+
 local InventoryClient = require(script.Services.InventoryClient)
 InventoryClient.Start()
 

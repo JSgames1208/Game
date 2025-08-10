@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 require(ReplicatedStorage.Shared.network)
+local Admin = require(script.Admin.Admin)
+local AdminRights = require(script.Admin.AdminRights)
 local StockState = require(script.Modules.Shops.StockState)
 local TransactionHandler = require(script.Modules.Shops.TransactionHandler)
 local CurrencyService = require(script.Services.CurrencyService)
@@ -33,6 +35,10 @@ Players.PlayerAdded:Connect(function(player: Player)
 	StockState.Init(player)
 	ShopService.Init()
 	TransactionHandler.Init()
+
+	if AdminRights.HasRights(player) then
+		Admin.Init(player)
+	end
 end)
 
 Players.PlayerRemoving:Connect(function(player: Player)

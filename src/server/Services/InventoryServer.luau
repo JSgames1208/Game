@@ -26,6 +26,10 @@ function InventoryService.SendToClient(player: Player)
 end
 
 function InventoryService.PlayerJoined(player: Player)
+	local profile = DataStore.profiles[player.UserId]
+	if not profile then
+		return
+	end
 	local inventory = DataStore.profiles[player.UserId].Data.Inventory
 
 	Inventories[player.UserId] = inventory

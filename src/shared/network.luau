@@ -172,6 +172,12 @@ local packets = ByteNet.defineNamespace("IslandNet", function()
 			}),
 			reliabilityType = "reliable",
 		}),
+
+		--SERVER -> CLIENT
+		InitAdmin = ByteNet.definePacket({
+			value = ByteNet.nothing,
+			reliabilityType = "reliable",
+		}),
 	}
 end)
 
