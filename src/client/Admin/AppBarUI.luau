@@ -10,6 +10,7 @@ local player = Players.LocalPlayer
 local mouse = player:GetMouse()
 
 local AppButton = require(StarterGui.UI.Features.Admin.AppButton)
+local WindowManager = require(StarterGui.UI.Features.Admin.WindowManager)
 local GetAppButton = require(StarterPlayer.StarterPlayerScripts.Client.Admin.Helpers.GetAppButton)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
 
@@ -181,7 +182,6 @@ local function mouseDown()
 				0
 			)
 		)
-		print(currentIndex)
 	end
 end
 
@@ -190,7 +190,9 @@ local function mouseUp(icon)
 	if isDragging then
 		AppBarUI.EndDrag()
 	else
-		print("CLICK")
+		if scope then
+			WindowManager.OpenWindow(scope.peek(apps)[currentIndex].name)
+		end
 	end
 end
 
@@ -257,7 +259,7 @@ function AppBarUI.Init(s: typeof(Fusion.scoped(Fusion)))
 
 					-- create a target Value and spring for this button and hydrate the instance
 					targetCache[id] = scope:Value(GetAppPos(#list, i))
-					springCache[id] = scope:Spring(targetCache[id], 20, 1)
+					springCache[id] = scope:Spring(targetCache[id], 30, 1)
 
 					scope:Hydrate(btn)({
 						AnchorPoint = Vector2.new(0.5, 0.5),
