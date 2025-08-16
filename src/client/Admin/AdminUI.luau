@@ -28,7 +28,7 @@ function AdminUI.Init()
 
 		AppBarUI.Init(scope)
 
-		AppBarUI.Populate(scope, { { name = "Test1" }, { name = "Test2" }, { name = "Test3" } })
+		AppBarUI.Populate({ { name = "Test1" }, { name = "Test2" }, { name = "Test3" } })
 	end
 end
 
