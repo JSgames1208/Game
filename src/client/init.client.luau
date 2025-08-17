@@ -16,6 +16,7 @@ local InventoryClient = require(script.Services.InventoryClient)
 InventoryClient.Start()
 
 require(script.Modules.HealthBarManager)
+local CursorService = require(StarterPlayer.StarterPlayerScripts.Client.Services.CursorService)
 local ItemEquip = require(script.Modules.ItemEquip)
 local BlockPlacerService = require(StarterPlayer.StarterPlayerScripts.Client.Services.BlockPlacerService)
 local DialogueClient = require(script.Services.DialogueClient)
@@ -24,6 +25,7 @@ local ToolService = require(StarterPlayer.StarterPlayerScripts.Client.Services.T
 local ShopClient = require(script.Services.ShopClient)
 local PlayerClient = require(script.Services.PlayerClient)
 
+CursorService.Init()
 BlockPlacerService.Start()
 ToolService.Start()
 ItemEquip.Start()

@@ -1,4 +1,3 @@
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local StarterPlayer = game:GetService("StarterPlayer")
@@ -7,8 +6,6 @@ local TextLabel = require(StarterGui.UI.Components.TextLabel)
 local GetTopMostWindowAtPosition =
 	require(StarterPlayer.StarterPlayerScripts.Client.Admin.Helpers.GetTopMostWindowAtPosition)
 local Fusion = require(ReplicatedStorage.Packages.Fusion)
-
-local PlayerGui = Players.LocalPlayer.PlayerGui
 
 local Children = Fusion.Children
 local OnEvent = Fusion.OnEvent
@@ -24,10 +21,12 @@ local function TopBar(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 			local x, y = input.Position.X, input.Position.Y
 			local topWindow = GetTopMostWindowAtPosition(Vector2.new(x, y))
 			if topWindow:FindFirstChild("TopBar") == frame then
-				dragging = true
-				dragStart = input.Position
-				startPos = frame.Position
-				clickCallback(frame.Parent)
+				if frame.Parent and frame.Parent:IsA("Frame") then
+					dragging = true
+					dragStart = input.Position
+					startPos = frame.Parent.Position
+					clickCallback(frame.Parent)
+				end
 			end
 		end
 	end
@@ -36,8 +35,14 @@ local function TopBar(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 		if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
 			local delta = input.Position - dragStart
 
-			frame.Position =
-				UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+			if frame.Parent and frame.Parent:IsA("Frame") then
+				frame.Parent.Position = UDim2.new(
+					startPos.X.Scale,
+					startPos.X.Offset + delta.X,
+					startPos.Y.Scale,
+					startPos.Y.Offset + delta.Y
+				)
+			end
 		end
 	end
 
@@ -52,6 +57,7 @@ local function TopBar(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 		Size = UDim2.new(1, 0, 0, 25),
 		Position = UDim2.new(0, 0, 0, 0),
 		BackgroundColor3 = Color3.fromRGB(230, 230, 230),
+		ZIndex = 2,
 		[OnEvent("InputBegan")] = onInputBegan,
 		[Children] = {
 			scope:New("UICorner")({
@@ -68,6 +74,12 @@ local function TopBar(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 					TextColor3 = Color3.fromRGB(0, 0, 0),
 				} :: TextLabel.TextLabelProps
 			),
+			scope:New("UIStroke")({
+				Thickness = 0.5,
+				Color = Color3.fromRGB(200, 200, 200),
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Enabled = true,
+			}),
 		},
 	}) :: Frame
 
