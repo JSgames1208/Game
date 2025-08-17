@@ -10,7 +10,12 @@ local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 local OnEvent = Fusion.OnEvent
 
-local function Window(scope: typeof(Fusion.scoped(Fusion)), appName: string?, clickCallback): Frame
+local function Window(
+	scope: typeof(Fusion.scoped(Fusion)),
+	appName: string?,
+	clickCallback: (Frame) -> (),
+	closeCallback: (string) -> ()
+): Frame
 	local isHovering = false
 
 	local frame: Frame
@@ -27,7 +32,7 @@ local function Window(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 		if input.UserInputType == Enum.UserInputType.MouseButton1 and isHovering then
 			local x, y = input.Position.X, input.Position.Y
 			local topWindow = GetTopMostWindowAtPosition(Vector2.new(x, y))
-			if topWindow:FindFirstChild("TopBar") == frame then
+			if topWindow:FindFirstChild("TopBar") == frame and frame.Parent and frame.Parent:IsA("Frame") then
 				clickCallback(frame.Parent)
 			elseif topWindow == frame then
 				clickCallback(frame)
@@ -60,7 +65,7 @@ local function Window(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 			scope:New("UICorner")({
 				CornerRadius = UDim.new(0.02, 0),
 			}),
-			TopBar(scope, appName, clickCallback),
+			TopBar(scope, appName, clickCallback, closeCallback),
 			Contents(scope, appName),
 
 			right,

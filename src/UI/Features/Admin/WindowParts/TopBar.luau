@@ -10,7 +10,12 @@ local Fusion = require(ReplicatedStorage.Packages.Fusion)
 local Children = Fusion.Children
 local OnEvent = Fusion.OnEvent
 
-local function TopBar(scope: typeof(Fusion.scoped(Fusion)), appName: string?, clickCallback): Frame
+local function TopBar(
+	scope: typeof(Fusion.scoped(Fusion)),
+	appName: string?,
+	clickCallback: (Frame) -> (),
+	closeCallback: (string) -> ()
+): Frame
 	local dragging: boolean = false
 	local dragStart: Vector3
 	local startPos: UDim2
@@ -52,6 +57,17 @@ local function TopBar(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 		end
 	end
 
+	local closeButton = scope:New("TextButton")({
+		Size = UDim2.new(0, 15, 0, 15),
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -5, 0.5, 0),
+		BackgroundColor3 = Color3.fromRGB(240, 0, 0),
+		[OnEvent("MouseButton1Click")] = function()
+			closeCallback(appName or "")
+		end,
+		[Children] = { scope:New("UICorner")({ CornerRadius = UDim.new(1, 0) }) },
+	})
+
 	frame = scope:New("Frame")({
 		Name = "TopBar",
 		Size = UDim2.new(1, 0, 0, 25),
@@ -80,6 +96,7 @@ local function TopBar(scope: typeof(Fusion.scoped(Fusion)), appName: string?, cl
 				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 				Enabled = true,
 			}),
+			closeButton,
 		},
 	}) :: Frame
 

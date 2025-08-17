@@ -21,7 +21,7 @@ local function ResizeBar(scope: typeof(Fusion.scoped(Fusion)), side: Side): Fram
 		Position = UDim2.new(0, -4, 0, 25)
 	elseif side == "top" then
 		Size = UDim2.new(1, 0, 0, 4)
-		Position = UDim2.new(0, 0, 0, -4)
+		Position = UDim2.new(0, 0, 0, -5)
 	elseif side == "bottom" then
 		Size = UDim2.new(1, 0, 0, 4)
 		Position = UDim2.new(0, 0, 1, 0)

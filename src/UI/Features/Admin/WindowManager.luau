@@ -50,7 +50,7 @@ function WindowManager.OpenWindow(appName: string)
 		return
 	end
 	if windows[appName] == nil then
-		local window = Window(scope, appName, WindowManager.FocusWindow)
+		local window = Window(scope, appName, WindowManager.FocusWindow, WindowManager.CloseWindow)
 		window.Parent = WindowGui
 		windows[appName] = window
 		WindowManager.FocusWindow(window)
@@ -65,7 +65,14 @@ function WindowManager.OpenWindow(appName: string)
 	end
 end
 
-function WindowManager.FocusWindow(window: Frame?)
+function WindowManager.CloseWindow(appName: string): ()
+	if windows[appName] and windows[appName].Visible then
+		windows[appName]:Destroy()
+		windows[appName] = nil
+	end
+end
+
+function WindowManager.FocusWindow(window: Frame?): ()
 	if window and window ~= focussedWindow then
 		local top = GetHighestWindowZIndex()
 		window.ZIndex = top + 1
