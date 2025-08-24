@@ -6,6 +6,9 @@ local IslandRenderer = require(ServerScriptService.Server.Modules.IslandRenderer
 local InventoryServer = require(ServerScriptService.Server.Services.InventoryServer)
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
+local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
+local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
+local BlockKey = require(ReplicatedStorage.Shared.Utils.String.BlockKey)
 local packets = require(ReplicatedStorage.Shared.network)
 local IslandData = require(script.Parent.IslandData)
 
@@ -36,10 +39,14 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 						end
 					end
 				end
-				blocks[pos] = nil
 
 				for itemId, amount in ItemLibrary.itemDefinitions[block.id].drops do
-					InventoryServer.GiveItem(player, itemId, amount)
+					--InventoryServer.GiveItem(player, itemId, amount)
+					EntityService.SpawnItemEntity(
+						player,
+						GridMath.gridPosToPos(BlockCoord.ParsePos(pos), island.PlotPosition),
+						itemId
+					)
 					QuestService.HandleEvent(player, {
 						type = "collect",
 						id = itemId,
@@ -52,6 +59,8 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 					id = block.id,
 					amount = 1,
 				})
+
+				blocks[pos] = nil
 
 				EnvironmentChecks.CheckBlockAbove(player, pos, PlaceFallingBlockFn, EntityService)
 

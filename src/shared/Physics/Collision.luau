@@ -1,10 +1,17 @@
 local Players = game:GetService("Players")
 local Collision = {}
 
-function Collision.sweepRay(origins: { Vector3 }, movement: Vector3, ignoreList: { any }?)
+function Collision.sweepRay(origins: { Vector3 }, movement: Vector3, ignoreList: { any }?, ignoreItems: boolean?)
 	local rayParams = RaycastParams.new()
 
 	local ignore: { any } = ignoreList or {}
+	ignoreItems = ignoreItems ~= nil and ignoreItems or true
+
+	if ignoreItems then
+		for _, item in workspace.Entities.ItemEntities:GetChildren() do
+			table.insert(ignore, item)
+		end
+	end
 
 	for _, player in Players:GetPlayers() do
 		if player.Character then

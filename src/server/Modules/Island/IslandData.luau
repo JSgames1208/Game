@@ -43,8 +43,8 @@ function IslandData.Set(player: Player, data: PlayerIsland)
 	PlayerIslands[player.UserId] = data
 end
 
-function IslandData.Get(player: Player)
-	return PlayerIslands[player.UserId] or {}
+function IslandData.Get(player: Player): PlayerIsland
+	return PlayerIslands[player.UserId]
 end
 
 function IslandData.Remove(player: Player)

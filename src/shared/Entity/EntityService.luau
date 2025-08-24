@@ -1,8 +1,10 @@
 local RunService = game:GetService("RunService")
+local Entity = require(script.Parent.Entity)
 local FallingBlockEntity = require(script.Parent.FallingBlockEntity)
+local ItemEntity = require(script.Parent.ItemEntity)
 local EntityService = {}
 
-local Entities = {}
+local Entities: { Entity.Entity } = {}
 
 function EntityService.Start()
 	RunService.Heartbeat:Connect(function(dt: number)
@@ -27,6 +29,11 @@ function EntityService.SpawnFallingBlock(
 )
 	local fallingBlock = FallingBlockEntity.new(player, pos, blockId, callback)
 	table.insert(Entities, fallingBlock)
+end
+
+function EntityService.SpawnItemEntity(player: Player, pos: Vector3, itemId: string)
+	local itemEntity = ItemEntity.new(player, pos, itemId)
+	table.insert(Entities, itemEntity)
 end
 
 return EntityService

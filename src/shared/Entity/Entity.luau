@@ -1,11 +1,35 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local EntityTypes = require(script.Parent.EntityTypes)
 local BlockHelpers = require(ReplicatedStorage.Shared.Modules.BlockHelpers)
 local Collision = require(ReplicatedStorage.Shared.Physics.Collision)
 local Entity = {}
 Entity.__index = Entity
 
-function Entity.new(pos: Vector3, player: Player)
-	local self = setmetatable({}, Entity)
+type Entity = {
+	player: Player,
+	position: Vector3,
+	lifeTime: number,
+	onGround: boolean,
+	noClip: boolean,
+	velocity: Vector3,
+	gravity: number,
+	type: string?,
+	model: (Part | MeshPart)?,
+
+	size: Vector3,
+
+	isDestroyed: boolean,
+
+	Update: (self: Entity, number) -> (),
+	Move: (self: Entity, number) -> (),
+	Destroy: (self: Entity) -> (),
+	GetVelocity: (self: Entity) -> Vector3,
+}
+
+--export type Entity = typeof(setmetatable({} :: self, Entity))
+
+function Entity.new(pos: Vector3, player: Player): Entity
+	local self = setmetatable({} :: any, Entity) :: Entity
 	self.player = player
 	self.position = pos
 	self.lifeTime = 0
@@ -13,19 +37,22 @@ function Entity.new(pos: Vector3, player: Player)
 	self.noClip = false
 	self.velocity = Vector3.zero
 	self.gravity = -196.2
+	self.model = nil
 	self.type = nil
+
+	self.size = Vector3.zero
 
 	self.isDestroyed = false
 	return self
 end
 
-function Entity:Update(dt)
+function Entity.Update(self: Entity, dt)
 	self.lifeTime += dt
-	self:Move(dt)
+	Entity.Move(self, dt)
 end
 
-function Entity:Move(dt)
-	self.velocity = self:GetVelocity() + Vector3.new(0, self.gravity * dt, 0)
+function Entity.Move(self: Entity, dt)
+	self.velocity = Entity.GetVelocity(self) + Vector3.new(0, self.gravity * dt, 0)
 	local movement = self.velocity * dt
 
 	if not self.model then
@@ -33,19 +60,19 @@ function Entity:Move(dt)
 	end
 
 	local hit = Collision.sweepRay(
-		BlockHelpers.GetBottomCorners(self.position, self.model.Size / 2),
+		BlockHelpers.GetBottomCorners(self.position, self.size / 2),
 		movement,
 		workspace.Entities.FallingBlocks:GetChildren()
 	)
 
 	if hit then
 		self.position =
-			Vector3.new(self.model.position.X, hit.Position.Y + self.model.Size.Y / 2 + 0.005, self.model.position.Z)
+			Vector3.new(self.model.Position.X, hit.Position.Y + self.model.Size.Y / 2 + 0.005, self.model.Position.Z)
 		self.velocity = Vector3.new(self.velocity.X, 0, self.velocity.Z)
 		self.onGround = true
 
-		if self.type == "fallingBlock" then
-			self:Destroy()
+		if self.type == EntityTypes.fallingBlock then
+			Entity.Destroy(self)
 			if self.placeBlockCallback then
 				self.placeBlockCallback(self.player, self.position, self.blockId)
 			end
@@ -59,7 +86,7 @@ function Entity:Move(dt)
 	self.model:PivotTo(CFrame.new(self.position))
 end
 
-function Entity:Destroy()
+function Entity.Destroy(self: Entity)
 	if self.model then
 		self.model:Destroy()
 		self.model = nil
@@ -69,7 +96,7 @@ end
 
 -- public getters
 
-function Entity:GetVelocity()
+function Entity.GetVelocity(self: Entity)
 	return self.velocity
 end
 

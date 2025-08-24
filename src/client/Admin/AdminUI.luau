@@ -32,7 +32,7 @@ function AdminUI.Init()
 		WindowGui = WindowManager.Init(scope)
 		AppBarUI.Init(scope)
 
-		AppBarUI.Populate({ { name = "Test1" }, { name = "Test2" }, { name = "Test3" } })
+		AppBarUI.Populate({ { name = "Test1" }, { name = "Players" }, { name = "Test3" } })
 	end
 end
 
