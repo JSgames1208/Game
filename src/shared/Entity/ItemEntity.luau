@@ -10,7 +10,7 @@ type self = {
 	Animate: (self: ItemEntity, dt: number) -> (),
 }
 
-local ItemEntity = {}
+local ItemEntity = setmetatable({}, Entity)
 ItemEntity.__index = ItemEntity
 
 export type ItemEntity = typeof(setmetatable({} :: self, ItemEntity)) & Entity.Entity
@@ -52,9 +52,13 @@ function ItemEntity.Update(self: ItemEntity, dt: number)
 end
 
 function ItemEntity.Animate(self: ItemEntity, dt: number)
-	local position =
-		Vector3.new(self.position.X, self.position.Y + 0.1 + math.sin(self.itemAge) / 5 * 4, self.position.Z)
-	self.model.Position = position
+	local position = Vector3.new(
+		self.position.X,
+		self.position.Y + 0.1 + ((math.sin(self.itemAge * 3) + 1) / 2) / 5.0 * 2,
+		self.position.Z
+	)
+
+	self.model:PivotTo(CFrame.new(position) * CFrame.fromOrientation(0, -self.itemAge, 0))
 end
 
 return ItemEntity

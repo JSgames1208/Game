@@ -2,10 +2,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local EntityTypes = require(script.Parent.EntityTypes)
 local BlockHelpers = require(ReplicatedStorage.Shared.Modules.BlockHelpers)
 local Collision = require(ReplicatedStorage.Shared.Physics.Collision)
-local Entity = {}
-Entity.__index = Entity
 
-type Entity = {
+export type Entity = {
 	player: Player,
 	position: Vector3,
 	lifeTime: number,
@@ -18,18 +16,22 @@ type Entity = {
 
 	size: Vector3,
 
+	shouldDestroy: boolean,
 	isDestroyed: boolean,
 
 	Update: (self: Entity, number) -> (),
 	Move: (self: Entity, number) -> (),
 	Destroy: (self: Entity) -> (),
 	GetVelocity: (self: Entity) -> Vector3,
-}
+} & any
+
+local Entity = {}
+Entity.__index = Entity
 
 --export type Entity = typeof(setmetatable({} :: self, Entity))
 
 function Entity.new(pos: Vector3, player: Player): Entity
-	local self = setmetatable({} :: any, Entity) :: Entity
+	local self = setmetatable({}, Entity) :: Entity
 	self.player = player
 	self.position = pos
 	self.lifeTime = 0
@@ -42,11 +44,15 @@ function Entity.new(pos: Vector3, player: Player): Entity
 
 	self.size = Vector3.zero
 
+	self.shouldDestroy = false
 	self.isDestroyed = false
 	return self
 end
 
 function Entity.Update(self: Entity, dt)
+	if self.shouldDestroy then
+		self:Destroy()
+	end
 	self.lifeTime += dt
 	Entity.Move(self, dt)
 end
@@ -60,19 +66,19 @@ function Entity.Move(self: Entity, dt)
 	end
 
 	local hit = Collision.sweepRay(
-		BlockHelpers.GetBottomCorners(self.position, self.size / 2),
+		BlockHelpers.GetBottomCorners(self.position, Vector3.new(self.size.X / 2, self.size.Y / 2, self.size.Z / 2)),
 		movement,
-		workspace.Entities.FallingBlocks:GetChildren()
+		workspace.Entities.FallingBlocks:GetChildren(),
+		true
 	)
 
 	if hit then
-		self.position =
-			Vector3.new(self.model.Position.X, hit.Position.Y + self.model.Size.Y / 2 + 0.005, self.model.Position.Z)
+		self.position = Vector3.new(self.position.X, hit.Position.Y + self.size.Y / 2 + 0.005, self.position.Z)
 		self.velocity = Vector3.new(self.velocity.X, 0, self.velocity.Z)
 		self.onGround = true
 
 		if self.type == EntityTypes.fallingBlock then
-			Entity.Destroy(self)
+			self.shouldDestroy = true
 			if self.placeBlockCallback then
 				self.placeBlockCallback(self.player, self.position, self.blockId)
 			end
@@ -83,7 +89,7 @@ function Entity.Move(self: Entity, dt)
 		self.onGround = false
 	end
 
-	self.model:PivotTo(CFrame.new(self.position))
+	--self.model:PivotTo(CFrame.new(self.position))
 end
 
 function Entity.Destroy(self: Entity)
