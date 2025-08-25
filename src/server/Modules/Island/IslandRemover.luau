@@ -44,7 +44,8 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 					EntityService.SpawnItemEntity(
 						player,
 						GridMath.gridPosToPos(BlockCoord.ParsePos(pos), island.PlotPosition),
-						itemId
+						itemId,
+						amount
 					)
 					QuestService.HandleEvent(player, {
 						type = "collect",

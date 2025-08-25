@@ -6,16 +6,18 @@ local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local packets = require(ReplicatedStorage.Shared.network)
 local InventoryService = {}
 
-local Inventories = {} -- [userId] = {...}
-local SelectedSlots = {} -- [userId] = slotId
+export type Inventory = { ItemStack.ItemStack }
 
-function InventoryService.Get(player: Player)
-	return Inventories[player.UserId] or table.create(9, nil)
+local Inventories: { Inventory } = {} -- [userId] = {...}
+local SelectedSlots: { [number]: number } = {} -- [userId] = slotId
+
+function InventoryService.Get(player: Player): Inventory
+	return Inventories[player.UserId]
 end
 
 function InventoryService.GetSelected(player: Player)
 	if InventoryService.Get(player)[SelectedSlots[player.UserId]] then
-		return InventoryService.Get(player)[SelectedSlots[player.UserId]].itemInfo.id
+		return InventoryService.Get(player)[SelectedSlots[player.UserId]]:getItem()
 	else
 		return nil
 	end
@@ -23,7 +25,18 @@ end
 
 function InventoryService.SendToClient(player: Player)
 	local inventory = InventoryService.Get(player)
-	packets.InventorySync.sendTo(inventory, player)
+	local serialized = {}
+
+	for i, stack in inventory do
+		serialized[i] = {
+			count = stack:getCount(),
+			itemInfo = {
+				id = stack:getItem() or "nothing",
+			},
+		}
+	end
+
+	packets.InventorySync.sendTo(serialized, player)
 end
 
 function InventoryService.PlayerJoined(player: Player)
@@ -34,17 +47,6 @@ function InventoryService.PlayerJoined(player: Player)
 	local inventory = DataStore.profiles[player.UserId].Data.Inventory
 
 	Inventories[player.UserId] = inventory
-	for _, item in Inventories[player.UserId] do
-		if item.count <= 0 then
-			item.count = 0
-			item.itemInfo.id = "nothing"
-		end
-	end
-	--InventoryService.GiveItem(player, "pine tree sapling", 400)
-	--InventoryService.GiveItem(player, "sand", 64)
-
-	--InventoryService.RemoveItem(player, 1000, "pine tree sapling")
-	--InventoryService.RemoveItem(player, 1000, "sand")
 
 	InventoryService.SendToClient(player)
 end
@@ -62,33 +64,74 @@ function InventoryService.IsAvailable(player: Player, amount: number)
 	end
 end
 
-function InventoryService.RemoveItem(player: Player, amount: number, itemId: string?)
+function InventoryService.splitStack(player: Player, slot: number, amount: number): ItemStack.ItemStack
 	local inventory = InventoryService.Get(player)
-	if itemId then
-		for _, item in inventory do
-			if item.itemInfo.id == itemId then
-				local removeAmount = math.min(ItemLibrary.itemDefinitions[itemId].maxStack, amount)
-				item.count -= removeAmount
-				amount -= removeAmount
-			end
+
+	if slot > 0 and slot <= #inventory and not inventory[slot]:isEmpty() and amount > 0 then
+		local s: ItemStack.ItemStack = inventory[slot]:split(amount)
+		if inventory[slot]:getCount() == 0 then
+			inventory[slot] = ItemStack.empty()
 		end
-		DataStore.profiles[player.UserId].Data.Inventory = inventory
-		InventoryService.SendToClient(player)
+		InventoryService.setStack(player, slot, inventory[slot])
+		return s
 	else
-		if not SelectedSlots[player.UserId] then
-			return
-		end
-		inventory[SelectedSlots[player.UserId]].count -= amount
-		if inventory[SelectedSlots[player.UserId]].count <= 0 then
-			inventory[SelectedSlots[player.UserId]].itemInfo.id = "nothing"
-			inventory[SelectedSlots[player.UserId]].count = 0
-			DataStore.profiles[player.UserId].Data.Inventory = inventory
-		end
-		InventoryService.SendToClient(player)
+		local s = ItemStack.empty()
+		InventoryService.setStack(player, slot, inventory[slot])
+		return s
 	end
 end
 
-function InventoryService.insertStack(player: Player, slot: number, stack: ItemStack.ItemStack): boolean
+function InventoryService.removeStack(player: Player, slot: number?, amount: number?): ItemStack.ItemStack
+	if not slot then
+		slot = SelectedSlots[player.UserId]
+		if not slot then
+			return ItemStack.empty()
+		end
+	end
+
+	local inventory = InventoryService.Get(player)
+	if slot <= #inventory then
+		if not amount then
+			local itemStack = inventory[slot]
+			inventory[slot] = ItemStack.empty()
+			return itemStack
+		end
+		return InventoryService.splitStack(player, slot :: number, amount)
+	else
+		return ItemStack.empty()
+	end
+end
+
+function InventoryService.getEmptySlot(player: Player): number
+	local inventory = InventoryService.Get(player)
+	for i, stack in ipairs(inventory) do
+		if stack:isEmpty() then
+			return i
+		end
+	end
+
+	return -1
+end
+
+function InventoryService.setStack(player: Player, slot: number?, stack: ItemStack.ItemStack)
+	print(stack)
+	if not slot then
+		slot = SelectedSlots[player.UserId]
+	end
+	local inventory = InventoryService.Get(player)
+	if slot <= #inventory then
+		inventory[slot] = stack
+	end
+
+	print(inventory)
+
+	InventoryService.SendToClient(player)
+end
+
+function InventoryService.insertStack(player: Player, stack: ItemStack.ItemStack, slot: number?): boolean
+	if not slot then
+		InventoryService.insertStack(player, stack, -1)
+	end
 	if stack:isEmpty() then
 		return false
 	else
@@ -96,51 +139,75 @@ function InventoryService.insertStack(player: Player, slot: number, stack: ItemS
 		repeat
 			i = stack:getCount()
 			if slot == -1 then
+				local count = InventoryService.addStack(player, stack)
+				stack:setCount(count)
+			else
+				stack:setCount(InventoryService.addStack(player, stack, slot))
 			end
-		until 1 == 1
-	end
+		until stack:isEmpty() or stack:getCount() >= i
 
-	return true
+		return stack:getCount() < i
+	end
 end
 
 function InventoryService.addStack(player: Player, stack: ItemStack.ItemStack, slot: number?)
-	local i = stack:getCount()
-	local itemStack = InventoryService.getStack(player, 1)
+	if slot then
+		local i = stack:getCount()
+		local itemStack: ItemStack.ItemStack = InventoryService.getStack(player, slot)
+		if itemStack:isEmpty() then
+			InventoryService.setStack(player, slot, stack:copyWithCount(0))
+			itemStack = InventoryService.getStack(player, slot)
+		end
+
+		local j: number = itemStack:getMaxCount() - itemStack:getCount()
+		local k: number = math.min(i, j)
+		if k == 0 then
+			return i
+		else
+			i -= k
+			itemStack:increment(k)
+			InventoryService.setStack(player, slot, itemStack)
+			return i
+		end
+	else
+		local i = InventoryService.getOccupiedSlotWithRoomForStack(player, stack)
+		if i == -1 then
+			i = InventoryService.getEmptySlot(player)
+		end
+
+		return i == -1 and stack:getCount() or InventoryService.addStack(player, stack, i)
+	end
 end
 
-function InventoryService.getStack(player: Player, slot: number) end
-
-function InventoryService.GiveItem(player: Player, itemId: string, amount: number)
-	local inventory = InventoryService.Get(player)
-	local maxStack = ItemLibrary.itemDefinitions[itemId].maxStack
-	for _, item in ipairs(inventory) do
-		if item.itemInfo.id == itemId and item.count < maxStack then
-			local spaceLeft = maxStack - item.count
-			local toAdd = math.min(amount, spaceLeft)
-			item.count += toAdd
-			amount -= toAdd
-			if amount <= 0 then
-				break
+function InventoryService.getOccupiedSlotWithRoomForStack(player: Player, stack: ItemStack.ItemStack)
+	local selectedSlot = SelectedSlots[player.UserId]
+	if selectedSlot and InventoryService.canStackAddMore(InventoryService.Get(player)[selectedSlot], stack) then
+		return selectedSlot
+	else
+		for i, v in ipairs(InventoryService.Get(player)) do
+			if InventoryService.canStackAddMore(InventoryService.Get(player)[i], stack) then
+				return i
 			end
 		end
-	end
-	if amount > 0 then
-		for _, item in ipairs(inventory) do
-			if item.itemInfo.id == "nothing" then
-				local toAdd = math.min(amount, maxStack)
-				item.itemInfo.id = itemId
-				item.count = toAdd
-				amount -= toAdd
-				if amount <= 0 then
-					break
-				end
-			end
-		end
-	end
 
-	DataStore.profiles[player.UserId].Data.Inventory = inventory
+		return -1
+	end
+end
 
-	InventoryService.SendToClient(player)
+function InventoryService.canStackAddMore(existingStack: ItemStack.ItemStack, stack: ItemStack.ItemStack): boolean
+	return not existingStack:isEmpty()
+		and ItemStack.areItemsEqual(existingStack, stack)
+		and existingStack:isStackable()
+		and existingStack:getCount() < existingStack:getMaxCount()
+end
+
+function InventoryService.getStack(player: Player, slot: number): ItemStack.ItemStack
+	if slot <= #InventoryService.Get(player) then
+		return InventoryService.Get(player)[slot]
+	else
+		warn(`Stack doesn't exist at slot {tostring(slot)} for player {player.Name}`)
+		return ItemStack.empty()
+	end
 end
 
 function InventoryService.SwapSlots(player: Player, from: number, to: number)

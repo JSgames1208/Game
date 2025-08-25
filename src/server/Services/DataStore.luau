@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local Types = require(ReplicatedStorage.Shared.Types)
 local ProfileService = require(ServerScriptService.ServerPackages.ProfileService)
 
@@ -16,9 +17,9 @@ defaultBlocks["-1,3,-1"] = { parent = "-1,2,-1" }
 
 local function GetBaseInventory()
 	local inventory = {}
-	inventory[1] = { itemInfo = { id = "obsidian pickaxe" }, count = 1 }
+	inventory[1] = ItemStack.new("obsidian pickaxe", 1)
 	for i = 2, 45 do
-		inventory[i] = { itemInfo = { id = "nothing" }, count = 0 }
+		inventory[i] = ItemStack.empty()
 	end
 	return inventory
 end
@@ -34,7 +35,7 @@ local profileStore = ProfileService.GetProfileStore("PlayerIslands", {
 	},
 })
 
-local TEST_MODE = false
+local TEST_MODE = true
 
 local DataStore = {}
 

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local EntityStorage = require(script.Parent.EntityStorage)
 local EntityTypes = require(script.Parent.EntityTypes)
 local BlockHelpers = require(ReplicatedStorage.Shared.Modules.BlockHelpers)
 local Collision = require(ReplicatedStorage.Shared.Physics.Collision)
@@ -11,7 +12,7 @@ export type Entity = {
 	noClip: boolean,
 	velocity: Vector3,
 	type: string?,
-	model: (Part | MeshPart)?,
+	model: (Part | MeshPart | Model)?,
 
 	size: Vector3,
 
@@ -105,6 +106,9 @@ end
 
 function Entity.destroy(self: Entity): ()
 	if self.model then
+		if EntityStorage.get(self.model) then
+			EntityStorage.remove(self.model)
+		end
 		self.model:Destroy()
 		self.model = nil
 	end

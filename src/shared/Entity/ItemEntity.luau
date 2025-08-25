@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local IslandData = require(ServerScriptService.Server.Modules.Island.IslandData)
+local InventoryServer = require(ServerScriptService.Server.Services.InventoryServer)
 local GetItemModel = require(ReplicatedStorage.Shared.Entity.Helpers.GetItemModel)
 local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local Entity = require(script.Parent.Entity)
@@ -10,8 +11,9 @@ export type ItemEntity = Entity.Entity & {
 	itemAge: number,
 	itemId: string,
 	stack: ItemStack.ItemStack,
+	owner: number,
 
-	_getStack: (self: ItemEntity) -> ItemStack.ItemStack,
+	getStack: (self: ItemEntity) -> ItemStack.ItemStack,
 
 	animate: (self: ItemEntity, dt: number) -> (),
 }
@@ -19,41 +21,60 @@ export type ItemEntity = Entity.Entity & {
 local ItemEntity = setmetatable({}, Entity)
 ItemEntity.__index = ItemEntity
 
---export type ItemEntity = typeof(setmetatable({} :: self, ItemEntity)) & Entity.Entity
-
-function ItemEntity.new(player: Player, pos: Vector3, itemId: string): ItemEntity
+function ItemEntity.new(player: Player, pos: Vector3, itemId: string, amount: number?): ItemEntity
 	local self = setmetatable(Entity.new(pos, player) :: any, ItemEntity) :: ItemEntity
 
 	self.itemAge = 0
 	self.itemId = itemId
 	self.type = EntityTypes.itemEntity
-	self.stack = ItemStack.new(itemId, 1)
+	self.stack = ItemStack.new(itemId, amount or 1)
+
+	self.owner = nil
 
 	local part = GetItemModel(itemId)
 	if part then
 		part = part:Clone()
-		if part.CanCollide ~= nil then
+		if part:IsA("Model") then
+			for _, d in part:GetDescendants() do
+				if d:IsA("Part") or d:IsA("MeshPart") then
+					d.CanCollide = false
+				end
+			end
+		else
 			part.CanCollide = false
 		end
 		part.Parent = workspace.Entities.ItemEntities
-		part.Size = part.Size / 4
+		if part:IsA("Model") then
+			part:ScaleTo(0.25)
+		else
+			part.Size = part.Size / 4
+		end
 		for _, texture: Texture in part:GetChildren() do
 			if texture:IsA("Texture") then
 				texture.StudsPerTileU = 1
 				texture.StudsPerTileV = 1
 			end
 		end
-		part.Position = pos
+		part:PivotTo(CFrame.new(pos))
+		for _, d in part:GetDescendants() do
+			if d:HasTag("Block") then
+				d:RemoveTag("Block")
+			end
+		end
 		part:RemoveTag("Block")
 	end
 	self.model = part
 
-	self.size = self.model.ExtentsSize
+	if self.model:IsA("Model") then
+		_, self.size = self.model:GetBoundingBox()
+	else
+		self.size = self.model.Size
+	end
 
 	return self
 end
 
-function ItemEntity._getStack(self: ItemEntity): ItemStack.ItemStack
+function ItemEntity.getStack(self: ItemEntity): ItemStack.ItemStack
 	return self.stack
 end
 
@@ -64,8 +85,9 @@ end
 
 ---@Override
 function ItemEntity.update(self: ItemEntity, dt: number)
-	if self:_getStack():isEmpty() then
-		self.shouldDestroy = true
+	if self:getStack():isEmpty() then
+		self:destroy()
+		return
 	else
 		self.itemAge += dt
 		self:applyGravity(dt)
@@ -77,6 +99,7 @@ function ItemEntity.update(self: ItemEntity, dt: number)
 			if not islandData then
 				return
 			end
+
 			for _, part in overlap do
 				if part:HasTag("Block") then
 					self.position = Vector3.new(self.position.X, (self.position.Y + 4) // 4 * 4, self.position.Z)
@@ -92,15 +115,21 @@ function ItemEntity.update(self: ItemEntity, dt: number)
 	end
 end
 
-function ItemEntity.onPlayerCollision(self: ItemEntity, player: Entity.Entity)
-	local itemStack = self:getStack()
-	local item
+function ItemEntity.onPlayerCollision(self: ItemEntity, player: Player)
+	local itemStack: ItemStack.ItemStack = self:getStack()
+	local i = itemStack:getCount()
+	if (self.owner == nil or self.owner == player.UserId) and InventoryServer.insertStack(player, itemStack) then
+		if itemStack:isEmpty() then
+			self:destroy()
+			itemStack:setCount(i)
+		end
+	end
 end
 
 function ItemEntity.animate(self: ItemEntity, dt: number)
 	local position = Vector3.new(
 		self.position.X,
-		self.position.Y + 0.1 + ((math.sin(self.itemAge * 3) + 1) / 2) / 5.0 * 2,
+		self.position.Y + 0.3 + ((math.sin(self.itemAge * 3) + 1) / 2) / 5.0 * 2,
 		self.position.Z
 	)
 

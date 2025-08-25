@@ -7,6 +7,7 @@ local CurrencyService = require(script.Parent.CurrencyService)
 local DataStore = require(script.Parent.DataStore)
 local InventoryServer = require(script.Parent.InventoryServer)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
+local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local Types = require(ReplicatedStorage.Shared.Types)
 local QuestService = {}
 
@@ -97,7 +98,7 @@ function QuestService.CompleteQuest(player: Player, questId: string): ()
 
 	if def.rewards.items then
 		for _, item in pairs(def.rewards.items) do
-			InventoryServer.GiveItem(player, item.id, item.amount)
+			InventoryServer.insertStack(player, ItemStack.new(item.id, item.amount))
 		end
 	end
 
