@@ -37,12 +37,20 @@ function FallingBlockEntity.new(
 	return self
 end
 
-function FallingBlockEntity.Update(self: FallingBlockEntity, dt)
-	Entity.Update(self, dt)
+---@Override
+function FallingBlockEntity.update(self: FallingBlockEntity, dt)
+	Entity.update(self, dt)
+	self:applyGravity(dt)
+	self:move(dt)
 
 	if not self.isDestroyed then
 		self.model:PivotTo(CFrame.new(self.position))
 	end
+end
+
+---@Override
+function FallingBlockEntity.getGravity()
+	return -196.2
 end
 
 return FallingBlockEntity

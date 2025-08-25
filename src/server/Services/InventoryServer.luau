@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local DataStore = require(ServerScriptService.Server.Services.DataStore)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local packets = require(ReplicatedStorage.Shared.network)
@@ -86,6 +87,28 @@ function InventoryService.RemoveItem(player: Player, amount: number, itemId: str
 		InventoryService.SendToClient(player)
 	end
 end
+
+function InventoryService.insertStack(player: Player, slot: number, stack: ItemStack.ItemStack): boolean
+	if stack:isEmpty() then
+		return false
+	else
+		local i: number
+		repeat
+			i = stack:getCount()
+			if slot == -1 then
+			end
+		until 1 == 1
+	end
+
+	return true
+end
+
+function InventoryService.addStack(player: Player, stack: ItemStack.ItemStack, slot: number?)
+	local i = stack:getCount()
+	local itemStack = InventoryService.getStack(player, 1)
+end
+
+function InventoryService.getStack(player: Player, slot: number) end
 
 function InventoryService.GiveItem(player: Player, itemId: string, amount: number)
 	local inventory = InventoryService.Get(player)

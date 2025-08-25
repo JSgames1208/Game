@@ -16,7 +16,7 @@ function EntityService.Start()
 		end
 
 		for _, entity in Entities do
-			entity:Update(dt)
+			entity:update(dt)
 		end
 	end)
 end

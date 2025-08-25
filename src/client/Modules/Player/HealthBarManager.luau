@@ -36,7 +36,6 @@ function HealthBarManager.Init(_currentHP, _maxHP)
 			Size = UDim2.new(0.5, 0, 0.01, 0),
 			SizeConstraint = Enum.SizeConstraint.RelativeXX,
 			Position = scope:Computed(function(use)
-				print(use(screenSize))
 				return UDim2.new(0.5, 0, 0.965, -use(screenSize).X / 20.0)
 			end),
 

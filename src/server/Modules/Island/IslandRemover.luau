@@ -41,7 +41,6 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 				end
 
 				for itemId, amount in ItemLibrary.itemDefinitions[block.id].drops do
-					--InventoryServer.GiveItem(player, itemId, amount)
 					EntityService.SpawnItemEntity(
 						player,
 						GridMath.gridPosToPos(BlockCoord.ParsePos(pos), island.PlotPosition),

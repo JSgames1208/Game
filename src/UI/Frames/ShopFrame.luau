@@ -65,8 +65,6 @@ local function ShopFrame(scope: typeof(Fusion.scoped(Fusion)), props: ShopFrameP
 					}),
 
 					scope:ForValues(props.shopStock, function(use, scope, item)
-						print(item)
-
 						return ShopOption(scope, {
 							itemId = item.id,
 							itemInfo = item,

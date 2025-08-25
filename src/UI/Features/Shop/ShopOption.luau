@@ -80,7 +80,6 @@ local function ShopOption(scope: typeof(Fusion.scoped(Fusion)), props: ShopOptio
 				scope,
 				{
 					Text = scope:Computed(function(use)
-						print(use(props.itemInfo))
 						return `In stock: {use(scope.peek(props.itemInfo).stock)}`
 					end),
 					TextScaled = true,
