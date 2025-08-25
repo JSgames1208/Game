@@ -210,24 +210,18 @@ function InventoryService.getStack(player: Player, slot: number): ItemStack.Item
 	end
 end
 
-function InventoryService.SwapSlots(player: Player, from: number, to: number)
+function InventoryService.swapSlots(player: Player, from: number, to: number)
 	local inventory = InventoryService.Get(player)
-	if inventory[from].itemInfo.id == inventory[to].itemInfo.id then
-		local toAdd = math.min(
-			ItemLibrary.itemDefinitions[inventory[from].itemInfo.id].maxStack - inventory[to].count,
-			inventory[from].count
-		)
-		inventory[to].count = inventory[to].count + toAdd
-		inventory[from].count = inventory[from].count - toAdd
-		if inventory[from].count <= 0 then
-			inventory[from].itemInfo.id = "nothing"
-			inventory[from].count = 0
-		end
+	if inventory[from]:isOf(inventory[to]:getItem()) then
+		local left = InventoryService.addStack(player, inventory[from], to)
+		inventory[from]:setCount(left)
 	else
 		local holder = table.clone(inventory[to])
 		inventory[to] = inventory[from]
 		inventory[from] = holder
 	end
+
+	print(inventory)
 
 	InventoryService.SendToClient(player)
 end
@@ -241,7 +235,7 @@ packets.SlotPressed.listen(function(data, player: Player)
 end)
 
 packets.SwapSlots.listen(function(data: { from: number, to: number }, player: Player)
-	InventoryService.SwapSlots(player, data.from, data.to)
+	InventoryService.swapSlots(player, data.from, data.to)
 end)
 
 return InventoryService
