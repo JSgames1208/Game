@@ -12,6 +12,7 @@ export type Entity = {
 	onGround: boolean,
 	noClip: boolean,
 	velocity: Vector3,
+	removed: boolean,
 	type: string?,
 	model: (Part | MeshPart | Model)?,
 
@@ -24,6 +25,10 @@ export type Entity = {
 
 	getGravity: (self: Entity) -> number,
 	applyGravity: (self: Entity, dt: number) -> (),
+
+	isOnGround: (self: Entity) -> boolean,
+	isRemoved: (self: Entity) -> boolean,
+	setRemoved: (self: Entity) -> (),
 
 	move: (self: Entity, dt: number) -> (),
 	destroy: (self: Entity) -> (),
@@ -47,6 +52,7 @@ function Entity.new(pos: Vector3, player: Player?): Entity
 	self.velocity = Vector3.zero
 	self.model = nil
 	self.type = nil
+	self.removed = false
 
 	self.size = Vector3.zero
 
@@ -60,6 +66,18 @@ function Entity.update(self: Entity, dt): ()
 		self:destroy()
 	end
 	self.lifeTime += dt
+end
+
+function Entity.isOnGround(self: Entity): boolean
+	return self.onGround
+end
+
+function Entity.isRemoved(self: Entity): boolean
+	return self.removed
+end
+
+function Entity.setRemoved(self: Entity): ()
+	self.removed = true
 end
 
 --[[

@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local EntityStorage = require(script.Parent.EntityStorage)
 local EntityTypes = require(ReplicatedStorage.Shared.Entity.EntityTypes)
 local IslandData = require(ServerScriptService.Server.Modules.Island.IslandData)
 local GetItemModel = require(ReplicatedStorage.Shared.Entity.Helpers.GetItemModel)
@@ -15,6 +16,10 @@ export type ItemEntity = Entity.Entity & {
 	playerEntity: PlayerEntity.PlayerEntity,
 
 	getStack: (self: ItemEntity) -> ItemStack.ItemStack,
+	setStack: (self: ItemEntity, stack: ItemStack.ItemStack) -> (),
+
+	tryMerge: (self: ItemEntity) -> (),
+	canMerge: (self: ItemEntity) -> boolean,
 
 	animate: (self: ItemEntity, dt: number) -> (),
 }
@@ -35,6 +40,8 @@ function ItemEntity.new(
 	self.itemId = itemId
 	self.type = EntityTypes.itemEntity
 	self.stack = ItemStack.new(itemId, amount or 1)
+
+	self.velocity = Vector3.new(math.random(-4, 4), math.random(5, 20), math.random(-4, 4))
 
 	self.owner = nil
 	self.playerEntity = playerEntity
@@ -86,6 +93,10 @@ function ItemEntity.getStack(self: ItemEntity): ItemStack.ItemStack
 	return self.stack
 end
 
+function ItemEntity.setStack(self: ItemEntity, stack: ItemStack.ItemStack): ()
+	self.stack = stack
+end
+
 ---@Override
 function ItemEntity.getGravity()
 	return -196.2
@@ -99,7 +110,14 @@ function ItemEntity.update(self: ItemEntity, dt: number)
 	else
 		self.itemAge += dt
 		self:applyGravity(dt)
+
 		self:move(dt)
+		local f = 0.98
+		if self:isOnGround() then
+			f = 0.6
+		end
+
+		self:setVelocity(Vector3.new(self:getVelocity().X * f, self:getVelocity().Y * 0.98, self:getVelocity().Z * f))
 
 		local overlap = workspace:GetPartBoundsInBox(CFrame.new(self.position), self.size)
 		if next(overlap) then
@@ -117,9 +135,88 @@ function ItemEntity.update(self: ItemEntity, dt: number)
 
 		self:animate(dt)
 
+		self:tryMerge()
+
 		if self.itemAge :: number >= 300 then
 			self.shouldDestroy = true
 		end
+	end
+end
+
+function ItemEntity.tryMerge(self: ItemEntity, itemEntity: ItemEntity?): ()
+	if not itemEntity then
+		if self:canMerge() then
+			for _, entityModel in workspace.Entities.ItemEntities:GetChildren() do
+				if entityModel:HasTag("Entity") then
+					if (entityModel:GetPivot().Position - self.position).Magnitude < 5 then
+						local entity = EntityStorage.get(entityModel)
+						if entity and entity ~= self then
+							if entity:canMerge() then
+								self:tryMerge(entity)
+								if self:isRemoved() then
+									break
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if itemEntity then
+		local stack: ItemStack.ItemStack = self:getStack()
+		local stack2: ItemStack.ItemStack = itemEntity:getStack()
+
+		if self.owner == itemEntity.owner and self:canMerge(itemEntity) then
+			if stack2:getCount() < stack:getCount() then
+				mergeEntities(self, stack, itemEntity, stack2)
+			else
+				mergeEntities(itemEntity, stack2, self, stack)
+			end
+		end
+	end
+end
+
+function ItemEntity.canMerge(self: ItemEntity, stack1: ItemStack.ItemStack?, stack2: ItemStack.ItemStack?): boolean
+	if not (stack1 and stack2) then
+		local stack: ItemStack.ItemStack = self:getStack()
+		local itemAge: number = self.itemAge
+		return itemAge < 300 and stack:getCount() < stack:getMaxCount()
+	end
+
+	if stack1 and stack2 then
+		return if stack2:getCount() + stack1:getCount() > stack2:getMaxCount()
+			then false
+			else ItemStack.areItemsEqual(stack1, stack2)
+	end
+
+	return false
+end
+
+function mergeStacks(stack1: ItemStack.ItemStack, stack2: ItemStack.ItemStack, maxCount: number): ItemStack.ItemStack
+	local i = math.min(math.min(stack1:getMaxCount(), maxCount) - stack1:getCount(), stack2:getCount())
+	local itemStack = stack1:copyWithCount(stack1:getCount() + 1)
+	stack2:decrement(i)
+	return itemStack
+end
+
+function mergeIntoEntity(targetEntity: ItemEntity, stack1: ItemStack.ItemStack, stack2: ItemStack.ItemStack): ()
+	local itemStack = mergeStacks(stack1, stack2, 64)
+	targetEntity:setStack(itemStack)
+end
+
+function mergeEntities(
+	targetEntity: ItemEntity,
+	targetStack: ItemStack.ItemStack,
+	sourceEntity: ItemEntity,
+	sourceStack: ItemStack.ItemStack
+)
+	mergeIntoEntity(targetEntity, targetStack, sourceStack)
+	targetEntity.itemAge = math.min(targetEntity.itemAge, sourceEntity.itemAge)
+	if sourceStack:isEmpty() then
+		sourceEntity:setRemoved()
+		sourceEntity:destroy()
 	end
 end
 
