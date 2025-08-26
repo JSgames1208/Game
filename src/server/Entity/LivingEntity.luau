@@ -1,4 +1,5 @@
-local Entity = require(script.Parent.Entity)
+local ServerScriptService = game:GetService("ServerScriptService")
+local Entity = require(ServerScriptService.Server.Entity.Entity)
 
 export type LivingEntity = Entity.Entity & {
 	health: number,

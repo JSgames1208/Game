@@ -1,17 +1,18 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local EntityTypes = require(ReplicatedStorage.Shared.Entity.EntityTypes)
 local IslandData = require(ServerScriptService.Server.Modules.Island.IslandData)
-local InventoryServer = require(ServerScriptService.Server.Services.InventoryServer)
 local GetItemModel = require(ReplicatedStorage.Shared.Entity.Helpers.GetItemModel)
 local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
-local Entity = require(script.Parent.Entity)
-local EntityTypes = require(script.Parent.EntityTypes)
+local Entity = require(ServerScriptService.Server.Entity.Entity)
+local PlayerEntity = require(ServerScriptService.Server.Entity.Player.PlayerEntity)
 
 export type ItemEntity = Entity.Entity & {
 	itemAge: number,
 	itemId: string,
 	stack: ItemStack.ItemStack,
 	owner: number,
+	playerEntity: PlayerEntity.PlayerEntity,
 
 	getStack: (self: ItemEntity) -> ItemStack.ItemStack,
 
@@ -21,7 +22,13 @@ export type ItemEntity = Entity.Entity & {
 local ItemEntity = setmetatable({}, Entity)
 ItemEntity.__index = ItemEntity
 
-function ItemEntity.new(player: Player, pos: Vector3, itemId: string, amount: number?): ItemEntity
+function ItemEntity.new(
+	player: Player,
+	playerEntity: PlayerEntity.PlayerEntity,
+	pos: Vector3,
+	itemId: string,
+	amount: number?
+): ItemEntity
 	local self = setmetatable(Entity.new(pos, player) :: any, ItemEntity) :: ItemEntity
 
 	self.itemAge = 0
@@ -30,6 +37,7 @@ function ItemEntity.new(player: Player, pos: Vector3, itemId: string, amount: nu
 	self.stack = ItemStack.new(itemId, amount or 1)
 
 	self.owner = nil
+	self.playerEntity = playerEntity
 
 	local part = GetItemModel(itemId)
 	if part then
@@ -118,7 +126,10 @@ end
 function ItemEntity.onPlayerCollision(self: ItemEntity, player: Player)
 	local itemStack: ItemStack.ItemStack = self:getStack()
 	local i = itemStack:getCount()
-	if (self.owner == nil or self.owner == player.UserId) and InventoryServer.insertStack(player, itemStack) then
+	if
+		(self.owner == nil or self.owner == player.UserId)
+		and self.playerEntity:getInventory():insertStack(itemStack)
+	then
 		if itemStack:isEmpty() then
 			self:destroy()
 			itemStack:setCount(i)

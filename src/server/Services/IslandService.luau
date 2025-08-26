@@ -1,12 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
+local PlayerInventory = require(ServerScriptService.Server.Entity.Player.PlayerInventory)
+local EntityService = require(script.Parent.EntityService)
 local IslandData = require(ServerScriptService.Server.Modules.Island.IslandData)
 local IslandInitializer = require(ServerScriptService.Server.Modules.Island.IslandInitializer)
 local IslandPlacer = require(ServerScriptService.Server.Modules.Island.IslandPlacer)
 local IslandRemover = require(ServerScriptService.Server.Modules.Island.IslandRemover)
 local IslandRenderer = require(ServerScriptService.Server.Modules.IslandRenderer)
-local InventoryServer = require(script.Parent.InventoryServer)
 local DataStore = require(ServerScriptService.Server.Services.DataStore)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 local packets = require(ReplicatedStorage.Shared.network)
@@ -34,11 +34,12 @@ end
 packets.PlaceBlock.listen(function(data, player)
 	local pos = Vector3.new(data.x, data.y, data.z)
 	local blockId = data.blockId
-	if InventoryServer.IsAvailable(player, 1) then
+	local inventory: PlayerInventory.PlayerInventory = EntityService.getPlayerEntity(player):getInventory()
+	if inventory:getSelectedStack():getCount() >= 1 then
 		local placed = IslandPlacer.PlaceBlock(player, pos, blockId)
 		if placed then
 			local island = IslandData.Get(player)
-			InventoryServer.removeStack(player, nil, 1)
+			inventory:removeStack(nil, 1)
 			local position: Vector3 = pos * 4 + island.PlotPosition
 			packets.BlockPlaced.sendTo(position, player)
 		end

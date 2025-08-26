@@ -1,22 +1,27 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Entity = require(ReplicatedStorage.Shared.Entity.Entity)
-local EntityStorage = require(ReplicatedStorage.Shared.Entity.EntityStorage)
-local LivingEntity = require(ReplicatedStorage.Shared.Entity.LivingEntity)
+local ServerScriptService = game:GetService("ServerScriptService")
+local PlayerInventory = require(script.Parent.PlayerInventory)
+local Entity = require(ServerScriptService.Server.Entity.Entity)
+local EntityStorage = require(ServerScriptService.Server.Entity.EntityStorage)
+local LivingEntity = require(ServerScriptService.Server.Entity.LivingEntity)
 
 export type PlayerEntity = LivingEntity.LivingEntity & {
 	orientation: Vector3,
+	inventory: PlayerInventory.PlayerInventory,
+
+	getInventory: () -> PlayerInventory.PlayerInventory,
 }
 
 local PlayerEntity = setmetatable({}, LivingEntity)
 PlayerEntity.__index = PlayerEntity
 
-function PlayerEntity.new(player: Player, pos: Vector3): PlayerEntity
+function PlayerEntity.new(player: Player, pos: Vector3, inventory: PlayerInventory.PlayerInventory): PlayerEntity
 	local self = setmetatable(LivingEntity.new(pos, player) :: any, PlayerEntity) :: PlayerEntity
 	self.player = player
 	self.size = Vector3.new(2, 5, 1)
 	self.orientation = Vector3.new(0, 0, 0)
 	self.position = Vector3.new(0, 0, 0)
 	self.model = (player.Character or player.CharacterAdded:Wait()):FindFirstChild("CollisionPart")
+	self.inventory = PlayerInventory.new(player, self, inventory)
 
 	return self
 end
@@ -42,6 +47,10 @@ function PlayerEntity.update(self: PlayerEntity, dt: number): ()
 			end
 		end
 	end
+end
+
+function PlayerEntity.getInventory(self: PlayerEntity): PlayerInventory.PlayerInventory
+	return self.inventory
 end
 
 function PlayerEntity.collideWithEntity(self: PlayerEntity, entity: Entity.Entity)

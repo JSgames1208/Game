@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local EntityStorage = require(script.Parent.EntityStorage)
-local EntityTypes = require(script.Parent.EntityTypes)
+local ServerScriptService = game:GetService("ServerScriptService")
+local EntityTypes = require(ReplicatedStorage.Shared.Entity.EntityTypes)
+local EntityStorage = require(ServerScriptService.Server.Entity.EntityStorage)
 local BlockHelpers = require(ReplicatedStorage.Shared.Modules.BlockHelpers)
 local Collision = require(ReplicatedStorage.Shared.Physics.Collision)
 
@@ -35,8 +36,6 @@ export type Entity = {
 
 local Entity = {}
 Entity.__index = Entity
-
---export type Entity = typeof(setmetatable({} :: self, Entity))
 
 function Entity.new(pos: Vector3, player: Player?): Entity
 	local self = setmetatable({}, Entity) :: Entity

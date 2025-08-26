@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Entity = require(script.Parent.Entity)
-local EntityTypes = require(script.Parent.EntityTypes)
+local ServerScriptService = game:GetService("ServerScriptService")
+local EntityTypes = require(ReplicatedStorage.Shared.Entity.EntityTypes)
+local Entity = require(ServerScriptService.Server.Entity.Entity)
 
 export type FallingBlockEntity = Entity.Entity & {
 	blockId: string,

@@ -1,10 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local PlayerInventory = require(ServerScriptService.Server.Entity.Player.PlayerInventory)
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local IslandRenderer = require(ServerScriptService.Server.Modules.IslandRenderer)
-local InventoryServer = require(ServerScriptService.Server.Services.InventoryServer)
+local EntityService = require(ServerScriptService.Server.Services.EntityService)
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 local IslandData = require(script.Parent.IslandData)
@@ -44,8 +45,7 @@ end
 function EnvironmentChecks.CheckBlockAbove(
 	player: Player,
 	pos: string,
-	PlaceFallingBlockFn: (Player, Vector3, string, any) -> (),
-	EntityService
+	PlaceFallingBlockFn: (Player, Vector3, string, any) -> ()
 )
 	local island = IslandData.Get(player)
 	local removedPos: Vector3 = BlockCoord.ParsePos(pos)
@@ -60,7 +60,8 @@ function EnvironmentChecks.CheckBlockAbove(
 		local falling: boolean = itemDef.falling
 		if type == "tree" or type == "sapling" then
 			for drop, amount in itemDef.drops do
-				InventoryServer.insertStack(player, ItemStack.new(drop, amount))
+				local inventory: PlayerInventory.PlayerInventory = EntityService.getPlayerEntity(player):getInventory()
+				inventory:insertStack(ItemStack.new(drop, amount))
 				QuestService.HandleEvent(player, {
 					type = "collect",
 					id = drop,

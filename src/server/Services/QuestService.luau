@@ -1,10 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local PlayerInventory = require(ServerScriptService.Server.Entity.Player.PlayerInventory)
 local ObjectiveHandler = require(ServerScriptService.Server.Modules.Quests.ObjectiveHandler)
 local QuestMarkerServer = require(ServerScriptService.Server.Modules.Quests.QuestMarkerServer)
 local QuestNetworker = require(ServerScriptService.Server.Modules.Quests.QuestNetworker)
 local CurrencyService = require(script.Parent.CurrencyService)
 local DataStore = require(script.Parent.DataStore)
+local EntityService = require(script.Parent.EntityService)
 local InventoryServer = require(script.Parent.InventoryServer)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
@@ -98,7 +100,8 @@ function QuestService.CompleteQuest(player: Player, questId: string): ()
 
 	if def.rewards.items then
 		for _, item in pairs(def.rewards.items) do
-			InventoryServer.insertStack(player, ItemStack.new(item.id, item.amount))
+			local inventory: PlayerInventory.PlayerInventory = EntityService.getPlayerEntity(player):getInventory()
+			inventory:insertStack(ItemStack.new(item.id, item.amount))
 		end
 	end
 

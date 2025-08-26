@@ -1,14 +1,13 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local EntityService = require(ReplicatedStorage.Shared.Entity.EntityService)
+local PlayerInventory = require(ServerScriptService.Server.Entity.Player.PlayerInventory)
 local EnvironmentChecks = require(script.Parent.EnvironmentChecks)
 local IslandRenderer = require(ServerScriptService.Server.Modules.IslandRenderer)
-local InventoryServer = require(ServerScriptService.Server.Services.InventoryServer)
+local EntityService = require(ServerScriptService.Server.Services.EntityService)
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
-local BlockKey = require(ReplicatedStorage.Shared.Utils.String.BlockKey)
 local packets = require(ReplicatedStorage.Shared.network)
 local IslandData = require(script.Parent.IslandData)
 
@@ -18,8 +17,9 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 	local island = IslandData.Get(player)
 	local blocks = island.IslandData.Blocks
 	local block = blocks[pos]
+	local inventory: PlayerInventory.PlayerInventory = EntityService.getPlayerEntity(player):getInventory()
 	if block then
-		local toolId = InventoryServer.GetSelected(player)
+		local toolId = inventory:getSelectedStack():getItem()
 
 		if not toolId then
 			return
@@ -62,7 +62,7 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 
 				blocks[pos] = nil
 
-				EnvironmentChecks.CheckBlockAbove(player, pos, PlaceFallingBlockFn, EntityService)
+				EnvironmentChecks.CheckBlockAbove(player, pos, PlaceFallingBlockFn)
 
 				EnvironmentChecks.CheckDirt(player, pos)
 			end
