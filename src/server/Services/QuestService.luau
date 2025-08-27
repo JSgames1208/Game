@@ -7,7 +7,6 @@ local QuestNetworker = require(ServerScriptService.Server.Modules.Quests.QuestNe
 local CurrencyService = require(script.Parent.CurrencyService)
 local DataStore = require(script.Parent.DataStore)
 local EntityService = require(script.Parent.EntityService)
-local InventoryServer = require(script.Parent.InventoryServer)
 local QuestData = require(ReplicatedStorage.Shared.Data.QuestData)
 local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local Types = require(ReplicatedStorage.Shared.Types)

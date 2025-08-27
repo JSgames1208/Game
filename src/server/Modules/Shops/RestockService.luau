@@ -7,8 +7,8 @@ local Chance = require(ReplicatedStorage.Shared.Utils.Math.Chance)
 local Time = require(ReplicatedStorage.Shared.Utils.Math.Time)
 local RestockService = {}
 
-function RestockService.Init()
-	RestockService.RestockAll()
+function RestockService.Init(player: Player)
+	RestockService.RestockAll(player)
 
 	task.delay(Time.GetTimeUntilNext5MinMark(), function()
 		while true do
@@ -18,8 +18,7 @@ function RestockService.Init()
 	end)
 end
 
-function RestockService.Restock(shopId: string)
-	print(shopId)
+function RestockService.Restock(shopId: string, player: Player?)
 	local shopConfig = ShopData[shopId]
 
 	if not shopConfig then
@@ -38,10 +37,14 @@ function RestockService.Restock(shopId: string)
 		end
 
 		local amount = math.random(item.minStock or 0, item.maxStock)
-		StockState.Set(shopId, { id = item.id, stock = amount, lastRestock = os.time() })
+		StockState.Set(shopId, { id = item.id, stock = amount, lastRestock = os.time() }, player)
 	end
 
-	for _, player in Players:GetPlayers() do
+	if not player then
+		for _, player in Players:GetPlayers() do
+			ShopNetworker.UpdateShop(shopId, StockState.Get(shopId, nil, player), true, player)
+		end
+	else
 		ShopNetworker.UpdateShop(shopId, StockState.Get(shopId, nil, player), true, player)
 	end
 end
@@ -52,9 +55,9 @@ function RestockService.SetItemStock(player: Player, shopId: string, itemId: str
 	ShopNetworker.UpdateItem(player, shopId, itemId, amount)
 end
 
-function RestockService.RestockAll()
+function RestockService.RestockAll(player: Player?)
 	for _, shop in ShopData do
-		RestockService.Restock(shop.id)
+		RestockService.Restock(shop.id, player)
 	end
 end
 

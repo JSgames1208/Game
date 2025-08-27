@@ -31,6 +31,7 @@ Players.PlayerAdded:Connect(function(player: Player)
 	CurrencyService.PlayerJoined(player)
 	QuestService.PlayerJoined(player)
 	StockState.Init(player)
+	ShopService.Init(player)
 
 	if AdminRights.HasRights(player) then
 		Admin.Init(player)
@@ -38,7 +39,6 @@ Players.PlayerAdded:Connect(function(player: Player)
 end)
 
 EntityService.Start()
-ShopService.Init()
 TransactionHandler.Init()
 DialogueServer.Init()
 

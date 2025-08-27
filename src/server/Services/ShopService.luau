@@ -4,8 +4,8 @@ local ShopNetworker = require(ServerScriptService.Server.Modules.Shops.ShopNetwo
 local StockState = require(ServerScriptService.Server.Modules.Shops.StockState)
 local ShopService = {}
 
-function ShopService.Init()
-	RestockService.Init()
+function ShopService.Init(player: Player)
+	RestockService.Init(player)
 end
 
 function ShopService.InitShop(player: Player, shopId: string)

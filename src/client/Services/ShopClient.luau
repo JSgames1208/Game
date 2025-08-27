@@ -8,6 +8,9 @@ local packets = require(ReplicatedStorage.Shared.network)
 local ShopUI = require(StarterPlayer.StarterPlayerScripts.Client.Modules.Shops.ShopUI)
 local ShopClient = {}
 
+local shopInfo: { [string]: { any } } = {}
+local currentShopId: string = nil
+
 function ShopClient.Start()
 	ShopUI.SetButtonCallback(ShopClient.ButtonClicked)
 	ShopUI.Init()
@@ -17,8 +20,10 @@ function ShopClient.Start()
 			NotificationService.AddNotification(`Your {data.shopId} has restocked!`)
 		end
 		if data.shopId and data.shopStock and ShopData[data.shopId] then
-			ShopUI.SetShopData(ShopData[data.shopId])
-			ShopUI.SetShopStock(data.shopStock)
+			shopInfo[data.shopId] = data.shopStock
+			if currentShopId == data.shopId then
+				ShopUI.SetShopStock(shopInfo[data.shopId])
+			end
 		end
 	end)
 
@@ -29,6 +34,9 @@ function ShopClient.Start()
 	end)
 
 	packets.OpenShop.listen(function(data)
+		currentShopId = data.shopId
+		ShopUI.SetShopData(ShopData[data.shopId])
+		ShopUI.SetShopStock(shopInfo[data.shopId])
 		ShopUI.SetVisible(true)
 	end)
 

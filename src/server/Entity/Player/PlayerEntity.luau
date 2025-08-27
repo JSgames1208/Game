@@ -17,7 +17,7 @@ PlayerEntity.__index = PlayerEntity
 function PlayerEntity.new(player: Player, pos: Vector3, inventory: PlayerInventory.PlayerInventory): PlayerEntity
 	local self = setmetatable(LivingEntity.new(pos, player) :: any, PlayerEntity) :: PlayerEntity
 	self.player = player
-	self.size = Vector3.new(2, 5, 1)
+	self.size = Vector3.new(4, 5, 4)
 	self.orientation = Vector3.new(0, 0, 0)
 	self.position = Vector3.new(0, 0, 0)
 	self.model = (player.Character or player.CharacterAdded:Wait()):FindFirstChild("CollisionPart")

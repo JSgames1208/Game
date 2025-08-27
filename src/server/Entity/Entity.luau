@@ -153,6 +153,7 @@ function Entity.destroy(self: Entity): ()
 		self.model:Destroy()
 		self.model = nil
 	end
+	self:setRemoved()
 	self.isDestroyed = true
 end
 

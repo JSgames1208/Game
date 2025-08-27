@@ -8,6 +8,8 @@ local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local Entity = require(ServerScriptService.Server.Entity.Entity)
 local PlayerEntity = require(ServerScriptService.Server.Entity.Player.PlayerEntity)
 
+local ITEM_DESPAWN_TIME: number = 300
+
 export type ItemEntity = Entity.Entity & {
 	itemAge: number,
 	itemId: string,
@@ -171,8 +173,8 @@ function ItemEntity.update(self: ItemEntity, dt: number)
 			self.mergeCheckTimer = 0
 		end
 
-		if self.itemAge :: number >= 300 then
-			self.shouldDestroy = true
+		if self.itemAge :: number >= ITEM_DESPAWN_TIME then
+			self:destroy()
 		end
 	end
 end
@@ -216,7 +218,7 @@ function ItemEntity.canMerge(self: ItemEntity, stack1: ItemStack.ItemStack?, sta
 	if not (stack1 and stack2) then
 		local stack: ItemStack.ItemStack = self:getStack()
 		local itemAge: number = self.itemAge
-		return itemAge < 300 and stack:getCount() < stack:getMaxCount()
+		return itemAge < ITEM_DESPAWN_TIME and stack:getCount() < stack:getMaxCount()
 	end
 
 	if stack1 and stack2 then
