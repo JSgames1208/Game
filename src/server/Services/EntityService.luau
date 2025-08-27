@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
+local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local DataStore = require(script.Parent.DataStore)
 local Entity = require(ServerScriptService.Server.Entity.Entity)
 local EntityStorage = require(ServerScriptService.Server.Entity.EntityStorage)
@@ -29,21 +31,6 @@ function EntityService.Start()
 			player:update(dt)
 		end
 	end)
-
-	coroutine.wrap(function()
-		wait(5)
-		while true do
-			wait(0.1)
-			for _, player in Players:GetPlayers() do
-				for i = -2, 2, 1 do
-					EntityService.SpawnItemEntity(player, Vector3.new(0, 100, i), "grass")
-				end
-				for i = -2, 2, 1 do
-					EntityService.SpawnItemEntity(player, Vector3.new(i, 100, 0), "obsidian")
-				end
-			end
-		end
-	end)()
 end
 
 function EntityService.SpawnFallingBlock(

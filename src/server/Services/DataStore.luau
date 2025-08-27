@@ -12,8 +12,8 @@ for x = -2, 2 do
 	end
 end
 defaultBlocks["0,0,0"] = { id = "bedrock" }
-defaultBlocks["-1,2,-1"] = { id = "pine tree", blocked = { "-1,3,-1" } }
-defaultBlocks["-1,3,-1"] = { parent = "-1,2,-1" }
+--defaultBlocks["-1,2,-1"] = { id = "pine tree", blocked = { "-1,3,-1" } }
+--defaultBlocks["-1,3,-1"] = { parent = "-1,2,-1" }
 
 local function GetBaseInventory()
 	local inventory = {}

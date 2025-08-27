@@ -35,7 +35,8 @@ packets.PlaceBlock.listen(function(data, player)
 	local pos = Vector3.new(data.x, data.y, data.z)
 	local blockId = data.blockId
 	local inventory: PlayerInventory.PlayerInventory = EntityService.getPlayerEntity(player):getInventory()
-	if inventory:getSelectedStack():getCount() >= 1 then
+	local selectedStack = inventory:getSelectedStack()
+	if selectedStack and selectedStack:getCount() >= 1 then
 		local placed = IslandPlacer.PlaceBlock(player, pos, blockId)
 		if placed then
 			local island = IslandData.Get(player)
