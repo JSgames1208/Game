@@ -13,13 +13,19 @@ export type ItemEntity = Entity.Entity & {
 	itemId: string,
 	stack: ItemStack.ItemStack,
 	owner: number,
+	pickupDelay: number,
 	playerEntity: PlayerEntity.PlayerEntity,
+
+	lastMergeInterval: number,
+	mergeCheckTimer: number,
+
+	setDefaultPickupDelay: (self: ItemEntity) -> (),
 
 	getStack: (self: ItemEntity) -> ItemStack.ItemStack,
 	setStack: (self: ItemEntity, stack: ItemStack.ItemStack) -> (),
 
-	tryMerge: (self: ItemEntity) -> (),
-	canMerge: (self: ItemEntity) -> boolean,
+	tryMerge: (self: ItemEntity, itemEntity: ItemEntity) -> (),
+	canMerge: (self: ItemEntity, stack1: ItemStack.ItemStack?, stack2: ItemStack.ItemStack?) -> boolean,
 
 	animate: (self: ItemEntity, dt: number) -> (),
 }
@@ -41,7 +47,13 @@ function ItemEntity.new(
 	self.type = EntityTypes.itemEntity
 	self.stack = ItemStack.new(itemId, amount or 1)
 
+	self.position = pos
+
+	self.lastMergeInterval = 0
+	self.mergeCheckTimer = 0
+
 	self.velocity = Vector3.new(math.random(-4, 4), math.random(5, 20), math.random(-4, 4))
+	self:setDefaultPickupDelay()
 
 	self.owner = nil
 	self.playerEntity = playerEntity
@@ -89,6 +101,10 @@ function ItemEntity.new(
 	return self
 end
 
+function ItemEntity.setDefaultPickupDelay(self: ItemEntity): ()
+	self.pickupDelay = 0.5
+end
+
 function ItemEntity.getStack(self: ItemEntity): ItemStack.ItemStack
 	return self.stack
 end
@@ -108,6 +124,9 @@ function ItemEntity.update(self: ItemEntity, dt: number)
 		self:destroy()
 		return
 	else
+		if self.pickupDelay :: number > 0 then
+			self.pickupDelay = math.max(0, self.pickupDelay - dt)
+		end
 		self.itemAge += dt
 		self:applyGravity(dt)
 
@@ -135,7 +154,22 @@ function ItemEntity.update(self: ItemEntity, dt: number)
 
 		self:animate(dt)
 
-		self:tryMerge()
+		local moved: boolean = math.floor(self.lastX / 4) * 4 ~= math.floor(self:getX() / 4) * 4
+			or math.floor(self.lastY / 4) * 4 ~= math.floor(self:getY() / 4) * 4
+			or math.floor(self.lastZ / 4) * 4 ~= math.floor(self:getZ() / 4) * 4
+
+		if moved then
+			self.lastMergeInterval = 0.1
+		else
+			self.lastMergeInterval = 2
+		end
+
+		self.mergeCheckTimer += dt
+
+		if self.mergeCheckTimer :: number >= self.lastMergeInterval then
+			self:tryMerge()
+			self.mergeCheckTimer = 0
+		end
 
 		if self.itemAge :: number >= 300 then
 			self.shouldDestroy = true
@@ -148,7 +182,7 @@ function ItemEntity.tryMerge(self: ItemEntity, itemEntity: ItemEntity?): ()
 		if self:canMerge() then
 			for _, entityModel in workspace.Entities.ItemEntities:GetChildren() do
 				if entityModel:HasTag("Entity") then
-					if (entityModel:GetPivot().Position - self.position).Magnitude < 5 then
+					if (entityModel:GetPivot().Position - self.position).Magnitude < 3 then
 						local entity = EntityStorage.get(entityModel)
 						if entity and entity ~= self then
 							if entity:canMerge() then
@@ -168,7 +202,7 @@ function ItemEntity.tryMerge(self: ItemEntity, itemEntity: ItemEntity?): ()
 		local stack: ItemStack.ItemStack = self:getStack()
 		local stack2: ItemStack.ItemStack = itemEntity:getStack()
 
-		if self.owner == itemEntity.owner and self:canMerge(itemEntity) then
+		if self.owner == itemEntity.owner and self:canMerge(stack, stack2) then
 			if stack2:getCount() < stack:getCount() then
 				mergeEntities(self, stack, itemEntity, stack2)
 			else
@@ -213,6 +247,7 @@ function mergeEntities(
 	sourceStack: ItemStack.ItemStack
 )
 	mergeIntoEntity(targetEntity, targetStack, sourceStack)
+	targetEntity.pickupDelay = math.max(targetEntity.pickupDelay, sourceEntity.pickupDelay)
 	targetEntity.itemAge = math.min(targetEntity.itemAge, sourceEntity.itemAge)
 	if sourceStack:isEmpty() then
 		sourceEntity:setRemoved()
@@ -223,8 +258,10 @@ end
 function ItemEntity.onPlayerCollision(self: ItemEntity, player: Player)
 	local itemStack: ItemStack.ItemStack = self:getStack()
 	local i = itemStack:getCount()
+	local pickupDelay: number = self.pickupDelay
 	if
-		(self.owner == nil or self.owner == player.UserId)
+		pickupDelay <= 0
+		and (self.owner == nil or self.owner == player.UserId)
 		and self.playerEntity:getInventory():insertStack(itemStack)
 	then
 		if itemStack:isEmpty() then

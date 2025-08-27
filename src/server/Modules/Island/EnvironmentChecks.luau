@@ -5,9 +5,11 @@ local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
 local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local IslandRenderer = require(ServerScriptService.Server.Modules.IslandRenderer)
+local DataStore = require(ServerScriptService.Server.Services.DataStore)
 local EntityService = require(ServerScriptService.Server.Services.EntityService)
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
+local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
 local IslandData = require(script.Parent.IslandData)
 local EnvironmentChecks = {}
 
@@ -60,8 +62,8 @@ function EnvironmentChecks.CheckBlockAbove(
 		local falling: boolean = itemDef.falling
 		if type == "tree" or type == "sapling" then
 			for drop, amount in itemDef.drops do
-				local inventory: PlayerInventory.PlayerInventory = EntityService.getPlayerEntity(player):getInventory()
-				inventory:insertStack(ItemStack.new(drop, amount))
+				local worldPos = GridMath.gridPosToPos(checkPos, IslandData.Get(player).PlotPosition)
+				EntityService.SpawnItemEntity(player, worldPos, drop, amount)
 				QuestService.HandleEvent(player, {
 					type = "collect",
 					id = drop,

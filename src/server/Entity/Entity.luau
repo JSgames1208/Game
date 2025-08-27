@@ -16,6 +16,14 @@ export type Entity = {
 	type: string?,
 	model: (Part | MeshPart | Model)?,
 
+	getX: (self: Entity) -> number,
+	getY: (self: Entity) -> number,
+	getZ: (self: Entity) -> number,
+
+	lastX: number,
+	lastY: number,
+	lastZ: number,
+
 	size: Vector3,
 
 	shouldDestroy: boolean,
@@ -68,6 +76,18 @@ function Entity.update(self: Entity, dt): ()
 	self.lifeTime += dt
 end
 
+function Entity.getX(self: Entity)
+	return self.position.X
+end
+
+function Entity.getY(self: Entity)
+	return self.position.Y
+end
+
+function Entity.getZ(self: Entity)
+	return self.position.Z
+end
+
 function Entity.isOnGround(self: Entity): boolean
 	return self.onGround
 end
@@ -102,6 +122,10 @@ function Entity.move(self: Entity, dt): ()
 		workspace.Entities.FallingBlocks:GetChildren(),
 		true
 	)
+
+	self.lastX = self.position.X
+	self.lastY = self.position.Y
+	self.lastZ = self.position.Z
 
 	if hit then
 		self.position = Vector3.new(self.position.X, hit.Position.Y + self.size.Y / 2 + 0.005, self.position.Z)
