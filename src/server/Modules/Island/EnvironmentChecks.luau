@@ -1,16 +1,14 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local PlayerInventory = require(ServerScriptService.Server.Entity.Player.PlayerInventory)
 local BlockLibrary = require(ReplicatedStorage.Shared.BlockLibrary)
-local ItemStack = require(ReplicatedStorage.Shared.Item.ItemStack)
 local ItemLibrary = require(ReplicatedStorage.Shared.ItemLibrary)
 local IslandRenderer = require(ServerScriptService.Server.Modules.IslandRenderer)
-local DataStore = require(ServerScriptService.Server.Services.DataStore)
 local EntityService = require(ServerScriptService.Server.Services.EntityService)
 local QuestService = require(ServerScriptService.Server.Services.QuestService)
 local BlockCoord = require(ReplicatedStorage.Shared.Utils.BlockCoord)
 local GridMath = require(ReplicatedStorage.Shared.Utils.Math.GridMath)
 local IslandData = require(script.Parent.IslandData)
+
 local EnvironmentChecks = {}
 
 function EnvironmentChecks.CheckGrass(player: Player, pos: Vector3)

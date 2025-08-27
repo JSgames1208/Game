@@ -11,7 +11,7 @@ export type PlayerInventory = {
 
 	getSelectedSlot: (self: PlayerInventory) -> number,
 	setSelectedSlot: (self: PlayerInventory, slot: number) -> (),
-	getSelectedStack: (self: PlayerInventory) -> ItemStack.ItemStack,
+	getSelectedStack: (self: PlayerInventory) -> ItemStack.ItemStack?,
 	setSelectedStack: (self: PlayerInventory, stack: ItemStack.ItemStack) -> (),
 	getMainStacks: (self: PlayerInventory) -> { ItemStack.ItemStack },
 	getEmptySlot: (self: PlayerInventory) -> number,
@@ -48,12 +48,14 @@ function PlayerInventory.setSelectedSlot(self: PlayerInventory, slot: number): (
 	self.selectedSlot = slot
 end
 
-function PlayerInventory.getSelectedStack(self: PlayerInventory): ()
-	return self.main[self:getSelectedSlot()]
+function PlayerInventory.getSelectedStack(self: PlayerInventory): number?
+	return if self:getSelectedSlot() ~= 0 then self.main[self:getSelectedSlot()] else nil
 end
 
 function PlayerInventory.setSelectedStack(self: PlayerInventory, stack: ItemStack.ItemStack)
-	self.main[self:getSelectedSlot()] = stack
+	if self:getSelectedSlot() ~= 0 then
+		self.main[self:getSelectedSlot()] = stack
+	end
 end
 
 function PlayerInventory.getMainStacks(self: PlayerInventory): { ItemStack.ItemStack }
@@ -162,7 +164,8 @@ end
 
 function PlayerInventory.getOccupiedSlotWithRoomForStack(self: PlayerInventory, stack: ItemStack.ItemStack)
 	local selectedSlot = self:getSelectedSlot()
-	if selectedSlot and canStackAddMore(self:getSelectedStack(), stack) then
+	local selectedStack = self:getSelectedStack()
+	if selectedSlot and selectedStack and canStackAddMore(selectedStack, stack) then
 		return selectedSlot
 	else
 		for i, v in ipairs(self:getMainStacks()) do

@@ -19,7 +19,11 @@ function IslandRemover.MineBlock(player: Player, pos: string, PlaceFallingBlockF
 	local block = blocks[pos]
 	local inventory: PlayerInventory.PlayerInventory = EntityService.getPlayerEntity(player):getInventory()
 	if block then
-		local toolId = inventory:getSelectedStack():getItem()
+		local selectedTool = inventory:getSelectedStack()
+		if not selectedTool then
+			return
+		end
+		local toolId = selectedTool:getItem()
 
 		if not toolId then
 			return
